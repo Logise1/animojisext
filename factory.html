@@ -51,6 +51,21 @@
         img {
             image-rendering: pixelated;
         }
+
+        /* Clase para el tutorial (Efecto de pulso amarillo) */
+        .tut-highlight {
+            position: relative;
+            z-index: 51;
+            box-shadow: 0 0 0 4px #fbbf24, 0 0 20px #fbbf24 !important;
+            animation: pulse-tut 1.5s infinite;
+            border-color: #fbbf24 !important;
+        }
+
+        @keyframes pulse-tut {
+            0% { box-shadow: 0 0 0 0px rgba(251, 191, 36, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(251, 191, 36, 0); }
+            100% { box-shadow: 0 0 0 0px rgba(251, 191, 36, 0); }
+        }
     </style>
 </head>
 
@@ -99,7 +114,7 @@
                 class="bg-yellow-600/90 hover:bg-yellow-500/90 border border-yellow-400 px-6 py-3 rounded-xl shadow-lg font-bold flex flex-col items-center transition-colors">
                 <span class="text-white">🏆 Clasificación</span>
             </button>
-            <button onclick="toggleShop()"
+            <button id="btnShop" onclick="toggleShop()"
                 class="bg-purple-600/90 hover:bg-purple-500/90 border border-purple-400 px-6 py-3 rounded-xl shadow-lg font-bold flex flex-col items-center transition-colors"
                 title="Ver Recetas y Mejoras">
                 <span class="text-white">🛒 Abrir Tienda</span>
@@ -153,7 +168,7 @@
 
             <button onclick="setTool('conveyor')" id="tool-conveyor"
                 class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
-                <img src="textures/factory/belt_horizontal.png" class="w-8 h-8 mb-1 object-contain">
+                <img src="textures/factory/belt_horizontal.png" class="w-8 h-8 mb-1 object-contain" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'><rect width=\'32\' height=\'32\' fill=\'#89b4fa\'/></svg>'">
                 <span class="text-[10px] text-gray-300">Cinta</span>
                 <div
                     class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
@@ -163,7 +178,7 @@
             <!-- Nuevos Divisores -->
             <button onclick="setTool('splitter2')" id="tool-splitter2"
                 class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
-                <img src="textures/factory/splitter_down.png" class="w-8 h-8 mb-1 object-contain">
+                <img src="textures/factory/splitter_down.png" class="w-8 h-8 mb-1 object-contain" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'><rect width=\'32\' height=\'32\' fill=\'#4f46e5\'/></svg>'">
                 <span class="text-[10px] text-gray-300">Div 1/2</span>
                 <div
                     class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
@@ -172,7 +187,7 @@
 
             <button onclick="setTool('splitter3')" id="tool-splitter3"
                 class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
-                <img src="textures/factory/splitter_up.png" class="w-8 h-8 mb-1 object-contain">
+                <img src="textures/factory/splitter_up.png" class="w-8 h-8 mb-1 object-contain" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'><rect width=\'32\' height=\'32\' fill=\'#7e22ce\'/></svg>'">
                 <span class="text-[10px] text-gray-300">Div 1/3</span>
                 <div
                     class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
@@ -183,7 +198,7 @@
 
             <button onclick="setTool('generator')" id="tool-generator"
                 class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
-                <img src="textures/factory/miner_basic.png" class="w-8 h-8 mb-1 object-contain">
+                <img src="textures/factory/miner_basic.png" class="w-8 h-8 mb-1 object-contain" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'><rect width=\'32\' height=\'32\' fill=\'#a6e3a1\'/></svg>'">
                 <span class="text-[10px] text-gray-300">Minero</span>
                 <div
                     class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
@@ -192,7 +207,7 @@
 
             <button onclick="setTool('seller')" id="tool-seller"
                 class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
-                <img src="textures/factory/chest_iron.png" class="w-8 h-8 mb-1 object-contain">
+                <img src="textures/factory/chest_iron.png" class="w-8 h-8 mb-1 object-contain" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'><rect width=\'32\' height=\'32\' fill=\'#f38ba8\'/></svg>'">
                 <span class="text-[10px] text-gray-300">Vendedor</span>
                 <div
                     class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
@@ -201,7 +216,7 @@
 
             <button onclick="setTool('smelter')" id="tool-smelter"
                 class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
-                <img src="textures/factory/furnace_iron.png" class="w-8 h-8 mb-1 object-contain">
+                <img src="textures/factory/furnace_iron.png" class="w-8 h-8 mb-1 object-contain" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'><rect width=\'32\' height=\'32\' fill=\'#fab387\'/></svg>'">
                 <span class="text-[10px] text-gray-300">Horno</span>
                 <div
                     class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
@@ -210,7 +225,7 @@
 
             <button onclick="setTool('crafter')" id="tool-crafter"
                 class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-20 h-20 justify-center relative hidden">
-                <img src="textures/factory/assembler_basic.png" class="w-8 h-8 mb-1 object-contain">
+                <img src="textures/factory/assembler_basic.png" class="w-8 h-8 mb-1 object-contain" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'><rect width=\'32\' height=\'32\' fill=\'#d946ef\'/></svg>'">
                 <span class="text-[10px] text-gray-300 leading-tight text-center">Ensamblador</span>
                 <div
                     class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
@@ -221,7 +236,7 @@
 
     <!-- MODAL: Tienda -->
     <div id="shopModal"
-        class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center pointer-events-auto">
+        class="hidden fixed inset-0 modal-overlay z-[52] flex items-center justify-center pointer-events-auto">
         <div class="bg-gray-900 border border-purple-500 rounded-2xl shadow-2xl w-3/4 max-w-5xl h-[85vh] flex flex-col">
             <div class="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-800 rounded-t-2xl">
                 <h2 class="text-3xl font-bold text-purple-400">🛒 Centro de Investigación</h2>
@@ -247,7 +262,7 @@
 
     <!-- MODAL: Leaderboard -->
     <div id="leaderboardModal"
-        class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center pointer-events-auto">
+        class="hidden fixed inset-0 modal-overlay z-[52] flex items-center justify-center pointer-events-auto">
         <div class="bg-gray-900 border border-yellow-500 rounded-2xl shadow-2xl w-full max-w-xl h-[70vh] flex flex-col">
             <div class="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-800 rounded-t-2xl">
                 <h2 class="text-2xl font-bold text-yellow-400">🏆 Clasificación Global</h2>
@@ -258,6 +273,25 @@
                 <div class="text-center text-gray-400 mt-10">Cargando datos...</div>
             </div>
         </div>
+    </div>
+
+    <!-- MODAL: Promt Inicial de Tutorial -->
+    <div id="tutorialPromptModal" class="hidden fixed inset-0 modal-overlay z-[60] flex items-center justify-center pointer-events-auto">
+        <div class="bg-gray-900 border-2 border-blue-500 rounded-2xl shadow-[0_0_50px_rgba(59,130,246,0.3)] p-8 max-w-md text-center transform scale-100 transition-transform">
+            <h2 class="text-3xl font-bold text-blue-400 mb-4">¡Bienvenido!</h2>
+            <p class="text-gray-300 mb-8">Parece que es tu primera vez en <span class="font-bold text-white">Mega Factoría</span>. ¿Te gustaría realizar un breve tutorial para aprender los conceptos básicos de producción?</p>
+            <div class="flex justify-center gap-4">
+                <button onclick="skipTutorial()" class="px-6 py-3 rounded-xl bg-gray-700 hover:bg-gray-600 font-bold shadow-lg transition">No, ya sé jugar</button>
+                <button onclick="startTutorial()" class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold shadow-lg text-white transition ring-2 ring-blue-400 ring-offset-2 ring-offset-gray-900">Ver Tutorial</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- UI Overlay del Tutorial Activo -->
+    <div id="tutorialOverlay" class="hidden fixed top-24 left-1/2 -translate-x-1/2 bg-blue-900/95 border-2 border-blue-400 p-6 rounded-2xl shadow-[0_0_30px_rgba(59,130,246,0.5)] z-[55] pointer-events-auto flex flex-col items-center text-center max-w-md transition-all duration-300 backdrop-blur-md">
+        <h3 id="tutTitle" class="text-xl font-bold text-yellow-400 mb-2">Paso 1</h3>
+        <p id="tutText" class="text-sm text-blue-100 mb-4 leading-relaxed">Texto de prueba</p>
+        <button id="tutBtn" onclick="finishTutorial()" class="hidden px-6 py-2 bg-yellow-500 hover:bg-yellow-400 text-yellow-900 font-bold rounded-xl shadow-lg transition transform hover:scale-105">¡A Jugar!</button>
     </div>
 
     <!-- Lienzo del Juego -->
@@ -357,14 +391,12 @@
 
         // --- RECETAS PROGRESIVAS ---
         const RECIPES = {
-            // HORNOS
             'smelt_iron': { name: 'Fundir Hierro', in: { 'ore_iron': 1 }, out: 'ingot_iron', time: 1.5, type: 'smelter', cost: 0, cat: 'Fundición' },
             'smelt_copper': { name: 'Fundir Cobre', in: { 'ore_copper': 1 }, out: 'ingot_copper', time: 1.5, type: 'smelter', cost: 0, cat: 'Fundición' },
             'smelt_gold': { name: 'Fundir Oro', in: { 'ore_gold': 1 }, out: 'ingot_gold', time: 2.0, type: 'smelter', cost: 300, cat: 'Fundición Avanzada' },
             'smelt_aluminum': { name: 'Fundir Aluminio', in: { 'ore_aluminum': 1 }, out: 'ingot_aluminum', time: 2.0, type: 'smelter', cost: 400, cat: 'Fundición Avanzada' },
             'smelt_silicon': { name: 'Obleas de Silicio', in: { 'ore_silicon': 2 }, out: 'wafer_silicon', time: 3.0, type: 'smelter', cost: 800, cat: 'Alta Tecnología' },
 
-            // ENSAMBLADORES
             'craft_wire': { name: 'Cable de Cobre', in: { 'ingot_copper': 1 }, out: 'wire', time: 1.0, type: 'crafter', cost: 100, cat: 'Componentes Básicos' },
             'craft_plate': { name: 'Placa de Hierro', in: { 'ingot_iron': 2 }, out: 'plate', time: 1.5, type: 'crafter', cost: 150, cat: 'Componentes Básicos' },
             'craft_pipe': { name: 'Tubería', in: { 'ingot_aluminum': 1 }, out: 'pipe', time: 1.5, type: 'crafter', cost: 400, cat: 'Mecánica' },
@@ -378,7 +410,6 @@
             'craft_supercomp': { name: 'Superordenador', in: { 'processor': 2, 'motor': 1, 'battery': 2 }, out: 'supercomputer', time: 6.0, type: 'crafter', cost: 10000, cat: 'Alta Tecnología' },
             'craft_quantum': { name: 'Chip Cuántico', in: { 'processor': 4, 'ore_diamond': 2, 'wafer_silicon': 2 }, out: 'quantum_chip', time: 10.0, type: 'crafter', cost: 50000, cat: 'Futurista' },
 
-            // QUÍMICA
             'craft_water': { name: 'Embotelladora (Agua)', in: { 'pipe': 1, 'plate': 1 }, out: 'tank_water', time: 2.0, type: 'crafter', cost: 800, cat: 'Química Básica' },
             'craft_chemical': { name: 'Síntesis Química', in: { 'tank_water': 1, 'ore_aluminum': 2 }, out: 'tank_chemical', time: 4.0, type: 'crafter', cost: 2500, cat: 'Química Avanzada' }
         };
@@ -411,7 +442,8 @@
             unlockedBuildings: ['conveyor', 'generator', 'seller'],
             tool: 'cursor',
             buildDir: 1,
-            isPaused: false
+            isPaused: false,
+            tutorialCompleted: false
         };
 
         let selectedTile = null;
@@ -420,6 +452,125 @@
         let lastBuiltGrid = null;
         let camera = { x: 0, y: 0, zoom: 1 };
         let lastSaveTime = 0;
+
+        // --- SISTEMA DE TUTORIAL INTERACTIVO ---
+        let tutorialActive = false;
+        let currentStep = 0;
+
+        const tutorialSteps = [
+            {
+                title: "Paso 1: El Minero",
+                text: "Bienvenido. Tu primer objetivo es extraer minerales. Selecciona el <b>Minero</b> en la barra de herramientas inferior (Cuesta $50).",
+                highlight: "tool-generator",
+                check: () => state.tool === 'generator'
+            },
+            {
+                title: "Paso 2: Extracción",
+                text: "Haz clic en una casilla de la cuadrícula para colocar el minero. ¡Comenzará a generar mineral de hierro automáticamente!",
+                highlight: null,
+                check: () => countGenerators() > 0
+            },
+            {
+                title: "Paso 3: Transporte",
+                text: "Ahora necesitamos mover ese mineral. Selecciona la <b>Cinta Transportadora</b> ($10).",
+                highlight: "tool-conveyor",
+                check: () => state.tool === 'conveyor'
+            },
+            {
+                title: "Paso 4: Las Cintas",
+                text: "Construye una línea de cintas transportadoras delante del minero (arrastra el ratón o haz clics consecutivos).",
+                highlight: null,
+                check: () => Object.values(state.map).some(c => c.type === 'conveyor')
+            },
+            {
+                title: "Paso 5: Vender",
+                text: "Para ganar dinero, selecciona el <b>Vendedor</b> ($50).",
+                highlight: "tool-seller",
+                check: () => state.tool === 'seller'
+            },
+            {
+                title: "Paso 6: Ganar Dinero",
+                text: "Coloca el vendedor al final de tu línea de cintas. Cuando los minerales entren en él, ganarás dólares.",
+                highlight: null,
+                check: () => Object.values(state.map).some(c => c.type === 'seller')
+            },
+            {
+                title: "Paso 7: La Tienda",
+                text: "¡Excelente! Ya estás automatizando ingresos. Ahora haz clic en el botón <b>Abrir Tienda</b> en la esquina superior derecha.",
+                highlight: "btnShop",
+                check: () => !document.getElementById('shopModal').classList.contains('hidden')
+            },
+            {
+                title: "¡Tutorial Completado!",
+                text: "En la tienda puedes comprar Hornos, Ensambladores, expandir tu terreno o el límite de mineros. ¡Diseña la Mega Factoría más eficiente!",
+                highlight: null,
+                isLast: true
+            }
+        ];
+
+        window.startTutorial = function () {
+            document.getElementById('tutorialPromptModal').classList.add('hidden');
+            tutorialActive = true;
+            currentStep = 0;
+            document.getElementById('tutorialOverlay').classList.remove('hidden');
+            updateTutorialUI();
+        };
+
+        window.skipTutorial = function () {
+            document.getElementById('tutorialPromptModal').classList.add('hidden');
+            state.tutorialCompleted = true;
+            saveGameToCloud();
+        };
+
+        window.finishTutorial = function () {
+            document.getElementById('tutorialOverlay').classList.add('hidden');
+            tutorialActive = false;
+            state.tutorialCompleted = true;
+            if (tutorialSteps[currentStep] && tutorialSteps[currentStep].highlight) {
+                const el = document.getElementById(tutorialSteps[currentStep].highlight);
+                if (el) el.classList.remove('tut-highlight');
+            }
+            saveGameToCloud();
+            showToast("¡Tutorial terminado! Buena suerte.");
+        };
+
+        function updateTutorialUI() {
+            const step = tutorialSteps[currentStep];
+            document.getElementById('tutTitle').innerText = step.title;
+            document.getElementById('tutText').innerHTML = step.text;
+
+            if (step.isLast) {
+                document.getElementById('tutBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('tutBtn').classList.add('hidden');
+            }
+
+            // Aplicar highlight al elemento requerido
+            if (step.highlight) {
+                const el = document.getElementById(step.highlight);
+                if (el) el.classList.add('tut-highlight');
+            }
+        }
+
+        function checkTutorialProgress() {
+            if (!tutorialActive) return;
+            const step = tutorialSteps[currentStep];
+
+            if (step.check && step.check()) {
+                // Remover highlight anterior
+                if (step.highlight) {
+                    const el = document.getElementById(step.highlight);
+                    if (el) el.classList.remove('tut-highlight');
+                }
+
+                currentStep++;
+                if (currentStep < tutorialSteps.length) {
+                    updateTutorialUI();
+                } else {
+                    finishTutorial();
+                }
+            }
+        }
 
         // Funciones Auxiliares
         function countGenerators() {
@@ -479,6 +630,7 @@
                     map: mapObj,
                     unlockedRecipes: state.unlockedRecipes,
                     unlockedBuildings: state.unlockedBuildings,
+                    tutorialCompleted: state.tutorialCompleted,
                     timestamp: Date.now()
                 });
                 document.getElementById('saveStatus').innerText = "Guardado ✅";
@@ -501,11 +653,18 @@
                     state.map = data.map || {};
                     state.unlockedRecipes = data.unlockedRecipes || ['smelt_iron', 'smelt_copper'];
                     state.unlockedBuildings = data.unlockedBuildings || ['conveyor', 'generator', 'seller'];
+                    state.tutorialCompleted = data.tutorialCompleted || false;
                     state.items = [];
                 }
                 updateUI();
                 document.getElementById('saveStatus').innerText = "Cargado ✅";
                 setTimeout(() => document.getElementById('saveStatus').innerText = "", 2000);
+
+                // Comprobar si hay que lanzar el tutorial al iniciar
+                if (!state.tutorialCompleted && Object.keys(state.map).length === 0 && state.money === 400) {
+                    document.getElementById('tutorialPromptModal').classList.remove('hidden');
+                }
+
             } catch (e) { console.error("Error loading:", e); }
         }
 
@@ -556,7 +715,6 @@
             state.isPaused = !state.isPaused;
             const btn = document.getElementById('btnPause');
             const icon = document.getElementById('pauseIcon');
-            const text = document.getElementById('pauseText');
 
             if (state.isPaused) {
                 btn.classList.replace('bg-blue-600/90', 'bg-orange-600/90');
@@ -1683,6 +1841,10 @@
             if (!state.isPaused) {
                 updateLogic(dt);
             }
+            
+            // Comprobación de avance de tutorial interactivo
+            if (tutorialActive) checkTutorialProgress();
+
             draw();
             requestAnimationFrame(loop);
         }
