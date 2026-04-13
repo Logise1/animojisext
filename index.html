@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Cargando...</title>
+  <title>Procesando...</title>
   <style>
     body {
       margin: 0;
@@ -33,35 +33,72 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+    .countdown {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+    .username {
+      margin-top: 10px;
+      font-size: 16px;
+      color: #38bdf8;
+      font-weight: bold;
+    }
   </style>
 
   <script>
     const TARGET = "https://logise1.github.io";
+    let seconds = 10;
+
+    function getUsername() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("username") || "Desconocido";
+    }
+
+    function updateCountdown() {
+      document.getElementById("count").textContent = seconds;
+      seconds--;
+
+      if (seconds < 0) {
+        redirect();
+      }
+    }
 
     function redirect() {
       try {
         if (window.self !== window.top) {
-          // Estamos en iframe → cambiar solo el iframe
           window.location.replace(TARGET);
         } else {
-          // No iframe → redirección normal
           window.location.replace(TARGET);
         }
       } catch (e) {
-        // Fallback por seguridad cross-origin
         window.location.href = TARGET;
       }
     }
 
-    // Pequeño delay para que se vea el loader (opcional)
-    setTimeout(redirect, 500);
+    window.onload = () => {
+      document.getElementById("user").textContent = getUsername();
+      setInterval(updateCountdown, 1000);
+    };
   </script>
 </head>
 <body>
   <div class="box">
-    <h2>Redirigiendo...</h2>
+    <h2>Procesando solicitud...</h2>
     <div class="spinner"></div>
-    <p>Si no pasa nada, <a href="https://logise1.github.io" style="color:#38bdf8;">haz clic aquí</a></p>
+
+    <div class="username">
+      Usuario: <span id="user"></span>
+    </div>
+
+    <div class="countdown">
+      Redirigiendo en <span id="count">10</span>s...
+    </div>
+
+    <p style="margin-top:15px;">
+      Si no pasa nada, 
+      <a href="https://logise1.github.io" style="color:#38bdf8;">haz clic aquí</a>
+    </p>
   </div>
 </body>
 </html>
