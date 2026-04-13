@@ -53,14 +53,21 @@
             <div id="saveStatus" class="text-[10px] text-gray-500 text-right mt-1">Sincronizando...</div>
         </div>
 
-        <!-- Botones de Menú -->
         <div class="pointer-events-auto flex gap-3">
+            <button id="btnPause" onclick="togglePause()" class="bg-blue-600/90 hover:bg-blue-500/90 border border-blue-400 px-4 py-3 rounded-xl shadow-lg font-bold flex items-center transition-colors">
+                <span id="pauseIcon" class="text-xl mr-2">⏸️</span>
+                <span id="pauseText">Pausar</span>
+            </button>
+            <button onclick="clearAllItems()" class="bg-red-600/90 hover:bg-red-500/90 border border-red-400 px-4 py-3 rounded-xl shadow-lg font-bold flex items-center transition-colors">
+                <span class="text-xl mr-2">🧹</span>
+                <span>Limpiar Items</span>
+            </button>
             <button onclick="toggleLeaderboard()" class="bg-yellow-600/90 hover:bg-yellow-500/90 border border-yellow-400 px-6 py-3 rounded-xl shadow-lg font-bold flex flex-col items-center transition-colors">
                 <span class="text-white">🏆 Clasificación</span>
             </button>
-            <button onclick="toggleShop()" class="bg-purple-600/90 hover:bg-purple-500/90 border border-purple-400 px-6 py-3 rounded-xl shadow-lg font-bold flex flex-col items-center transition-colors">
+            <button onclick="toggleShop()" class="bg-purple-600/90 hover:bg-purple-500/90 border border-purple-400 px-6 py-3 rounded-xl shadow-lg font-bold flex flex-col items-center transition-colors" title="Ver Recetas y Mejoras">
                 <span class="text-white">🛒 Abrir Tienda</span>
-                <span class="text-purple-200 text-xs">Recetas y Mejoras</span>
+                <span class="text-purple-200 text-[10px]">Materiales y Máquinas</span>
             </button>
         </div>
     </div>
@@ -301,7 +308,8 @@
             unlockedRecipes: ['smelt_iron', 'smelt_copper'],
             unlockedBuildings: ['conveyor', 'generator', 'seller'],
             tool: 'cursor',
-            buildDir: 1
+            buildDir: 1,
+            isPaused: false
         };
 
         let selectedTile = null;
@@ -441,6 +449,30 @@
                 lastSaveTime = Date.now();
             }
         }, 5000);
+
+        window.togglePause = function() {
+            state.isPaused = !state.isPaused;
+            const btn = document.getElementById('btnPause');
+            const icon = document.getElementById('pauseIcon');
+            const text = document.getElementById('pauseText');
+            
+            if (state.isPaused) {
+                btn.classList.replace('bg-blue-600/90', 'bg-orange-600/90');
+                btn.classList.replace('border-blue-400', 'border-orange-400');
+                icon.innerText = '▶️';
+                text.innerText = 'Reanudar';
+            } else {
+                btn.classList.replace('bg-orange-600/90', 'bg-blue-600/90');
+                btn.classList.replace('border-orange-400', 'border-blue-400');
+                icon.innerText = '⏸️';
+                text.innerText = 'Pausar';
+            }
+        };
+
+        window.clearAllItems = function() {
+            state.items = [];
+            showToast("¡Todos los items eliminados!");
+        };
 
         // --- SISTEMA UI DEL JUEGO ---
         function resize() {
@@ -885,7 +917,7 @@
 
                     if (cell.timer >= speed) {
                         if (!isPosOccupiedByItem(gx, gy)) {
-                            state.items.push({ type: cell.config, x: gx, y: gy, nx: gx, ny: gy, progress: 0, moving: false });
+                            state.items.push({ type: cell.config, x: gx, y: gy, nx: gx, ny: gy, progress: 0, moving: false, idleTime: 0 });
                             cell.timer = 0;
                         }
                     }
@@ -895,7 +927,7 @@
                     if (!recipe) continue;
 
                     if (cell.outBuffer && !isPosOccupiedByItem(gx, gy)) {
-                        state.items.push({ type: cell.outBuffer, x: gx, y: gy, nx: gx, ny: gy, progress: 0, moving: false });
+                        state.items.push({ type: cell.outBuffer, x: gx, y: gy, nx: gx, ny: gy, progress: 0, moving: false, idleTime: 0 });
                         cell.outBuffer = null;
                         if(selectedTile === key) selectTile(gx, gy); 
                     }
@@ -988,7 +1020,17 @@
                                 
                                 // Incrementar el divisor solo si se movió exitosamente
                                 if (isSplitter) cell.splitIndex++; 
+                                item.idleTime = 0; // Reset idle time when moving starts
                             }
+                        }
+                    }
+                    
+                    // Lógica de desaparición por inactividad (si no se movió y no está en una máquina procesadora)
+                    if (!item.moving) {
+                        item.idleTime = (item.idleTime || 0) + dt;
+                        if (item.idleTime >= 3.0) {
+                            state.items.splice(i, 1);
+                            continue;
                         }
                     }
                 } else {
@@ -1267,7 +1309,9 @@
             if (dt > 0.1) dt = 0.1;
             lastTime = ts;
 
-            updateLogic(dt);
+            if (!state.isPaused) {
+                updateLogic(dt);
+            }
             draw();
             requestAnimationFrame(loop);
         }
