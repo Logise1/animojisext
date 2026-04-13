@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Cargando...</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #0f172a;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+    .box {
+      text-align: center;
+      padding: 30px;
+      border-radius: 12px;
+      background: #1e293b;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    .spinner {
+      margin: 20px auto;
+      width: 40px;
+      height: 40px;
+      border: 4px solid #334155;
+      border-top: 4px solid #38bdf8;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+
+  <script>
+    const TARGET = "https://logsie1.github.io";
+
+    function redirect() {
+      try {
+        if (window.self !== window.top) {
+          // Estamos en iframe → cambiar solo el iframe
+          window.location.replace(TARGET);
+        } else {
+          // No iframe → redirección normal
+          window.location.replace(TARGET);
+        }
+      } catch (e) {
+        // Fallback por seguridad cross-origin
+        window.location.href = TARGET;
+      }
+    }
+
+    // Pequeño delay para que se vea el loader (opcional)
+    setTimeout(redirect, 500);
+  </script>
+</head>
+<body>
+  <div class="box">
+    <h2>Redirigiendo...</h2>
+    <div class="spinner"></div>
+    <p>Si no pasa nada, <a href="https://logsie1.github.io" style="color:#38bdf8;">haz clic aquí</a></p>
+  </div>
+</body>
+</html>
