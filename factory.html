@@ -1,22 +1,47 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Factory Builder - Edición Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; background-color: #11111b; user-select: none;
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #11111b;
+            user-select: none;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        canvas { display: block; width: 100%; height: 100%; }
-        
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #1e1e2e; border-radius: 4px;}
-        ::-webkit-scrollbar-thumb { background: #45475a; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #585b70; }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e1e2e;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #45475a;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #585b70;
+        }
 
         .modal-overlay {
             background-color: rgba(0, 0, 0, 0.75);
@@ -24,29 +49,36 @@
         }
     </style>
 </head>
+
 <body class="text-white font-sans" oncontextmenu="return false;">
 
     <!-- UI SUPERIOR: Economía e Info -->
     <div class="absolute top-0 left-0 w-full p-4 pointer-events-none flex justify-between items-start z-10">
-        
+
         <!-- Estado del Jugador -->
-        <div class="bg-gray-800/90 backdrop-blur-md p-4 rounded-xl border border-gray-700 shadow-lg pointer-events-auto flex flex-col gap-1 w-72">
+        <div
+            class="bg-gray-800/90 backdrop-blur-md p-4 rounded-xl border border-gray-700 shadow-lg pointer-events-auto flex flex-col gap-1 w-72">
             <h1 class="text-xl font-bold text-blue-400">Mega Factoría</h1>
             <div class="text-sm font-bold text-gray-300 flex items-center gap-2">
-                <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                        clip-rule="evenodd"></path>
+                </svg>
                 <span id="playerNameDisplay">Cargando...</span>
             </div>
             <div class="text-3xl font-mono text-green-400 font-bold tracking-tight mt-1">
                 $<span id="moneyDisplay">0</span>
             </div>
-            
+
             <div class="text-xs text-gray-400 mt-2 flex justify-between items-center bg-gray-900/50 p-2 rounded">
-                <span>Mineros: <span id="genCountDisplay" class="font-bold text-white">0</span>/<span id="maxGenDisplay">3</span></span>
+                <span>Mineros: <span id="genCountDisplay" class="font-bold text-white">0</span>/<span
+                        id="maxGenDisplay">3</span></span>
             </div>
 
             <div class="text-xs text-gray-400 mt-1 flex justify-between items-center bg-gray-900/50 p-2 rounded">
                 <span>Terreno: <span id="gridSizeDisplay">5</span>x<span id="gridSizeDisplay2">5</span></span>
-                <button id="btnExpand" class="bg-blue-600 hover:bg-blue-500 px-2 py-1 rounded text-white transition-colors shadow">
+                <button id="btnExpand"
+                    class="bg-blue-600 hover:bg-blue-500 px-2 py-1 rounded text-white transition-colors shadow">
                     Expandir ($<span id="expandCostDisplay">500</span>)
                 </button>
             </div>
@@ -54,18 +86,23 @@
         </div>
 
         <div class="pointer-events-auto flex gap-3">
-            <button id="btnPause" onclick="togglePause()" class="bg-blue-600/90 hover:bg-blue-500/90 border border-blue-400 px-4 py-3 rounded-xl shadow-lg font-bold flex items-center transition-colors">
+            <button id="btnPause" onclick="togglePause()"
+                class="bg-blue-600/90 hover:bg-blue-500/90 border border-blue-400 px-4 py-3 rounded-xl shadow-lg font-bold flex items-center transition-colors">
                 <span id="pauseIcon" class="text-xl mr-2">⏸️</span>
                 <span id="pauseText">Pausar</span>
             </button>
-            <button onclick="clearAllItems()" class="bg-red-600/90 hover:bg-red-500/90 border border-red-400 px-4 py-3 rounded-xl shadow-lg font-bold flex items-center transition-colors">
+            <button onclick="clearAllItems()"
+                class="bg-red-600/90 hover:bg-red-500/90 border border-red-400 px-4 py-3 rounded-xl shadow-lg font-bold flex items-center transition-colors">
                 <span class="text-xl mr-2">🧹</span>
                 <span>Limpiar Items</span>
             </button>
-            <button onclick="toggleLeaderboard()" class="bg-yellow-600/90 hover:bg-yellow-500/90 border border-yellow-400 px-6 py-3 rounded-xl shadow-lg font-bold flex flex-col items-center transition-colors">
+            <button onclick="toggleLeaderboard()"
+                class="bg-yellow-600/90 hover:bg-yellow-500/90 border border-yellow-400 px-6 py-3 rounded-xl shadow-lg font-bold flex flex-col items-center transition-colors">
                 <span class="text-white">🏆 Clasificación</span>
             </button>
-            <button onclick="toggleShop()" class="bg-purple-600/90 hover:bg-purple-500/90 border border-purple-400 px-6 py-3 rounded-xl shadow-lg font-bold flex flex-col items-center transition-colors" title="Ver Recetas y Mejoras">
+            <button onclick="toggleShop()"
+                class="bg-purple-600/90 hover:bg-purple-500/90 border border-purple-400 px-6 py-3 rounded-xl shadow-lg font-bold flex flex-col items-center transition-colors"
+                title="Ver Recetas y Mejoras">
                 <span class="text-white">🛒 Abrir Tienda</span>
                 <span class="text-purple-200 text-[10px]">Materiales y Máquinas</span>
             </button>
@@ -73,26 +110,30 @@
     </div>
 
     <!-- TOAST NOTIFICATION (Alertas sin bloquear UI) -->
-    <div id="toast" class="fixed bottom-36 left-1/2 -translate-x-1/2 bg-red-600/95 border border-red-400 text-white px-6 py-3 rounded-full font-bold shadow-2xl opacity-0 translate-y-4 transition-all duration-300 pointer-events-none z-50 text-sm">
+    <div id="toast"
+        class="fixed bottom-36 left-1/2 -translate-x-1/2 bg-red-600/95 border border-red-400 text-white px-6 py-3 rounded-full font-bold shadow-2xl opacity-0 translate-y-4 transition-all duration-300 pointer-events-none z-50 text-sm">
         Mensaje
     </div>
 
     <!-- PANEL DERECHO: Inspector de Selección -->
-    <div id="inspectorPanel" class="hidden absolute top-32 right-4 w-72 bg-gray-800/95 backdrop-blur-xl p-5 rounded-2xl border border-gray-600 shadow-2xl pointer-events-auto z-20 flex flex-col gap-4 transform transition-all">
+    <div id="inspectorPanel"
+        class="hidden absolute top-32 right-4 w-72 bg-gray-800/95 backdrop-blur-xl p-5 rounded-2xl border border-gray-600 shadow-2xl pointer-events-auto z-20 flex flex-col gap-4 transform transition-all">
         <div class="flex justify-between items-center border-b border-gray-600 pb-2">
             <h2 id="inspTitle" class="text-lg font-bold text-white">Máquina</h2>
             <button onclick="closeInspector()" class="text-gray-400 hover:text-white font-bold text-xl">&times;</button>
         </div>
-        
+
         <div id="inspConfig" class="flex flex-col gap-2 max-h-64 overflow-y-auto pr-2">
             <!-- Generado por JS -->
         </div>
 
         <div class="grid grid-cols-2 gap-2 mt-2">
-            <button onclick="rotateSelected()" class="bg-blue-600 hover:bg-blue-500 py-2 rounded-lg font-bold text-sm shadow">
+            <button onclick="rotateSelected()"
+                class="bg-blue-600 hover:bg-blue-500 py-2 rounded-lg font-bold text-sm shadow">
                 ↻ Rotar
             </button>
-            <button onclick="deleteSelected()" class="bg-red-600 hover:bg-red-500 py-2 rounded-lg font-bold text-sm shadow flex justify-center items-center gap-1">
+            <button onclick="deleteSelected()"
+                class="bg-red-600 hover:bg-red-500 py-2 rounded-lg font-bold text-sm shadow flex justify-center items-center gap-1">
                 Borrar
             </button>
         </div>
@@ -101,74 +142,116 @@
 
     <!-- UI INFERIOR: Inventario / Barra de Herramientas -->
     <div class="absolute bottom-6 left-1/2 -translate-x-1/2 pointer-events-auto z-10 w-max">
-        <div class="bg-gray-900/95 backdrop-blur-xl px-4 py-3 rounded-2xl border border-gray-700 shadow-[0_10px_40px_rgba(0,0,0,0.5)] flex items-end gap-2" id="toolbarContainer">
-            
-            <button onclick="setTool('cursor')" id="tool-cursor" class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-blue-500 transition-all flex flex-col items-center w-20 h-20 justify-center">
+        <div class="bg-gray-900/95 backdrop-blur-xl px-4 py-3 rounded-2xl border border-gray-700 shadow-[0_10px_40px_rgba(0,0,0,0.5)] flex items-end gap-2"
+            id="toolbarContainer">
+
+            <button onclick="setTool('cursor')" id="tool-cursor"
+                class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-blue-500 transition-all flex flex-col items-center w-20 h-20 justify-center">
                 <span class="text-2xl mb-1">👆</span>
                 <span class="text-[11px] font-bold text-gray-200">Seleccionar</span>
             </button>
             <div class="w-px h-16 bg-gray-700 mx-1"></div>
-            
-            <button onclick="setTool('conveyor')" id="tool-conveyor" class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
-                <div class="w-8 h-8 bg-gray-600 mb-1 rounded flex items-center justify-center text-white font-bold">»</div>
+
+            <button onclick="setTool('conveyor')" id="tool-conveyor"
+                class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
+                <div class="w-8 h-8 bg-gray-600 mb-1 rounded flex items-center justify-center text-white font-bold">»
+                </div>
                 <span class="text-[10px] text-gray-300">Cinta</span>
-                <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$10</div>
+                <div
+                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
+                    $10</div>
             </button>
 
             <!-- Nuevos Divisores -->
-            <button onclick="setTool('splitter2')" id="tool-splitter2" class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
-                <div class="w-8 h-8 bg-indigo-500 mb-1 rounded border-2 border-indigo-300 flex items-center justify-center text-white font-bold text-xs leading-none text-center">1:2<br>Div</div>
+            <button onclick="setTool('splitter2')" id="tool-splitter2"
+                class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
+                <div
+                    class="w-8 h-8 bg-indigo-500 mb-1 rounded border-2 border-indigo-300 flex items-center justify-center text-white font-bold text-xs leading-none text-center">
+                    1:2<br>Div</div>
                 <span class="text-[10px] text-gray-300">Div 1/2</span>
-                <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$150</div>
+                <div
+                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
+                    $150</div>
             </button>
 
-            <button onclick="setTool('splitter3')" id="tool-splitter3" class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
-                <div class="w-8 h-8 bg-purple-600 mb-1 rounded border-2 border-purple-400 flex items-center justify-center text-white font-bold text-xs leading-none text-center">1:3<br>Div</div>
+            <button onclick="setTool('splitter3')" id="tool-splitter3"
+                class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
+                <div
+                    class="w-8 h-8 bg-purple-600 mb-1 rounded border-2 border-purple-400 flex items-center justify-center text-white font-bold text-xs leading-none text-center">
+                    1:3<br>Div</div>
                 <span class="text-[10px] text-gray-300">Div 1/3</span>
-                <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$300</div>
+                <div
+                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
+                    $300</div>
             </button>
 
             <div class="w-px h-16 bg-gray-700 mx-1"></div>
 
-            <button onclick="setTool('generator')" id="tool-generator" class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
-                <div class="w-8 h-8 bg-green-500 mb-1 rounded border-2 border-green-300 flex items-center justify-center font-bold text-gray-900">M</div>
+            <button onclick="setTool('generator')" id="tool-generator"
+                class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
+                <div
+                    class="w-8 h-8 bg-green-500 mb-1 rounded border-2 border-green-300 flex items-center justify-center font-bold text-gray-900">
+                    M</div>
                 <span class="text-[10px] text-gray-300">Minero</span>
-                <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$50</div>
+                <div
+                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
+                    $50</div>
             </button>
 
-            <button onclick="setTool('seller')" id="tool-seller" class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
-                <div class="w-8 h-8 bg-red-500 mb-1 rounded border-2 border-red-300 flex items-center justify-center text-white font-bold">$</div>
+            <button onclick="setTool('seller')" id="tool-seller"
+                class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
+                <div
+                    class="w-8 h-8 bg-red-500 mb-1 rounded border-2 border-red-300 flex items-center justify-center text-white font-bold">
+                    $</div>
                 <span class="text-[10px] text-gray-300">Vendedor</span>
-                <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$50</div>
+                <div
+                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
+                    $50</div>
             </button>
 
-            <button onclick="setTool('smelter')" id="tool-smelter" class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
-                <div class="w-8 h-8 bg-orange-500 mb-1 rounded border-2 border-orange-300 flex items-center justify-center text-white font-bold text-xs">H</div>
+            <button onclick="setTool('smelter')" id="tool-smelter"
+                class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
+                <div
+                    class="w-8 h-8 bg-orange-500 mb-1 rounded border-2 border-orange-300 flex items-center justify-center text-white font-bold text-xs">
+                    H</div>
                 <span class="text-[10px] text-gray-300">Horno</span>
-                <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$200</div>
+                <div
+                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
+                    $200</div>
             </button>
 
-            <button onclick="setTool('crafter')" id="tool-crafter" class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-20 h-20 justify-center relative hidden">
-                <div class="w-8 h-8 bg-fuchsia-500 mb-1 rounded border-2 border-fuchsia-300 flex items-center justify-center text-white font-bold text-xs">Ens</div>
+            <button onclick="setTool('crafter')" id="tool-crafter"
+                class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-20 h-20 justify-center relative hidden">
+                <div
+                    class="w-8 h-8 bg-fuchsia-500 mb-1 rounded border-2 border-fuchsia-300 flex items-center justify-center text-white font-bold text-xs">
+                    Ens</div>
                 <span class="text-[10px] text-gray-300 leading-tight text-center">Ensamblador</span>
-                <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$500</div>
+                <div
+                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
+                    $500</div>
             </button>
         </div>
     </div>
 
     <!-- MODAL: Tienda -->
-    <div id="shopModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center pointer-events-auto">
+    <div id="shopModal"
+        class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center pointer-events-auto">
         <div class="bg-gray-900 border border-purple-500 rounded-2xl shadow-2xl w-3/4 max-w-5xl h-[85vh] flex flex-col">
             <div class="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-800 rounded-t-2xl">
                 <h2 class="text-3xl font-bold text-purple-400">🛒 Centro de Investigación</h2>
-                <div class="text-2xl font-mono text-green-400 font-bold bg-gray-900 px-4 py-1 rounded-lg border border-gray-700">
+                <div
+                    class="text-2xl font-mono text-green-400 font-bold bg-gray-900 px-4 py-1 rounded-lg border border-gray-700">
                     $<span id="shopMoney">0</span>
                 </div>
-                <button onclick="toggleShop()" class="text-gray-400 hover:text-white font-bold text-3xl">&times;</button>
+                <button onclick="toggleShop()"
+                    class="text-gray-400 hover:text-white font-bold text-3xl">&times;</button>
             </div>
             <div class="p-4 flex gap-4 border-b border-gray-800 bg-gray-800/50">
-                <button onclick="shopTab('buildings')" id="tab-buildings" class="px-4 py-2 rounded-lg bg-purple-600 font-bold shadow">Edificios y Mejoras</button>
-                <button onclick="shopTab('recipes')" id="tab-recipes" class="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 font-bold shadow">Recetas de Ensamblaje</button>
+                <button onclick="shopTab('buildings')" id="tab-buildings"
+                    class="px-4 py-2 rounded-lg bg-purple-600 font-bold shadow">Edificios y Mejoras</button>
+                <button onclick="shopTab('recipes')" id="tab-recipes"
+                    class="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 font-bold shadow">Recetas de
+                    Ensamblaje</button>
             </div>
             <div class="flex-1 overflow-y-auto p-6" id="shopContent">
                 <!-- Rellenado por JS -->
@@ -177,11 +260,13 @@
     </div>
 
     <!-- MODAL: Leaderboard -->
-    <div id="leaderboardModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center pointer-events-auto">
+    <div id="leaderboardModal"
+        class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center pointer-events-auto">
         <div class="bg-gray-900 border border-yellow-500 rounded-2xl shadow-2xl w-full max-w-xl h-[70vh] flex flex-col">
             <div class="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-800 rounded-t-2xl">
                 <h2 class="text-2xl font-bold text-yellow-400">🏆 Clasificación Global</h2>
-                <button onclick="toggleLeaderboard()" class="text-gray-400 hover:text-white font-bold text-3xl">&times;</button>
+                <button onclick="toggleLeaderboard()"
+                    class="text-gray-400 hover:text-white font-bold text-3xl">&times;</button>
             </div>
             <div class="flex-1 overflow-y-auto p-2" id="leaderboardContent">
                 <div class="text-center text-gray-400 mt-10">Cargando datos...</div>
@@ -204,7 +289,7 @@
         try {
             let decoded = atob(rawUser);
             playerName = decoded.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-        } catch(e) { console.warn("Error decodificando nombre", e); }
+        } catch (e) { console.warn("Error decodificando nombre", e); }
         document.getElementById('playerNameDisplay').innerText = playerName;
 
         // --- FIREBASE CONFIG ---
@@ -226,75 +311,75 @@
         // --- CONSTANTES ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const TILE_SIZE = 64; 
-        const ITEM_SPEED = 2.5; 
-        
+        const TILE_SIZE = 64;
+        const ITEM_SPEED = 2.5;
+
         // --- MATERIALES (Visuales y Valor Base) ---
         const MATS = {
-            'ore_iron':    { name: 'Min. Hierro', color: '#9ca3af', shape: 'arc', value: 5 },
-            'ore_copper':  { name: 'Min. Cobre', color: '#b45309', shape: 'arc', value: 6 },
-            'ore_gold':    { name: 'Min. Oro', color: '#fbbf24', shape: 'arc', value: 15 },
-            'ore_aluminum':{ name: 'Min. Aluminio', color: '#cbd5e1', shape: 'arc', value: 10 },
+            'ore_iron': { name: 'Min. Hierro', color: '#9ca3af', shape: 'arc', value: 5 },
+            'ore_copper': { name: 'Min. Cobre', color: '#b45309', shape: 'arc', value: 6 },
+            'ore_gold': { name: 'Min. Oro', color: '#fbbf24', shape: 'arc', value: 15 },
+            'ore_aluminum': { name: 'Min. Aluminio', color: '#cbd5e1', shape: 'arc', value: 10 },
             'ore_silicon': { name: 'Silicio', color: '#14b8a6', shape: 'arc', value: 12 },
             'ore_diamond': { name: 'Diamante', color: '#67e8f9', shape: 'arc', value: 100 },
-            
-            'ingot_iron':  { name: 'Lingote Hierro', color: '#e5e7eb', shape: 'rect', value: 15 },
-            'ingot_copper':{ name: 'Lingote Cobre', color: '#d97706', shape: 'rect', value: 18 },
-            'ingot_gold':  { name: 'Lingote Oro', color: '#fcd34d', shape: 'rect', value: 45 },
-            'ingot_aluminum':{ name: 'Lingote Aluminio', color: '#f1f5f9', shape: 'rect', value: 30 },
-            'wafer_silicon':{ name: 'Oblea Silicio', color: '#2dd4bf', shape: 'rect', value: 40 },
-            
-            'wire':        { name: 'Cable', color: '#f59e0b', shape: 'coil', value: 25 },
-            'plate':       { name: 'Placa Metálica', color: '#6b7280', shape: 'plate', value: 40 },
-            'gear':        { name: 'Engranaje', color: '#4b5563', shape: 'gear', value: 70 },
-            'pipe':        { name: 'Tubería', color: '#94a3b8', shape: 'pipe', value: 50 },
-            
-            'circuit':     { name: 'Circuito', color: '#10b981', shape: 'chip', value: 150 },
-            'processor':   { name: 'Procesador', color: '#3b82f6', shape: 'chip', value: 450 },
-            'motor':       { name: 'Motor', color: '#ef4444', shape: 'cylinder', value: 400 },
-            'battery':     { name: 'Batería', color: '#a855f7', shape: 'cylinder', value: 350 },
-            'supercomputer':{ name: 'Superordenador', color: '#ec4899', shape: 'chip', value: 2500 },
-            'quantum_chip':{ name: 'Chip Cuántico', color: '#06b6d4', shape: 'chip', value: 6000 }
+
+            'ingot_iron': { name: 'Lingote Hierro', color: '#e5e7eb', shape: 'rect', value: 15 },
+            'ingot_copper': { name: 'Lingote Cobre', color: '#d97706', shape: 'rect', value: 18 },
+            'ingot_gold': { name: 'Lingote Oro', color: '#fcd34d', shape: 'rect', value: 45 },
+            'ingot_aluminum': { name: 'Lingote Aluminio', color: '#f1f5f9', shape: 'rect', value: 30 },
+            'wafer_silicon': { name: 'Oblea Silicio', color: '#2dd4bf', shape: 'rect', value: 40 },
+
+            'wire': { name: 'Cable', color: '#f59e0b', shape: 'coil', value: 25 },
+            'plate': { name: 'Placa Metálica', color: '#6b7280', shape: 'plate', value: 40 },
+            'gear': { name: 'Engranaje', color: '#4b5563', shape: 'gear', value: 70 },
+            'pipe': { name: 'Tubería', color: '#94a3b8', shape: 'pipe', value: 50 },
+
+            'circuit': { name: 'Circuito', color: '#10b981', shape: 'chip', value: 150 },
+            'processor': { name: 'Procesador', color: '#3b82f6', shape: 'chip', value: 450 },
+            'motor': { name: 'Motor', color: '#ef4444', shape: 'cylinder', value: 400 },
+            'battery': { name: 'Batería', color: '#a855f7', shape: 'cylinder', value: 350 },
+            'supercomputer': { name: 'Superordenador', color: '#ec4899', shape: 'chip', value: 2500 },
+            'quantum_chip': { name: 'Chip Cuántico', color: '#06b6d4', shape: 'chip', value: 6000 }
         };
 
         // --- RECETAS PROGRESIVAS ---
         const RECIPES = {
             // HORNOS
-            'smelt_iron': { name: 'Fundir Hierro', in: {'ore_iron':1}, out: 'ingot_iron', time: 1.5, type: 'smelter', cost: 0, cat: 'Fundición' },
-            'smelt_copper': { name: 'Fundir Cobre', in: {'ore_copper':1}, out: 'ingot_copper', time: 1.5, type: 'smelter', cost: 0, cat: 'Fundición' },
-            'smelt_gold': { name: 'Fundir Oro', in: {'ore_gold':1}, out: 'ingot_gold', time: 2.0, type: 'smelter', cost: 300, cat: 'Fundición Avanzada' },
-            'smelt_aluminum': { name: 'Fundir Aluminio', in: {'ore_aluminum':1}, out: 'ingot_aluminum', time: 2.0, type: 'smelter', cost: 400, cat: 'Fundición Avanzada' },
-            'smelt_silicon': { name: 'Obleas de Silicio', in: {'ore_silicon':2}, out: 'wafer_silicon', time: 3.0, type: 'smelter', cost: 800, cat: 'Alta Tecnología' },
-            
+            'smelt_iron': { name: 'Fundir Hierro', in: { 'ore_iron': 1 }, out: 'ingot_iron', time: 1.5, type: 'smelter', cost: 0, cat: 'Fundición' },
+            'smelt_copper': { name: 'Fundir Cobre', in: { 'ore_copper': 1 }, out: 'ingot_copper', time: 1.5, type: 'smelter', cost: 0, cat: 'Fundición' },
+            'smelt_gold': { name: 'Fundir Oro', in: { 'ore_gold': 1 }, out: 'ingot_gold', time: 2.0, type: 'smelter', cost: 300, cat: 'Fundición Avanzada' },
+            'smelt_aluminum': { name: 'Fundir Aluminio', in: { 'ore_aluminum': 1 }, out: 'ingot_aluminum', time: 2.0, type: 'smelter', cost: 400, cat: 'Fundición Avanzada' },
+            'smelt_silicon': { name: 'Obleas de Silicio', in: { 'ore_silicon': 2 }, out: 'wafer_silicon', time: 3.0, type: 'smelter', cost: 800, cat: 'Alta Tecnología' },
+
             // ENSAMBLADORES
-            'craft_wire': { name: 'Cable de Cobre', in: {'ingot_copper':1}, out: 'wire', time: 1.0, type: 'crafter', cost: 100, cat: 'Componentes Básicos' },
-            'craft_plate': { name: 'Placa de Hierro', in: {'ingot_iron':2}, out: 'plate', time: 1.5, type: 'crafter', cost: 150, cat: 'Componentes Básicos' },
-            'craft_pipe': { name: 'Tubería', in: {'ingot_aluminum':1}, out: 'pipe', time: 1.5, type: 'crafter', cost: 400, cat: 'Mecánica' },
-            'craft_gear': { name: 'Engranaje', in: {'ingot_iron':1, 'plate':1}, out: 'gear', time: 2.0, type: 'crafter', cost: 300, cat: 'Mecánica' },
-            
-            'craft_circuit': { name: 'Circuito Básico', in: {'wire':2, 'plate':1}, out: 'circuit', time: 2.5, type: 'crafter', cost: 800, cat: 'Electrónica' },
-            'craft_battery': { name: 'Batería', in: {'wire':2, 'ingot_aluminum':2}, out: 'battery', time: 3.0, type: 'crafter', cost: 1200, cat: 'Electrónica' },
-            'craft_motor': { name: 'Motor Industrial', in: {'gear':2, 'wire':3, 'pipe':1}, out: 'motor', time: 3.5, type: 'crafter', cost: 2500, cat: 'Mecánica Avanzada' },
-            
-            'craft_processor': { name: 'Procesador', in: {'circuit':2, 'wafer_silicon':1, 'ingot_gold':1}, out: 'processor', time: 4.0, type: 'crafter', cost: 4000, cat: 'Alta Tecnología' },
-            'craft_supercomp': { name: 'Superordenador', in: {'processor':2, 'motor':1, 'battery':2}, out: 'supercomputer', time: 6.0, type: 'crafter', cost: 10000, cat: 'Alta Tecnología' },
-            'craft_quantum': { name: 'Chip Cuántico', in: {'processor':4, 'ore_diamond':2, 'wafer_silicon':2}, out: 'quantum_chip', time: 10.0, type: 'crafter', cost: 50000, cat: 'Futurista' }
+            'craft_wire': { name: 'Cable de Cobre', in: { 'ingot_copper': 1 }, out: 'wire', time: 1.0, type: 'crafter', cost: 100, cat: 'Componentes Básicos' },
+            'craft_plate': { name: 'Placa de Hierro', in: { 'ingot_iron': 2 }, out: 'plate', time: 1.5, type: 'crafter', cost: 150, cat: 'Componentes Básicos' },
+            'craft_pipe': { name: 'Tubería', in: { 'ingot_aluminum': 1 }, out: 'pipe', time: 1.5, type: 'crafter', cost: 400, cat: 'Mecánica' },
+            'craft_gear': { name: 'Engranaje', in: { 'ingot_iron': 1, 'plate': 1 }, out: 'gear', time: 2.0, type: 'crafter', cost: 300, cat: 'Mecánica' },
+
+            'craft_circuit': { name: 'Circuito Básico', in: { 'wire': 2, 'plate': 1 }, out: 'circuit', time: 2.5, type: 'crafter', cost: 800, cat: 'Electrónica' },
+            'craft_battery': { name: 'Batería', in: { 'wire': 2, 'ingot_aluminum': 2 }, out: 'battery', time: 3.0, type: 'crafter', cost: 1200, cat: 'Electrónica' },
+            'craft_motor': { name: 'Motor Industrial', in: { 'gear': 2, 'wire': 3, 'pipe': 1 }, out: 'motor', time: 3.5, type: 'crafter', cost: 2500, cat: 'Mecánica Avanzada' },
+
+            'craft_processor': { name: 'Procesador', in: { 'circuit': 2, 'wafer_silicon': 1, 'ingot_gold': 1 }, out: 'processor', time: 4.0, type: 'crafter', cost: 4000, cat: 'Alta Tecnología' },
+            'craft_supercomp': { name: 'Superordenador', in: { 'processor': 2, 'motor': 1, 'battery': 2 }, out: 'supercomputer', time: 6.0, type: 'crafter', cost: 10000, cat: 'Alta Tecnología' },
+            'craft_quantum': { name: 'Chip Cuántico', in: { 'processor': 4, 'ore_diamond': 2, 'wafer_silicon': 2 }, out: 'quantum_chip', time: 10.0, type: 'crafter', cost: 50000, cat: 'Futurista' }
         };
 
         const BUILDINGS = {
-            conveyor:  { cost: 10,  name: 'Cinta Transportadora' },
-            generator: { cost: 50,  name: 'Minero / Generador' },
-            seller:    { cost: 50,  name: 'Vendedor' },
+            conveyor: { cost: 10, name: 'Cinta Transportadora' },
+            generator: { cost: 50, name: 'Minero / Generador' },
+            seller: { cost: 50, name: 'Vendedor' },
             splitter2: { cost: 150, name: 'Divisor Doble (1 a 2)', shop: true, info: 'Alterna items hacia su izquierda y derecha.' },
             splitter3: { cost: 300, name: 'Divisor Triple (1 a 3)', shop: true, info: 'Alterna items hacia izq, frente y derecha.' },
-            smelter:   { cost: 200, name: 'Horno de Fundición', shop: true, info: 'Funde minerales en lingotes.' },
-            crafter:   { cost: 500, name: 'Ensamblador', shop: true, info: 'Combina items para crear objetos avanzados.' }
+            smelter: { cost: 200, name: 'Horno de Fundición', shop: true, info: 'Funde minerales en lingotes.' },
+            crafter: { cost: 500, name: 'Ensamblador', shop: true, info: 'Combina items para crear objetos avanzados.' }
         };
 
         const DIRECTIONS = [
             { dx: 0, dy: -1, angle: -Math.PI / 2 }, // 0: Arriba
-            { dx: 1, dy: 0,  angle: 0 },            // 1: Derecha
-            { dx: 0, dy: 1,  angle: Math.PI / 2 },  // 2: Abajo
+            { dx: 1, dy: 0, angle: 0 },            // 1: Derecha
+            { dx: 0, dy: 1, angle: Math.PI / 2 },  // 2: Abajo
             { dx: -1, dy: 0, angle: Math.PI }       // 3: Izquierda
         ];
 
@@ -304,7 +389,7 @@
             gridSize: 5,
             maxGenerators: 3, // Límite inicial
             map: {}, // key: "x,y", value: { type, dir, config, inventory, outBuffer, timer, splitIndex }
-            items: [], 
+            items: [],
             unlockedRecipes: ['smelt_iron', 'smelt_copper'],
             unlockedBuildings: ['conveyor', 'generator', 'seller'],
             tool: 'cursor',
@@ -322,7 +407,7 @@
         // Funciones Auxiliares
         function countGenerators() {
             let count = 0;
-            for(let k in state.map) if(state.map[k].type === 'generator') count++;
+            for (let k in state.map) if (state.map[k].type === 'generator') count++;
             return count;
         }
 
@@ -346,8 +431,8 @@
                 } else {
                     await signInAnonymously(auth);
                 }
-            } catch (e) { 
-                console.error("Auth error", e); 
+            } catch (e) {
+                console.error("Auth error", e);
                 document.getElementById('saveStatus').innerText = "Error Auth";
             }
         };
@@ -367,7 +452,7 @@
             try {
                 const saveRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'saves', playerName);
                 const mapObj = {};
-                for (let [k, v] of Object.entries(state.map)) mapObj[k] = { ...v }; 
+                for (let [k, v] of Object.entries(state.map)) mapObj[k] = { ...v };
 
                 await setDoc(saveRef, {
                     name: playerName,
@@ -381,7 +466,7 @@
                 });
                 document.getElementById('saveStatus').innerText = "Guardado ✅";
                 setTimeout(() => document.getElementById('saveStatus').innerText = "", 2000);
-            } catch(e) { console.error("Error saving:", e); }
+            } catch (e) { console.error("Error saving:", e); }
         }
 
         async function loadGameFromCloud() {
@@ -390,7 +475,7 @@
                 document.getElementById('saveStatus').innerText = "Cargando...";
                 const saveRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'saves', playerName);
                 const docSnap = await getDoc(saveRef);
-                
+
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     state.money = data.money;
@@ -399,12 +484,12 @@
                     state.map = data.map || {};
                     state.unlockedRecipes = data.unlockedRecipes || ['smelt_iron', 'smelt_copper'];
                     state.unlockedBuildings = data.unlockedBuildings || ['conveyor', 'generator', 'seller'];
-                    state.items = []; 
+                    state.items = [];
                 }
                 updateUI();
                 document.getElementById('saveStatus').innerText = "Cargado ✅";
                 setTimeout(() => document.getElementById('saveStatus').innerText = "", 2000);
-            } catch(e) { console.error("Error loading:", e); }
+            } catch (e) { console.error("Error loading:", e); }
         }
 
         function setupLeaderboardListener() {
@@ -413,21 +498,21 @@
                 let allSaves = [];
                 snapshot.forEach(doc => allSaves.push(doc.data()));
                 allSaves.sort((a, b) => b.money - a.money);
-                
+
                 const lbContainer = document.getElementById('leaderboardContent');
                 lbContainer.innerHTML = '';
-                
-                if(allSaves.length === 0) {
+
+                if (allSaves.length === 0) {
                     lbContainer.innerHTML = '<div class="text-center text-gray-400 mt-10">Aún no hay jugadores registrados.</div>';
                     return;
                 }
 
                 allSaves.slice(0, 50).forEach((save, index) => {
                     let medal = '';
-                    if(index === 0) medal = '🥇';
-                    else if(index === 1) medal = '🥈';
-                    else if(index === 2) medal = '🥉';
-                    else medal = `<span class="text-gray-500 w-6 inline-block text-center">${index+1}</span>`;
+                    if (index === 0) medal = '🥇';
+                    else if (index === 1) medal = '🥈';
+                    else if (index === 2) medal = '🥉';
+                    else medal = `<span class="text-gray-500 w-6 inline-block text-center">${index + 1}</span>`;
 
                     const isMe = save.name === playerName;
                     const row = document.createElement('div');
@@ -450,12 +535,12 @@
             }
         }, 5000);
 
-        window.togglePause = function() {
+        window.togglePause = function () {
             state.isPaused = !state.isPaused;
             const btn = document.getElementById('btnPause');
             const icon = document.getElementById('pauseIcon');
             const text = document.getElementById('pauseText');
-            
+
             if (state.isPaused) {
                 btn.classList.replace('bg-blue-600/90', 'bg-orange-600/90');
                 btn.classList.replace('border-blue-400', 'border-orange-400');
@@ -469,7 +554,7 @@
             }
         };
 
-        window.clearAllItems = function() {
+        window.clearAllItems = function () {
             state.items = [];
             showToast("¡Todos los items eliminados!");
         };
@@ -486,24 +571,24 @@
         window.addEventListener('resize', resize);
         resize();
 
-        window.toggleShop = function() {
+        window.toggleShop = function () {
             const el = document.getElementById('shopModal');
             el.classList.toggle('hidden');
-            if(!el.classList.contains('hidden')) shopTab('buildings');
+            if (!el.classList.contains('hidden')) shopTab('buildings');
         };
 
-        window.toggleLeaderboard = function() {
+        window.toggleLeaderboard = function () {
             const el = document.getElementById('leaderboardModal');
             el.classList.toggle('hidden');
         };
 
-        window.shopTab = function(tab) {
+        window.shopTab = function (tab) {
             document.getElementById('shopMoney').innerText = state.money.toLocaleString();
             const content = document.getElementById('shopContent');
-            
-            document.getElementById('tab-buildings').className = `px-4 py-2 rounded-lg font-bold shadow ${tab==='buildings'?'bg-purple-600':'bg-gray-700 hover:bg-gray-600'}`;
-            document.getElementById('tab-recipes').className = `px-4 py-2 rounded-lg font-bold shadow ${tab==='recipes'?'bg-purple-600':'bg-gray-700 hover:bg-gray-600'}`;
-            
+
+            document.getElementById('tab-buildings').className = `px-4 py-2 rounded-lg font-bold shadow ${tab === 'buildings' ? 'bg-purple-600' : 'bg-gray-700 hover:bg-gray-600'}`;
+            document.getElementById('tab-recipes').className = `px-4 py-2 rounded-lg font-bold shadow ${tab === 'recipes' ? 'bg-purple-600' : 'bg-gray-700 hover:bg-gray-600'}`;
+
             content.innerHTML = '';
 
             if (tab === 'buildings') {
@@ -532,7 +617,7 @@
                                 <h3 class="text-xl font-bold text-white">${BUILDINGS[key].name}</h3>
                                 <p class="text-sm text-gray-400">${BUILDINGS[key].info}</p>
                             </div>
-                            ${isOwned ? 
+                            ${isOwned ?
                                 `<span class="text-green-400 font-bold bg-green-900/30 px-3 py-1 rounded">Comprado</span>` :
                                 `<button onclick="buyBuilding('${key}')" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg font-bold shadow text-white transition">$${BUILDINGS[key].cost}</button>`
                             }
@@ -545,8 +630,8 @@
                 const categories = {};
                 for (let key in RECIPES) {
                     let cat = RECIPES[key].cat;
-                    if(!categories[cat]) categories[cat] = [];
-                    categories[cat].push({id: key, ...RECIPES[key]});
+                    if (!categories[cat]) categories[cat] = [];
+                    categories[cat].push({ id: key, ...RECIPES[key] });
                 }
 
                 for (let cat in categories) {
@@ -560,21 +645,21 @@
 
                     categories[cat].forEach(rec => {
                         const isOwned = state.unlockedRecipes.includes(rec.id);
-                        const inStr = Object.entries(rec.in).map(([k,v]) => `${v}x ${MATS[k].name}`).join(' + ');
-                        
+                        const inStr = Object.entries(rec.in).map(([k, v]) => `${v}x ${MATS[k].name}`).join(' + ');
+
                         // Calcular rentabilidad
                         const outValue = MATS[rec.out].value;
                         let inValue = 0;
-                        for(let k in rec.in) inValue += MATS[k].value * rec.in[k];
+                        for (let k in rec.in) inValue += MATS[k].value * rec.in[k];
                         const profit = outValue - inValue;
-                        
+
                         const div = document.createElement('div');
                         div.className = "bg-gray-800 p-4 rounded-xl border border-gray-700 flex flex-col justify-between";
                         div.innerHTML = `
                             <div class="mb-3">
                                 <div class="flex justify-between items-start">
                                     <h4 class="font-bold text-white text-lg">${rec.name}</h4>
-                                    <span class="text-xs bg-gray-700 px-2 py-1 rounded text-gray-300">${rec.type==='smelter'?'Horno':'Ensamblador'}</span>
+                                    <span class="text-xs bg-gray-700 px-2 py-1 rounded text-gray-300">${rec.type === 'smelter' ? 'Horno' : 'Ensamblador'}</span>
                                 </div>
                                 <p class="text-xs text-orange-300 mt-2">Requiere: ${inStr}</p>
                                 <div class="mt-2 flex gap-2 text-xs">
@@ -583,10 +668,10 @@
                                 </div>
                             </div>
                             <div class="text-right mt-2">
-                                ${isOwned ? 
-                                    `<span class="text-green-400 font-bold text-sm bg-green-900/30 px-3 py-1 rounded">Desbloqueado</span>` :
-                                    `<button onclick="buyRecipe('${rec.id}')" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg font-bold shadow text-sm text-white w-full transition">$${rec.cost.toLocaleString()}</button>`
-                                }
+                                ${isOwned ?
+                                `<span class="text-green-400 font-bold text-sm bg-green-900/30 px-3 py-1 rounded">Desbloqueado</span>` :
+                                `<button onclick="buyRecipe('${rec.id}')" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg font-bold shadow text-sm text-white w-full transition">$${rec.cost.toLocaleString()}</button>`
+                            }
                             </div>
                         `;
                         grid.appendChild(div);
@@ -596,7 +681,7 @@
             }
         };
 
-        window.buyGenLimit = function() {
+        window.buyGenLimit = function () {
             const cost = state.maxGenerators * 500;
             if (state.money >= cost) {
                 state.money -= cost;
@@ -610,7 +695,7 @@
             }
         };
 
-        window.buyBuilding = function(key) {
+        window.buyBuilding = function (key) {
             const cost = BUILDINGS[key].cost;
             if (state.money >= cost && !state.unlockedBuildings.includes(key)) {
                 state.money -= cost;
@@ -621,7 +706,7 @@
             }
         };
 
-        window.buyRecipe = function(key) {
+        window.buyRecipe = function (key) {
             const cost = RECIPES[key].cost;
             if (state.money >= cost && !state.unlockedRecipes.includes(key)) {
                 state.money -= cost;
@@ -637,7 +722,7 @@
             document.getElementById('gridSizeDisplay').innerText = state.gridSize;
             document.getElementById('gridSizeDisplay2').innerText = state.gridSize;
             document.getElementById('expandCostDisplay').innerText = (state.gridSize * 150).toLocaleString();
-            
+
             // Stats Mineros
             document.getElementById('genCountDisplay').innerText = countGenerators();
             document.getElementById('maxGenDisplay').innerText = state.maxGenerators;
@@ -649,7 +734,7 @@
 
             // Show unlocked buildings
             ['smelter', 'crafter', 'splitter2', 'splitter3'].forEach(b => {
-                if(state.unlockedBuildings.includes(b)) {
+                if (state.unlockedBuildings.includes(b)) {
                     document.getElementById(`tool-${b}`).classList.remove('hidden');
                 }
             });
@@ -657,17 +742,17 @@
 
         document.getElementById('btnExpand').onclick = () => {
             const cost = state.gridSize * 150;
-            if (state.money >= cost) { 
-                state.money -= cost; 
-                state.gridSize++; 
-                updateUI(); 
+            if (state.money >= cost) {
+                state.money -= cost;
+                state.gridSize++;
+                updateUI();
                 saveGameToCloud();
             } else {
                 showToast("Falta dinero para expandir.");
             }
         };
 
-        window.setTool = function(t) {
+        window.setTool = function (t) {
             if (BUILDINGS[t]?.shop && !state.unlockedBuildings.includes(t)) return;
             state.tool = t;
             closeInspector();
@@ -718,7 +803,7 @@
                 }
             }
             isDraggingPan = false;
-            if(isDraggingBuild) saveGameToCloud(); 
+            if (isDraggingBuild) saveGameToCloud();
             isDraggingBuild = false;
         });
 
@@ -766,24 +851,24 @@
             const cost = BUILDINGS[state.tool].cost;
             if (state.money >= cost) {
                 if (existing) refundBuilding(existing);
-                
+
                 state.money -= cost;
-                
+
                 let cfg = null;
                 if (state.tool === 'generator') cfg = 'ore_iron';
                 if (state.tool === 'smelter') cfg = state.unlockedRecipes.find(r => RECIPES[r].type === 'smelter') || 'smelt_iron';
                 if (state.tool === 'crafter') cfg = state.unlockedRecipes.find(r => RECIPES[r].type === 'crafter') || 'craft_wire';
 
-                state.map[key] = { 
-                    type: state.tool, 
-                    dir: state.buildDir, 
-                    config: cfg, 
-                    inventory: {}, 
-                    outBuffer: null, 
+                state.map[key] = {
+                    type: state.tool,
+                    dir: state.buildDir,
+                    config: cfg,
+                    inventory: {},
+                    outBuffer: null,
                     timer: 0,
                     splitIndex: 0 // Para divisores
                 };
-                
+
                 updateUI();
                 lastBuiltGrid = { gx, gy };
             } else if (!isDraggingBuild) {
@@ -797,7 +882,7 @@
         }
 
         // --- INSPECTOR ---
-        window.selectTile = function(gx, gy) {
+        window.selectTile = function (gx, gy) {
             const key = `${gx},${gy}`;
             const cell = state.map[key];
             if (!cell) { closeInspector(); return; }
@@ -806,35 +891,35 @@
             const insp = document.getElementById('inspectorPanel');
             insp.classList.remove('hidden');
             document.getElementById('inspTitle').innerText = BUILDINGS[cell.type].name;
-            
+
             let html = '';
-            
+
             if (cell.type === 'generator') {
                 html += `<label class="text-xs text-gray-400">Mineral a Extraer:</label>
                          <select id="selConfig" class="bg-gray-700 text-white p-2 rounded outline-none border border-gray-600">
-                            <option value="ore_iron" ${cell.config==='ore_iron'?'selected':''}>Hierro</option>
-                            <option value="ore_copper" ${cell.config==='ore_copper'?'selected':''}>Cobre</option>
-                            <option value="ore_aluminum" ${cell.config==='ore_aluminum'?'selected':''}>Aluminio</option>
-                            <option value="ore_silicon" ${cell.config==='ore_silicon'?'selected':''}>Silicio</option>
-                            <option value="ore_gold" ${cell.config==='ore_gold'?'selected':''}>Oro</option>
-                            <option value="ore_diamond" ${cell.config==='ore_diamond'?'selected':''}>Diamante</option>
+                            <option value="ore_iron" ${cell.config === 'ore_iron' ? 'selected' : ''}>Hierro</option>
+                            <option value="ore_copper" ${cell.config === 'ore_copper' ? 'selected' : ''}>Cobre</option>
+                            <option value="ore_aluminum" ${cell.config === 'ore_aluminum' ? 'selected' : ''}>Aluminio</option>
+                            <option value="ore_silicon" ${cell.config === 'ore_silicon' ? 'selected' : ''}>Silicio</option>
+                            <option value="ore_gold" ${cell.config === 'ore_gold' ? 'selected' : ''}>Oro</option>
+                            <option value="ore_diamond" ${cell.config === 'ore_diamond' ? 'selected' : ''}>Diamante</option>
                          </select>`;
             } else if (cell.type === 'smelter' || cell.type === 'crafter') {
                 const machineType = cell.type;
                 html += `<label class="text-xs text-gray-400">Receta Asignada:</label>
                          <select id="selConfig" class="bg-gray-700 text-white p-2 rounded outline-none border border-gray-600">`;
-                
+
                 let hasRecipes = false;
                 state.unlockedRecipes.forEach(rKey => {
                     const rec = RECIPES[rKey];
                     if (rec && rec.type === machineType) {
-                        html += `<option value="${rKey}" ${cell.config===rKey?'selected':''}>${rec.name}</option>`;
+                        html += `<option value="${rKey}" ${cell.config === rKey ? 'selected' : ''}>${rec.name}</option>`;
                         hasRecipes = true;
                     }
                 });
-                if(!hasRecipes) html += `<option value="">-- Compra recetas en tienda --</option>`;
+                if (!hasRecipes) html += `<option value="">-- Compra recetas en tienda --</option>`;
                 html += `</select>`;
-                
+
                 if (cell.config && RECIPES[cell.config]) {
                     html += `<div class="mt-2 text-xs text-gray-400 border-t border-gray-600 pt-2">Inventario:</div>`;
                     const req = RECIPES[cell.config].in;
@@ -862,22 +947,22 @@
                     const c = state.map[selectedTile];
                     if (c) {
                         c.config = e.target.value;
-                        c.inventory = {}; 
+                        c.inventory = {};
                         c.outBuffer = null;
                         c.timer = 0;
-                        selectTile(gx, gy); 
+                        selectTile(gx, gy);
                         saveGameToCloud();
                     }
                 };
             }
         };
 
-        window.closeInspector = function() {
+        window.closeInspector = function () {
             selectedTile = null;
             document.getElementById('inspectorPanel').classList.add('hidden');
         };
 
-        window.rotateSelected = function() {
+        window.rotateSelected = function () {
             if (!selectedTile) return;
             const cell = state.map[selectedTile];
             if (cell) {
@@ -886,7 +971,7 @@
             }
         };
 
-        window.deleteSelected = function() {
+        window.deleteSelected = function () {
             if (!selectedTile) return;
             const cell = state.map[selectedTile];
             if (cell) {
@@ -912,8 +997,8 @@
                 if (cell.type === 'generator') {
                     cell.timer += dt;
                     let speed = 1.0;
-                    if(cell.config === 'ore_diamond') speed = 4.0;
-                    else if(cell.config === 'ore_gold' || cell.config === 'ore_silicon') speed = 2.0;
+                    if (cell.config === 'ore_diamond') speed = 4.0;
+                    else if (cell.config === 'ore_gold' || cell.config === 'ore_silicon') speed = 2.0;
 
                     if (cell.timer >= speed) {
                         if (!isPosOccupiedByItem(gx, gy)) {
@@ -921,7 +1006,7 @@
                             cell.timer = 0;
                         }
                     }
-                } 
+                }
                 else if (cell.type === 'smelter' || cell.type === 'crafter') {
                     const recipe = RECIPES[cell.config];
                     if (!recipe) continue;
@@ -929,7 +1014,7 @@
                     if (cell.outBuffer && !isPosOccupiedByItem(gx, gy)) {
                         state.items.push({ type: cell.outBuffer, x: gx, y: gy, nx: gx, ny: gy, progress: 0, moving: false, idleTime: 0 });
                         cell.outBuffer = null;
-                        if(selectedTile === key) selectTile(gx, gy); 
+                        if (selectedTile === key) selectTile(gx, gy);
                     }
 
                     if (!cell.outBuffer) {
@@ -948,7 +1033,7 @@
                                 }
                                 cell.outBuffer = recipe.out;
                                 cell.timer = 0;
-                                if(selectedTile === key) selectTile(gx, gy); 
+                                if (selectedTile === key) selectTile(gx, gy);
                             }
                         } else {
                             cell.timer = 0;
@@ -963,7 +1048,7 @@
 
                 if (!item.moving) {
                     const cell = state.map[`${item.x},${item.y}`];
-                    
+
                     if (cell) {
                         if (cell.type === 'seller') {
                             const val = MATS[item.type]?.value || 0;
@@ -991,7 +1076,7 @@
 
                         const nx = item.x + DIRECTIONS[pushDir].dx;
                         const ny = item.y + DIRECTIONS[pushDir].dy;
-                        
+
                         if (nx >= 0 && nx < state.gridSize && ny >= 0 && ny < state.gridSize) {
                             const nextCell = state.map[`${nx},${ny}`];
                             let canMove = false;
@@ -1003,11 +1088,8 @@
                                 } else if (nextCell.type === 'smelter' || nextCell.type === 'crafter') {
                                     const rec = RECIPES[nextCell.config];
                                     if (rec && rec.in[item.type]) {
-                                        let currentAmt = nextCell.inventory[item.type] || 0;
-                                        if (currentAmt < rec.in[item.type] * 2) {
-                                            canMove = true;
-                                            acceptedByMachine = true;
-                                        }
+                                        canMove = true;
+                                        acceptedByMachine = true;
                                     }
                                 }
                             }
@@ -1017,14 +1099,14 @@
                                 item.nx = nx;
                                 item.ny = ny;
                                 item.destMachine = acceptedByMachine ? `${nx},${ny}` : null;
-                                
+
                                 // Incrementar el divisor solo si se movió exitosamente
-                                if (isSplitter) cell.splitIndex++; 
+                                if (isSplitter) cell.splitIndex++;
                                 item.idleTime = 0; // Reset idle time when moving starts
                             }
                         }
                     }
-                    
+
                     // Lógica de desaparición por inactividad (si no se movió y no está en una máquina procesadora)
                     if (!item.moving) {
                         item.idleTime = (item.idleTime || 0) + dt;
@@ -1064,35 +1146,35 @@
             if (shape === 'arc') {
                 ctx.arc(0, 0, s, 0, Math.PI * 2);
             } else if (shape === 'rect') {
-                ctx.rect(-s, -s*0.8, s*2, s*1.6);
+                ctx.rect(-s, -s * 0.8, s * 2, s * 1.6);
             } else if (shape === 'chip') {
-                ctx.rect(-s*0.8, -s*0.8, s*1.6, s*1.6);
-                ctx.moveTo(-s, -s*0.5); ctx.lineTo(-s*0.8, -s*0.5);
-                ctx.moveTo(-s, 0); ctx.lineTo(-s*0.8, 0);
-                ctx.moveTo(-s, s*0.5); ctx.lineTo(-s*0.8, s*0.5);
-                ctx.moveTo(s, -s*0.5); ctx.lineTo(s*0.8, -s*0.5);
-                ctx.moveTo(s, 0); ctx.lineTo(s*0.8, 0);
-                ctx.moveTo(s, s*0.5); ctx.lineTo(s*0.8, s*0.5);
+                ctx.rect(-s * 0.8, -s * 0.8, s * 1.6, s * 1.6);
+                ctx.moveTo(-s, -s * 0.5); ctx.lineTo(-s * 0.8, -s * 0.5);
+                ctx.moveTo(-s, 0); ctx.lineTo(-s * 0.8, 0);
+                ctx.moveTo(-s, s * 0.5); ctx.lineTo(-s * 0.8, s * 0.5);
+                ctx.moveTo(s, -s * 0.5); ctx.lineTo(s * 0.8, -s * 0.5);
+                ctx.moveTo(s, 0); ctx.lineTo(s * 0.8, 0);
+                ctx.moveTo(s, s * 0.5); ctx.lineTo(s * 0.8, s * 0.5);
             } else if (shape === 'coil') {
-                ctx.arc(0, 0, s*0.8, 0, Math.PI*2);
+                ctx.arc(0, 0, s * 0.8, 0, Math.PI * 2);
                 ctx.stroke(); ctx.beginPath();
-                ctx.arc(0, 0, s*0.4, 0, Math.PI*2);
+                ctx.arc(0, 0, s * 0.4, 0, Math.PI * 2);
             } else if (shape === 'plate') {
-                ctx.rect(-s, -s*0.4, s*2, s*0.8);
+                ctx.rect(-s, -s * 0.4, s * 2, s * 0.8);
             } else if (shape === 'gear') {
-                for(let i=0; i<8; i++) {
-                    ctx.rotate(Math.PI/4);
-                    ctx.rect(-s*0.2, -s, s*0.4, s*2);
+                for (let i = 0; i < 8; i++) {
+                    ctx.rotate(Math.PI / 4);
+                    ctx.rect(-s * 0.2, -s, s * 0.4, s * 2);
                 }
                 ctx.fill(); ctx.beginPath(); ctx.fillStyle = '#11111b';
-                ctx.arc(0,0, s*0.4, 0, Math.PI*2);
+                ctx.arc(0, 0, s * 0.4, 0, Math.PI * 2);
             } else if (shape === 'pipe') {
-                ctx.rect(-s*0.2, -s, s*0.4, s*2);
+                ctx.rect(-s * 0.2, -s, s * 0.4, s * 2);
             } else if (shape === 'cylinder') {
-                ctx.rect(-s*0.6, -s, s*1.2, s*2);
+                ctx.rect(-s * 0.6, -s, s * 1.2, s * 2);
             }
             ctx.fill();
-            if(shape === 'chip' || shape === 'coil') ctx.stroke();
+            if (shape === 'chip' || shape === 'coil') ctx.stroke();
         }
 
         let mouseHoverX = -1; let mouseHoverY = -1;
@@ -1128,32 +1210,32 @@
                 const cell = state.map[key];
                 const [gx, gy] = key.split(',').map(Number);
                 ctx.save();
-                ctx.translate(gx * TILE_SIZE + TILE_SIZE/2, gy * TILE_SIZE + TILE_SIZE/2);
+                ctx.translate(gx * TILE_SIZE + TILE_SIZE / 2, gy * TILE_SIZE + TILE_SIZE / 2);
 
                 if (selectedTile === key) {
                     ctx.shadowColor = '#89b4fa';
                     ctx.shadowBlur = 15;
                     ctx.strokeStyle = '#89b4fa';
                     ctx.lineWidth = 3;
-                    ctx.strokeRect(-TILE_SIZE/2, -TILE_SIZE/2, TILE_SIZE, TILE_SIZE);
+                    ctx.strokeRect(-TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
                     ctx.shadowBlur = 0;
                 }
 
                 if (cell.type === 'conveyor') {
                     ctx.fillStyle = '#313244';
-                    ctx.fillRect(-TILE_SIZE/2, -TILE_SIZE/2, TILE_SIZE, TILE_SIZE);
+                    ctx.fillRect(-TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
                     ctx.rotate(DIRECTIONS[cell.dir].angle);
-                    
+
                     ctx.strokeStyle = '#585b70';
                     ctx.lineWidth = 3;
                     ctx.lineCap = 'round';
                     ctx.lineJoin = 'round';
                     const arrowSize = 5;
                     for (let i = -1; i <= 3; i++) {
-                        const x = (i * 20) + animOffset - TILE_SIZE/2;
-                        if(x > -TILE_SIZE/2 && x < TILE_SIZE/2) {
+                        const x = (i * 20) + animOffset - TILE_SIZE / 2;
+                        if (x > -TILE_SIZE / 2 && x < TILE_SIZE / 2) {
                             let distance = Math.abs(x);
-                            let opacity = (32 - distance) / 12; 
+                            let opacity = (32 - distance) / 12;
                             ctx.globalAlpha = Math.max(0, Math.min(1, opacity));
 
                             ctx.beginPath();
@@ -1168,32 +1250,32 @@
                 } else if (cell.type === 'splitter2' || cell.type === 'splitter3') {
                     // Diseño Visual Divisores
                     ctx.fillStyle = cell.type === 'splitter2' ? '#4f46e5' : '#7e22ce'; // Indigo vs Purple
-                    ctx.fillRect(-TILE_SIZE/2 + 2, -TILE_SIZE/2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
-                    
+                    ctx.fillRect(-TILE_SIZE / 2 + 2, -TILE_SIZE / 2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+
                     ctx.rotate(DIRECTIONS[cell.dir].angle);
-                    
+
                     // Flechas interiores
                     ctx.strokeStyle = '#c4b5fd';
                     ctx.lineWidth = 3;
                     ctx.lineCap = 'round';
                     ctx.lineJoin = 'round';
                     ctx.beginPath();
-                    
+
                     // Entrada centro
                     ctx.moveTo(-15, 0); ctx.lineTo(0, 0);
-                    
+
                     if (cell.type === 'splitter2') {
                         // Derivan a Izq y Der
-                        ctx.moveTo(0,0); ctx.lineTo(0, -15);
-                        ctx.moveTo(0,0); ctx.lineTo(0, 15);
+                        ctx.moveTo(0, 0); ctx.lineTo(0, -15);
+                        ctx.moveTo(0, 0); ctx.lineTo(0, 15);
                         // Flechas
                         ctx.moveTo(-5, -10); ctx.lineTo(0, -15); ctx.lineTo(5, -10); // Arriba(Izq)
                         ctx.moveTo(-5, 10); ctx.lineTo(0, 15); ctx.lineTo(5, 10);    // Abajo(Der)
                     } else {
                         // Derivan a Izq, Frente y Der
-                        ctx.moveTo(0,0); ctx.lineTo(0, -15);
-                        ctx.moveTo(0,0); ctx.lineTo(15, 0);
-                        ctx.moveTo(0,0); ctx.lineTo(0, 15);
+                        ctx.moveTo(0, 0); ctx.lineTo(0, -15);
+                        ctx.moveTo(0, 0); ctx.lineTo(15, 0);
+                        ctx.moveTo(0, 0); ctx.lineTo(0, 15);
                         // Flechas
                         ctx.moveTo(-5, -10); ctx.lineTo(0, -15); ctx.lineTo(5, -10); // Arriba(Izq)
                         ctx.moveTo(-5, 10); ctx.lineTo(0, 15); ctx.lineTo(5, 10);    // Abajo(Der)
@@ -1203,7 +1285,7 @@
 
                 } else if (cell.type === 'generator') {
                     ctx.fillStyle = '#a6e3a1';
-                    ctx.fillRect(-TILE_SIZE/2 + 2, -TILE_SIZE/2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                    ctx.fillRect(-TILE_SIZE / 2 + 2, -TILE_SIZE / 2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
                     ctx.fillStyle = '#11111b';
                     ctx.font = 'bold 24px font-mono'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                     ctx.fillText('M', 0, 0);
@@ -1212,12 +1294,12 @@
                     ctx.beginPath(); ctx.moveTo(18, -6); ctx.lineTo(28, 0); ctx.lineTo(18, 6); ctx.fill();
                 } else if (cell.type === 'seller') {
                     ctx.fillStyle = '#f38ba8';
-                    ctx.fillRect(-TILE_SIZE/2 + 2, -TILE_SIZE/2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                    ctx.fillRect(-TILE_SIZE / 2 + 2, -TILE_SIZE / 2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
                     ctx.fillStyle = '#11111b'; ctx.font = 'bold 28px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                     ctx.fillText('$', 0, 0);
                 } else if (cell.type === 'smelter') {
                     ctx.fillStyle = '#fab387';
-                    ctx.fillRect(-TILE_SIZE/2 + 2, -TILE_SIZE/2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                    ctx.fillRect(-TILE_SIZE / 2 + 2, -TILE_SIZE / 2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
                     ctx.fillStyle = '#11111b'; ctx.font = 'bold 20px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                     ctx.fillText('H', 0, -5);
                     if (cell.timer > 0 && RECIPES[cell.config]) {
@@ -1230,7 +1312,7 @@
                     ctx.beginPath(); ctx.moveTo(18, -6); ctx.lineTo(28, 0); ctx.lineTo(18, 6); ctx.fill();
                 } else if (cell.type === 'crafter') {
                     ctx.fillStyle = '#d946ef';
-                    ctx.fillRect(-TILE_SIZE/2 + 2, -TILE_SIZE/2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                    ctx.fillRect(-TILE_SIZE / 2 + 2, -TILE_SIZE / 2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
                     ctx.fillStyle = '#11111b'; ctx.font = 'bold 16px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                     ctx.fillText('Ens', 0, -5);
                     if (cell.timer > 0 && RECIPES[cell.config]) {
@@ -1252,7 +1334,7 @@
 
                 ctx.save();
                 ctx.translate(drawX, drawY);
-                
+
                 const mInfo = MATS[item.type];
                 if (mInfo) {
                     ctx.fillStyle = mInfo.color;
@@ -1266,7 +1348,7 @@
             // Fantasma Constructor
             if (mouseHoverX >= 0 && mouseHoverX < state.gridSize && mouseHoverY >= 0 && mouseHoverY < state.gridSize && state.tool !== 'cursor') {
                 ctx.save();
-                ctx.translate(mouseHoverX * TILE_SIZE + TILE_SIZE/2, mouseHoverY * TILE_SIZE + TILE_SIZE/2);
+                ctx.translate(mouseHoverX * TILE_SIZE + TILE_SIZE / 2, mouseHoverY * TILE_SIZE + TILE_SIZE / 2);
                 ctx.globalAlpha = 0.4;
 
                 let color = '#fff';
@@ -1277,20 +1359,20 @@
                 if (state.tool === 'seller') color = '#f38ba8';
                 if (state.tool === 'smelter') color = '#fab387';
                 if (state.tool === 'crafter') color = '#d946ef';
-                
+
                 ctx.fillStyle = color;
-                ctx.fillRect(-TILE_SIZE/2, -TILE_SIZE/2, TILE_SIZE, TILE_SIZE);
-                
+                ctx.fillRect(-TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+
                 ctx.rotate(DIRECTIONS[state.buildDir].angle);
                 if (state.tool === 'conveyor') {
                     ctx.strokeStyle = '#11111b'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
                     ctx.beginPath(); ctx.moveTo(-5, -5); ctx.lineTo(0, 0); ctx.lineTo(-5, 5); ctx.moveTo(5, -5); ctx.lineTo(10, 0); ctx.lineTo(5, 5); ctx.stroke();
                 } else if (state.tool.startsWith('splitter')) {
-                    ctx.fillStyle = '#11111b'; ctx.beginPath(); ctx.arc(0,0,8,0,Math.PI*2); ctx.fill();
+                    ctx.fillStyle = '#11111b'; ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fill();
                 } else {
                     ctx.fillStyle = '#11111b'; ctx.beginPath(); ctx.moveTo(5, -10); ctx.lineTo(25, 0); ctx.lineTo(5, 10); ctx.fill();
                 }
-                
+
                 ctx.restore();
             }
 
@@ -1321,4 +1403,5 @@
 
     </script>
 </body>
+
 </html>
