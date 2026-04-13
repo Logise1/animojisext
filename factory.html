@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Factory Builder - Edición Online</title>
+    <title>Factory Builder - Edición Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body, html {
@@ -39,9 +39,14 @@
             <div class="text-3xl font-mono text-green-400 font-bold tracking-tight mt-1">
                 $<span id="moneyDisplay">0</span>
             </div>
-            <div class="text-xs text-gray-400 mt-2 flex justify-between items-center">
-                <span>Territorio: <span id="gridSizeDisplay">5</span>x<span id="gridSizeDisplay2">5</span></span>
-                <button id="btnExpand" class="bg-blue-600 hover:bg-blue-500 px-2 py-1 rounded text-white transition-colors">
+            
+            <div class="text-xs text-gray-400 mt-2 flex justify-between items-center bg-gray-900/50 p-2 rounded">
+                <span>Mineros: <span id="genCountDisplay" class="font-bold text-white">0</span>/<span id="maxGenDisplay">3</span></span>
+            </div>
+
+            <div class="text-xs text-gray-400 mt-1 flex justify-between items-center bg-gray-900/50 p-2 rounded">
+                <span>Terreno: <span id="gridSizeDisplay">5</span>x<span id="gridSizeDisplay2">5</span></span>
+                <button id="btnExpand" class="bg-blue-600 hover:bg-blue-500 px-2 py-1 rounded text-white transition-colors shadow">
                     Expandir ($<span id="expandCostDisplay">500</span>)
                 </button>
             </div>
@@ -55,9 +60,14 @@
             </button>
             <button onclick="toggleShop()" class="bg-purple-600/90 hover:bg-purple-500/90 border border-purple-400 px-6 py-3 rounded-xl shadow-lg font-bold flex flex-col items-center transition-colors">
                 <span class="text-white">🛒 Abrir Tienda</span>
-                <span class="text-purple-200 text-xs">Recetas y Edificios</span>
+                <span class="text-purple-200 text-xs">Recetas y Mejoras</span>
             </button>
         </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION (Alertas sin bloquear UI) -->
+    <div id="toast" class="fixed bottom-36 left-1/2 -translate-x-1/2 bg-red-600/95 border border-red-400 text-white px-6 py-3 rounded-full font-bold shadow-2xl opacity-0 translate-y-4 transition-all duration-300 pointer-events-none z-50 text-sm">
+        Mensaje
     </div>
 
     <!-- PANEL DERECHO: Inspector de Selección -->
@@ -85,7 +95,7 @@
     <!-- UI INFERIOR: Inventario / Barra de Herramientas -->
     <div class="absolute bottom-6 left-1/2 -translate-x-1/2 pointer-events-auto z-10 w-max">
         <div class="bg-gray-900/95 backdrop-blur-xl px-4 py-3 rounded-2xl border border-gray-700 shadow-[0_10px_40px_rgba(0,0,0,0.5)] flex items-end gap-2" id="toolbarContainer">
-            <!-- Herramientas Base -->
+            
             <button onclick="setTool('cursor')" id="tool-cursor" class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-blue-500 transition-all flex flex-col items-center w-20 h-20 justify-center">
                 <span class="text-2xl mb-1">👆</span>
                 <span class="text-[11px] font-bold text-gray-200">Seleccionar</span>
@@ -97,6 +107,21 @@
                 <span class="text-[10px] text-gray-300">Cinta</span>
                 <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$10</div>
             </button>
+
+            <!-- Nuevos Divisores -->
+            <button onclick="setTool('splitter2')" id="tool-splitter2" class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
+                <div class="w-8 h-8 bg-indigo-500 mb-1 rounded border-2 border-indigo-300 flex items-center justify-center text-white font-bold text-xs leading-none text-center">1:2<br>Div</div>
+                <span class="text-[10px] text-gray-300">Div 1/2</span>
+                <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$150</div>
+            </button>
+
+            <button onclick="setTool('splitter3')" id="tool-splitter3" class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
+                <div class="w-8 h-8 bg-purple-600 mb-1 rounded border-2 border-purple-400 flex items-center justify-center text-white font-bold text-xs leading-none text-center">1:3<br>Div</div>
+                <span class="text-[10px] text-gray-300">Div 1/3</span>
+                <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$300</div>
+            </button>
+
+            <div class="w-px h-16 bg-gray-700 mx-1"></div>
 
             <button onclick="setTool('generator')" id="tool-generator" class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
                 <div class="w-8 h-8 bg-green-500 mb-1 rounded border-2 border-green-300 flex items-center justify-center font-bold text-gray-900">M</div>
@@ -110,34 +135,33 @@
                 <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$50</div>
             </button>
 
-            <!-- Dinámicos (Smelter, Crafter) se muestran aquí mediante JS -->
             <button onclick="setTool('smelter')" id="tool-smelter" class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
                 <div class="w-8 h-8 bg-orange-500 mb-1 rounded border-2 border-orange-300 flex items-center justify-center text-white font-bold text-xs">H</div>
                 <span class="text-[10px] text-gray-300">Horno</span>
-                <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$100</div>
+                <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$200</div>
             </button>
 
             <button onclick="setTool('crafter')" id="tool-crafter" class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-20 h-20 justify-center relative hidden">
-                <div class="w-8 h-8 bg-purple-500 mb-1 rounded border-2 border-purple-300 flex items-center justify-center text-white font-bold text-xs">Ens</div>
+                <div class="w-8 h-8 bg-fuchsia-500 mb-1 rounded border-2 border-fuchsia-300 flex items-center justify-center text-white font-bold text-xs">Ens</div>
                 <span class="text-[10px] text-gray-300 leading-tight text-center">Ensamblador</span>
-                <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$250</div>
+                <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$500</div>
             </button>
         </div>
     </div>
 
     <!-- MODAL: Tienda -->
     <div id="shopModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center pointer-events-auto">
-        <div class="bg-gray-900 border border-purple-500 rounded-2xl shadow-2xl w-3/4 max-w-4xl h-[80vh] flex flex-col">
+        <div class="bg-gray-900 border border-purple-500 rounded-2xl shadow-2xl w-3/4 max-w-5xl h-[85vh] flex flex-col">
             <div class="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-800 rounded-t-2xl">
-                <h2 class="text-3xl font-bold text-purple-400">🛒 Tienda de Tecnología</h2>
+                <h2 class="text-3xl font-bold text-purple-400">🛒 Centro de Investigación</h2>
                 <div class="text-2xl font-mono text-green-400 font-bold bg-gray-900 px-4 py-1 rounded-lg border border-gray-700">
                     $<span id="shopMoney">0</span>
                 </div>
                 <button onclick="toggleShop()" class="text-gray-400 hover:text-white font-bold text-3xl">&times;</button>
             </div>
             <div class="p-4 flex gap-4 border-b border-gray-800 bg-gray-800/50">
-                <button onclick="shopTab('buildings')" id="tab-buildings" class="px-4 py-2 rounded-lg bg-purple-600 font-bold">Edificios</button>
-                <button onclick="shopTab('recipes')" id="tab-recipes" class="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 font-bold">Catálogo de Recetas (+60)</button>
+                <button onclick="shopTab('buildings')" id="tab-buildings" class="px-4 py-2 rounded-lg bg-purple-600 font-bold shadow">Edificios y Mejoras</button>
+                <button onclick="shopTab('recipes')" id="tab-recipes" class="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 font-bold shadow">Recetas de Ensamblaje</button>
             </div>
             <div class="flex-1 overflow-y-auto p-6" id="shopContent">
                 <!-- Rellenado por JS -->
@@ -161,7 +185,6 @@
     <!-- Lienzo del Juego -->
     <canvas id="gameCanvas"></canvas>
 
-    <!-- FIREBASE & LOGICA DEL JUEGO -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -173,7 +196,6 @@
         let playerName = "Jugador Anonimo";
         try {
             let decoded = atob(rawUser);
-            // Formatear: Primera Mayúscula, resto minúscula
             playerName = decoded.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
         } catch(e) { console.warn("Error decodificando nombre", e); }
         document.getElementById('playerNameDisplay').innerText = playerName;
@@ -194,7 +216,7 @@
         const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-factory-id';
         let currentUser = null;
 
-        // --- CONSTANTES DEL JUEGO ---
+        // --- CONSTANTES ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const TILE_SIZE = 64; 
@@ -216,37 +238,37 @@
             'wafer_silicon':{ name: 'Oblea Silicio', color: '#2dd4bf', shape: 'rect', value: 40 },
             
             'wire':        { name: 'Cable', color: '#f59e0b', shape: 'coil', value: 25 },
-            'plate':       { name: 'Placa Metálica', color: '#6b7280', shape: 'plate', value: 35 },
-            'gear':        { name: 'Engranaje', color: '#4b5563', shape: 'gear', value: 60 },
-            'pipe':        { name: 'Tubería', color: '#94a3b8', shape: 'pipe', value: 45 },
+            'plate':       { name: 'Placa Metálica', color: '#6b7280', shape: 'plate', value: 40 },
+            'gear':        { name: 'Engranaje', color: '#4b5563', shape: 'gear', value: 70 },
+            'pipe':        { name: 'Tubería', color: '#94a3b8', shape: 'pipe', value: 50 },
             
             'circuit':     { name: 'Circuito', color: '#10b981', shape: 'chip', value: 150 },
-            'processor':   { name: 'Procesador', color: '#3b82f6', shape: 'chip', value: 400 },
-            'motor':       { name: 'Motor', color: '#ef4444', shape: 'cylinder', value: 350 },
-            'battery':     { name: 'Batería', color: '#a855f7', shape: 'cylinder', value: 300 },
-            'supercomputer':{ name: 'Superordenador', color: '#ec4899', shape: 'chip', value: 2000 },
-            'quantum_chip':{ name: 'Chip Cuántico', color: '#06b6d4', shape: 'chip', value: 5000 }
+            'processor':   { name: 'Procesador', color: '#3b82f6', shape: 'chip', value: 450 },
+            'motor':       { name: 'Motor', color: '#ef4444', shape: 'cylinder', value: 400 },
+            'battery':     { name: 'Batería', color: '#a855f7', shape: 'cylinder', value: 350 },
+            'supercomputer':{ name: 'Superordenador', color: '#ec4899', shape: 'chip', value: 2500 },
+            'quantum_chip':{ name: 'Chip Cuántico', color: '#06b6d4', shape: 'chip', value: 6000 }
         };
 
-        // --- CATÁLOGO DE RECETAS (+60 SIMULADAS) ---
+        // --- RECETAS PROGRESIVAS ---
         const RECIPES = {
             // HORNOS
             'smelt_iron': { name: 'Fundir Hierro', in: {'ore_iron':1}, out: 'ingot_iron', time: 1.5, type: 'smelter', cost: 0, cat: 'Fundición' },
             'smelt_copper': { name: 'Fundir Cobre', in: {'ore_copper':1}, out: 'ingot_copper', time: 1.5, type: 'smelter', cost: 0, cat: 'Fundición' },
-            'smelt_gold': { name: 'Fundir Oro', in: {'ore_gold':1}, out: 'ingot_gold', time: 2.0, type: 'smelter', cost: 500, cat: 'Fundición Avanzada' },
-            'smelt_aluminum': { name: 'Fundir Aluminio', in: {'ore_aluminum':1}, out: 'ingot_aluminum', time: 2.0, type: 'smelter', cost: 600, cat: 'Fundición Avanzada' },
-            'smelt_silicon': { name: 'Obleas de Silicio', in: {'ore_silicon':2}, out: 'wafer_silicon', time: 3.0, type: 'smelter', cost: 1000, cat: 'Alta Tecnología' },
+            'smelt_gold': { name: 'Fundir Oro', in: {'ore_gold':1}, out: 'ingot_gold', time: 2.0, type: 'smelter', cost: 300, cat: 'Fundición Avanzada' },
+            'smelt_aluminum': { name: 'Fundir Aluminio', in: {'ore_aluminum':1}, out: 'ingot_aluminum', time: 2.0, type: 'smelter', cost: 400, cat: 'Fundición Avanzada' },
+            'smelt_silicon': { name: 'Obleas de Silicio', in: {'ore_silicon':2}, out: 'wafer_silicon', time: 3.0, type: 'smelter', cost: 800, cat: 'Alta Tecnología' },
             
-            // ENSAMBLADORES - Básicos
+            // ENSAMBLADORES
             'craft_wire': { name: 'Cable de Cobre', in: {'ingot_copper':1}, out: 'wire', time: 1.0, type: 'crafter', cost: 100, cat: 'Componentes Básicos' },
             'craft_plate': { name: 'Placa de Hierro', in: {'ingot_iron':2}, out: 'plate', time: 1.5, type: 'crafter', cost: 150, cat: 'Componentes Básicos' },
-            'craft_gear': { name: 'Engranaje', in: {'ingot_iron':1, 'plate':1}, out: 'gear', time: 2.0, type: 'crafter', cost: 300, cat: 'Mecánica' },
             'craft_pipe': { name: 'Tubería', in: {'ingot_aluminum':1}, out: 'pipe', time: 1.5, type: 'crafter', cost: 400, cat: 'Mecánica' },
+            'craft_gear': { name: 'Engranaje', in: {'ingot_iron':1, 'plate':1}, out: 'gear', time: 2.0, type: 'crafter', cost: 300, cat: 'Mecánica' },
             
-            // ENSAMBLADORES - Avanzados
             'craft_circuit': { name: 'Circuito Básico', in: {'wire':2, 'plate':1}, out: 'circuit', time: 2.5, type: 'crafter', cost: 800, cat: 'Electrónica' },
             'craft_battery': { name: 'Batería', in: {'wire':2, 'ingot_aluminum':2}, out: 'battery', time: 3.0, type: 'crafter', cost: 1200, cat: 'Electrónica' },
             'craft_motor': { name: 'Motor Industrial', in: {'gear':2, 'wire':3, 'pipe':1}, out: 'motor', time: 3.5, type: 'crafter', cost: 2500, cat: 'Mecánica Avanzada' },
+            
             'craft_processor': { name: 'Procesador', in: {'circuit':2, 'wafer_silicon':1, 'ingot_gold':1}, out: 'processor', time: 4.0, type: 'crafter', cost: 4000, cat: 'Alta Tecnología' },
             'craft_supercomp': { name: 'Superordenador', in: {'processor':2, 'motor':1, 'battery':2}, out: 'supercomputer', time: 6.0, type: 'crafter', cost: 10000, cat: 'Alta Tecnología' },
             'craft_quantum': { name: 'Chip Cuántico', in: {'processor':4, 'ore_diamond':2, 'wafer_silicon':2}, out: 'quantum_chip', time: 10.0, type: 'crafter', cost: 50000, cat: 'Futurista' }
@@ -256,8 +278,10 @@
             conveyor:  { cost: 10,  name: 'Cinta Transportadora' },
             generator: { cost: 50,  name: 'Minero / Generador' },
             seller:    { cost: 50,  name: 'Vendedor' },
-            smelter:   { cost: 200, name: 'Horno de Fundición', shop: true },
-            crafter:   { cost: 500, name: 'Ensamblador', shop: true }
+            splitter2: { cost: 150, name: 'Divisor Doble (1 a 2)', shop: true, info: 'Alterna items hacia su izquierda y derecha.' },
+            splitter3: { cost: 300, name: 'Divisor Triple (1 a 3)', shop: true, info: 'Alterna items hacia izq, frente y derecha.' },
+            smelter:   { cost: 200, name: 'Horno de Fundición', shop: true, info: 'Funde minerales en lingotes.' },
+            crafter:   { cost: 500, name: 'Ensamblador', shop: true, info: 'Combina items para crear objetos avanzados.' }
         };
 
         const DIRECTIONS = [
@@ -269,23 +293,37 @@
 
         // --- ESTADO DEL JUEGO ---
         let state = {
-            money: 300,
+            money: 400,
             gridSize: 5,
-            map: {}, // key: "x,y", value: { type, dir, config, inventory, outBuffer, timer }
-            items: [], // [{type, x, y, nx, ny, progress, moving, destMachine}]
+            maxGenerators: 3, // Límite inicial
+            map: {}, // key: "x,y", value: { type, dir, config, inventory, outBuffer, timer, splitIndex }
+            items: [], 
             unlockedRecipes: ['smelt_iron', 'smelt_copper'],
             unlockedBuildings: ['conveyor', 'generator', 'seller'],
             tool: 'cursor',
             buildDir: 1
         };
 
-        // UI Refs
         let selectedTile = null;
         let isDraggingPan = false;
         let isDraggingBuild = false;
         let lastBuiltGrid = null;
         let camera = { x: 0, y: 0, zoom: 1 };
         let lastSaveTime = 0;
+
+        // Funciones Auxiliares
+        function countGenerators() {
+            let count = 0;
+            for(let k in state.map) if(state.map[k].type === 'generator') count++;
+            return count;
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.remove('opacity-0', 'translate-y-4');
+            setTimeout(() => toast.classList.add('opacity-0', 'translate-y-4'), 3000);
+        }
 
         // --- FIREBASE INICIALIZACIÓN ---
         const initAuth = async () => {
@@ -294,7 +332,7 @@
                     try {
                         await signInWithCustomToken(auth, __initial_auth_token);
                     } catch (tokenError) {
-                        console.warn("El token no coincide (probablemente usando Firebase personalizado). Iniciando como anónimo.", tokenError);
+                        console.warn("Token mismatch, usando Auth Anónimo para permitir guardado.", tokenError);
                         await signInAnonymously(auth);
                     }
                 } else {
@@ -306,7 +344,6 @@
             }
         };
 
-        // Faltaba ejecutar la función de autenticación para activar todo el sistema online
         initAuth();
 
         onAuthStateChanged(auth, async (user) => {
@@ -321,17 +358,14 @@
             if (!currentUser) return;
             try {
                 const saveRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'saves', playerName);
-                
-                // Preparar datos para Firestore
                 const mapObj = {};
-                for (let [k, v] of Object.entries(state.map)) {
-                    mapObj[k] = { ...v }; 
-                }
+                for (let [k, v] of Object.entries(state.map)) mapObj[k] = { ...v }; 
 
                 await setDoc(saveRef, {
                     name: playerName,
                     money: state.money,
                     gridSize: state.gridSize,
+                    maxGenerators: state.maxGenerators,
                     map: mapObj,
                     unlockedRecipes: state.unlockedRecipes,
                     unlockedBuildings: state.unlockedBuildings,
@@ -353,11 +387,10 @@
                     const data = docSnap.data();
                     state.money = data.money;
                     state.gridSize = data.gridSize || 5;
+                    state.maxGenerators = data.maxGenerators || 3;
                     state.map = data.map || {};
                     state.unlockedRecipes = data.unlockedRecipes || ['smelt_iron', 'smelt_copper'];
                     state.unlockedBuildings = data.unlockedBuildings || ['conveyor', 'generator', 'seller'];
-                    
-                    // Resetear items al cargar para evitar bugs de posiciones flotantes
                     state.items = []; 
                 }
                 updateUI();
@@ -371,14 +404,12 @@
             onSnapshot(savesRef, (snapshot) => {
                 let allSaves = [];
                 snapshot.forEach(doc => allSaves.push(doc.data()));
-                
-                // Sorting en memoria (Regla 2: No complex queries en firestore)
                 allSaves.sort((a, b) => b.money - a.money);
                 
                 const lbContainer = document.getElementById('leaderboardContent');
                 lbContainer.innerHTML = '';
                 
-                if (allSaves.length === 0) {
+                if(allSaves.length === 0) {
                     lbContainer.innerHTML = '<div class="text-center text-gray-400 mt-10">Aún no hay jugadores registrados.</div>';
                     return;
                 }
@@ -404,7 +435,6 @@
             }, (error) => console.error(error));
         }
 
-        // Auto-guardado cada 5 segundos
         setInterval(() => {
             if (Date.now() - lastSaveTime > 5000) {
                 saveGameToCloud();
@@ -438,15 +468,28 @@
         window.shopTab = function(tab) {
             document.getElementById('shopMoney').innerText = state.money.toLocaleString();
             const content = document.getElementById('shopContent');
-            const btnB = document.getElementById('tab-buildings');
-            const btnR = document.getElementById('tab-recipes');
             
-            btnB.className = `px-4 py-2 rounded-lg font-bold ${tab==='buildings'?'bg-purple-600':'bg-gray-700 hover:bg-gray-600'}`;
-            btnR.className = `px-4 py-2 rounded-lg font-bold ${tab==='recipes'?'bg-purple-600':'bg-gray-700 hover:bg-gray-600'}`;
+            document.getElementById('tab-buildings').className = `px-4 py-2 rounded-lg font-bold shadow ${tab==='buildings'?'bg-purple-600':'bg-gray-700 hover:bg-gray-600'}`;
+            document.getElementById('tab-recipes').className = `px-4 py-2 rounded-lg font-bold shadow ${tab==='recipes'?'bg-purple-600':'bg-gray-700 hover:bg-gray-600'}`;
             
             content.innerHTML = '';
 
             if (tab === 'buildings') {
+                // Tarjeta Especial: Mejora de Límite de Mineros
+                const upgCost = state.maxGenerators * 500;
+                const upgDiv = document.createElement('div');
+                upgDiv.className = "bg-indigo-900/40 p-4 rounded-xl border border-indigo-500 mb-6 flex justify-between items-center shadow-[0_0_15px_rgba(99,102,241,0.2)]";
+                upgDiv.innerHTML = `
+                    <div>
+                        <h3 class="text-xl font-bold text-indigo-300">📈 Expandir Límite de Mineros (+1)</h3>
+                        <p class="text-sm text-indigo-200/70">Aumenta la cantidad máxima de generadores que puedes tener simultáneamente.</p>
+                        <p class="text-xs text-white mt-1">Límite actual: ${state.maxGenerators}</p>
+                    </div>
+                    <button onclick="buyGenLimit()" class="bg-indigo-600 hover:bg-indigo-500 px-6 py-2 rounded-lg font-bold shadow text-white transition whitespace-nowrap">$${upgCost.toLocaleString()}</button>
+                `;
+                content.appendChild(upgDiv);
+
+                // Edificios normales
                 for (let key in BUILDINGS) {
                     if (BUILDINGS[key].shop) {
                         const isOwned = state.unlockedBuildings.includes(key);
@@ -455,7 +498,7 @@
                         div.innerHTML = `
                             <div>
                                 <h3 class="text-xl font-bold text-white">${BUILDINGS[key].name}</h3>
-                                <p class="text-sm text-gray-400">Desbloquea el edificio en la barra inferior.</p>
+                                <p class="text-sm text-gray-400">${BUILDINGS[key].info}</p>
                             </div>
                             ${isOwned ? 
                                 `<span class="text-green-400 font-bold bg-green-900/30 px-3 py-1 rounded">Comprado</span>` :
@@ -466,7 +509,7 @@
                     }
                 }
             } else {
-                // Agrupar recetas por categoría
+                // Recetas con cálculo de beneficio neto
                 const categories = {};
                 for (let key in RECIPES) {
                     let cat = RECIPES[key].cat;
@@ -487,6 +530,12 @@
                         const isOwned = state.unlockedRecipes.includes(rec.id);
                         const inStr = Object.entries(rec.in).map(([k,v]) => `${v}x ${MATS[k].name}`).join(' + ');
                         
+                        // Calcular rentabilidad
+                        const outValue = MATS[rec.out].value;
+                        let inValue = 0;
+                        for(let k in rec.in) inValue += MATS[k].value * rec.in[k];
+                        const profit = outValue - inValue;
+                        
                         const div = document.createElement('div');
                         div.className = "bg-gray-800 p-4 rounded-xl border border-gray-700 flex flex-col justify-between";
                         div.innerHTML = `
@@ -495,12 +544,16 @@
                                     <h4 class="font-bold text-white text-lg">${rec.name}</h4>
                                     <span class="text-xs bg-gray-700 px-2 py-1 rounded text-gray-300">${rec.type==='smelter'?'Horno':'Ensamblador'}</span>
                                 </div>
-                                <p class="text-xs text-orange-300 mt-1">Requiere: ${inStr}</p>
+                                <p class="text-xs text-orange-300 mt-2">Requiere: ${inStr}</p>
+                                <div class="mt-2 flex gap-2 text-xs">
+                                    <span class="bg-gray-900 px-2 py-1 rounded border border-gray-600">Venta final: $${outValue}</span>
+                                    <span class="bg-green-900/40 text-green-400 font-bold px-2 py-1 rounded border border-green-800">Beneficio Neto: +$${profit}</span>
+                                </div>
                             </div>
                             <div class="text-right mt-2">
                                 ${isOwned ? 
                                     `<span class="text-green-400 font-bold text-sm bg-green-900/30 px-3 py-1 rounded">Desbloqueado</span>` :
-                                    `<button onclick="buyRecipe('${rec.id}')" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg font-bold shadow text-sm text-white w-full transition">$${rec.cost}</button>`
+                                    `<button onclick="buyRecipe('${rec.id}')" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg font-bold shadow text-sm text-white w-full transition">$${rec.cost.toLocaleString()}</button>`
                                 }
                             </div>
                         `;
@@ -508,6 +561,20 @@
                     });
                     content.appendChild(grid);
                 }
+            }
+        };
+
+        window.buyGenLimit = function() {
+            const cost = state.maxGenerators * 500;
+            if (state.money >= cost) {
+                state.money -= cost;
+                state.maxGenerators++;
+                shopTab('buildings');
+                updateUI();
+                saveGameToCloud();
+                showToast("¡Límite de mineros ampliado!");
+            } else {
+                showToast("No tienes suficiente dinero.");
             }
         };
 
@@ -538,17 +605,22 @@
             document.getElementById('gridSizeDisplay').innerText = state.gridSize;
             document.getElementById('gridSizeDisplay2').innerText = state.gridSize;
             document.getElementById('expandCostDisplay').innerText = (state.gridSize * 150).toLocaleString();
+            
+            // Stats Mineros
+            document.getElementById('genCountDisplay').innerText = countGenerators();
+            document.getElementById('maxGenDisplay').innerText = state.maxGenerators;
 
+            // Toolbar active state
             document.querySelectorAll('.tool-btn').forEach(b => b.classList.replace('border-blue-500', 'border-transparent'));
             const btn = document.getElementById(`tool-${state.tool}`);
             if (btn) btn.classList.replace('border-transparent', 'border-blue-500');
 
-            if (state.unlockedBuildings.includes('smelter')) {
-                document.getElementById('tool-smelter').classList.remove('hidden');
-            }
-            if (state.unlockedBuildings.includes('crafter')) {
-                document.getElementById('tool-crafter').classList.remove('hidden');
-            }
+            // Show unlocked buildings
+            ['smelter', 'crafter', 'splitter2', 'splitter3'].forEach(b => {
+                if(state.unlockedBuildings.includes(b)) {
+                    document.getElementById(`tool-${b}`).classList.remove('hidden');
+                }
+            });
         }
 
         document.getElementById('btnExpand').onclick = () => {
@@ -558,11 +630,13 @@
                 state.gridSize++; 
                 updateUI(); 
                 saveGameToCloud();
+            } else {
+                showToast("Falta dinero para expandir.");
             }
         };
 
         window.setTool = function(t) {
-            if ((t === 'smelter' || t === 'crafter') && !state.unlockedBuildings.includes(t)) return;
+            if (BUILDINGS[t]?.shop && !state.unlockedBuildings.includes(t)) return;
             state.tool = t;
             closeInspector();
             updateUI();
@@ -612,9 +686,7 @@
                 }
             }
             isDraggingPan = false;
-            if(isDraggingBuild) {
-                saveGameToCloud(); // Guardar al terminar de construir arrastrando
-            }
+            if(isDraggingBuild) saveGameToCloud(); 
             isDraggingBuild = false;
         });
 
@@ -635,8 +707,8 @@
 
             if (gx < 0 || gy < 0 || gx >= state.gridSize || gy >= state.gridSize) return;
 
-            // Auto-dirección para cintas
-            if (state.tool === 'conveyor' && lastBuiltGrid) {
+            // Auto-dirección de cintas (o divisores)
+            if ((state.tool === 'conveyor' || state.tool.startsWith('splitter')) && lastBuiltGrid) {
                 if (lastBuiltGrid.gx !== gx || lastBuiltGrid.gy !== gy) {
                     const dx = gx - lastBuiltGrid.gx;
                     const dy = gy - lastBuiltGrid.gy;
@@ -649,6 +721,14 @@
             if (existing && existing.type === state.tool && existing.dir === state.buildDir) {
                 lastBuiltGrid = { gx, gy };
                 return;
+            }
+
+            // Límite de Mineros
+            if (state.tool === 'generator' && (!existing || existing.type !== 'generator')) {
+                if (countGenerators() >= state.maxGenerators) {
+                    showToast(`Límite máximo de mineros (${state.maxGenerators}) alcanzado.`);
+                    return;
+                }
             }
 
             const cost = BUILDINGS[state.tool].cost;
@@ -668,11 +748,14 @@
                     config: cfg, 
                     inventory: {}, 
                     outBuffer: null, 
-                    timer: 0 
+                    timer: 0,
+                    splitIndex: 0 // Para divisores
                 };
                 
                 updateUI();
                 lastBuiltGrid = { gx, gy };
+            } else if (!isDraggingBuild) {
+                showToast("Falta dinero para construir esto.");
             }
         }
 
@@ -736,7 +819,7 @@
                     }
                 }
             } else {
-                html = `<p class="text-sm text-gray-400 italic">No requiere configuración.</p>`;
+                html = `<p class="text-sm text-gray-400 italic">No requiere configuración extra.</p>`;
             }
 
             document.getElementById('inspConfig').innerHTML = html;
@@ -811,14 +894,12 @@
                     const recipe = RECIPES[cell.config];
                     if (!recipe) continue;
 
-                    // Expulsar outBuffer si hay hueco en la misma casilla
                     if (cell.outBuffer && !isPosOccupiedByItem(gx, gy)) {
                         state.items.push({ type: cell.outBuffer, x: gx, y: gy, nx: gx, ny: gy, progress: 0, moving: false });
                         cell.outBuffer = null;
-                        if(selectedTile === key) selectTile(gx, gy); // refresh UI
+                        if(selectedTile === key) selectTile(gx, gy); 
                     }
 
-                    // Fabricar si no hay atasco de salida
                     if (!cell.outBuffer) {
                         let canCraft = true;
                         for (let reqMat in recipe.in) {
@@ -860,8 +941,24 @@
                             continue;
                         }
 
-                        const nx = item.x + DIRECTIONS[cell.dir].dx;
-                        const ny = item.y + DIRECTIONS[cell.dir].dy;
+                        // Lógica de dirección (Cinta normal vs Divisores)
+                        let pushDir = cell.dir;
+                        let isSplitter = false;
+
+                        if (cell.type === 'splitter2') {
+                            isSplitter = true;
+                            // Alterna entre Izquierda y Derecha (relativo a cell.dir)
+                            const dirs = [(cell.dir + 3) % 4, (cell.dir + 1) % 4];
+                            pushDir = dirs[(cell.splitIndex || 0) % 2];
+                        } else if (cell.type === 'splitter3') {
+                            isSplitter = true;
+                            // Alterna entre Izquierda, Frente y Derecha
+                            const dirs = [(cell.dir + 3) % 4, cell.dir, (cell.dir + 1) % 4];
+                            pushDir = dirs[(cell.splitIndex || 0) % 3];
+                        }
+
+                        const nx = item.x + DIRECTIONS[pushDir].dx;
+                        const ny = item.y + DIRECTIONS[pushDir].dy;
                         
                         if (nx >= 0 && nx < state.gridSize && ny >= 0 && ny < state.gridSize) {
                             const nextCell = state.map[`${nx},${ny}`];
@@ -869,13 +966,12 @@
                             let acceptedByMachine = false;
 
                             if (nextCell && !isPosOccupiedByItem(nx, ny)) {
-                                if (nextCell.type === 'conveyor' || nextCell.type === 'seller') {
+                                if (nextCell.type === 'conveyor' || nextCell.type.startsWith('splitter') || nextCell.type === 'seller') {
                                     canMove = true;
                                 } else if (nextCell.type === 'smelter' || nextCell.type === 'crafter') {
                                     const rec = RECIPES[nextCell.config];
                                     if (rec && rec.in[item.type]) {
                                         let currentAmt = nextCell.inventory[item.type] || 0;
-                                        // Buffer doble
                                         if (currentAmt < rec.in[item.type] * 2) {
                                             canMove = true;
                                             acceptedByMachine = true;
@@ -889,6 +985,9 @@
                                 item.nx = nx;
                                 item.ny = ny;
                                 item.destMachine = acceptedByMachine ? `${nx},${ny}` : null;
+                                
+                                // Incrementar el divisor solo si se movió exitosamente
+                                if (isSplitter) cell.splitIndex++; 
                             }
                         }
                     }
@@ -999,23 +1098,18 @@
                 }
 
                 if (cell.type === 'conveyor') {
-                    // Fondo Cinta
                     ctx.fillStyle = '#313244';
                     ctx.fillRect(-TILE_SIZE/2, -TILE_SIZE/2, TILE_SIZE, TILE_SIZE);
                     ctx.rotate(DIRECTIONS[cell.dir].angle);
                     
-                    // Marcas animadas (Flechas) para mejorar claridad visual del flujo
                     ctx.strokeStyle = '#585b70';
                     ctx.lineWidth = 3;
                     ctx.lineCap = 'round';
                     ctx.lineJoin = 'round';
-                    
                     const arrowSize = 5;
-                    // Bucle para dibujar las flechas con fundido
                     for (let i = -1; i <= 3; i++) {
                         const x = (i * 20) + animOffset - TILE_SIZE/2;
                         if(x > -TILE_SIZE/2 && x < TILE_SIZE/2) {
-                            // Opacidad dinámica (Fade in / Fade out)
                             let distance = Math.abs(x);
                             let opacity = (32 - distance) / 12; 
                             ctx.globalAlpha = Math.max(0, Math.min(1, opacity));
@@ -1027,7 +1121,43 @@
                             ctx.stroke();
                         }
                     }
-                    ctx.globalAlpha = 1.0; // Restaurar opacidad al terminar
+                    ctx.globalAlpha = 1.0;
+
+                } else if (cell.type === 'splitter2' || cell.type === 'splitter3') {
+                    // Diseño Visual Divisores
+                    ctx.fillStyle = cell.type === 'splitter2' ? '#4f46e5' : '#7e22ce'; // Indigo vs Purple
+                    ctx.fillRect(-TILE_SIZE/2 + 2, -TILE_SIZE/2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                    
+                    ctx.rotate(DIRECTIONS[cell.dir].angle);
+                    
+                    // Flechas interiores
+                    ctx.strokeStyle = '#c4b5fd';
+                    ctx.lineWidth = 3;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    ctx.beginPath();
+                    
+                    // Entrada centro
+                    ctx.moveTo(-15, 0); ctx.lineTo(0, 0);
+                    
+                    if (cell.type === 'splitter2') {
+                        // Derivan a Izq y Der
+                        ctx.moveTo(0,0); ctx.lineTo(0, -15);
+                        ctx.moveTo(0,0); ctx.lineTo(0, 15);
+                        // Flechas
+                        ctx.moveTo(-5, -10); ctx.lineTo(0, -15); ctx.lineTo(5, -10); // Arriba(Izq)
+                        ctx.moveTo(-5, 10); ctx.lineTo(0, 15); ctx.lineTo(5, 10);    // Abajo(Der)
+                    } else {
+                        // Derivan a Izq, Frente y Der
+                        ctx.moveTo(0,0); ctx.lineTo(0, -15);
+                        ctx.moveTo(0,0); ctx.lineTo(15, 0);
+                        ctx.moveTo(0,0); ctx.lineTo(0, 15);
+                        // Flechas
+                        ctx.moveTo(-5, -10); ctx.lineTo(0, -15); ctx.lineTo(5, -10); // Arriba(Izq)
+                        ctx.moveTo(-5, 10); ctx.lineTo(0, 15); ctx.lineTo(5, 10);    // Abajo(Der)
+                        ctx.moveTo(10, -5); ctx.lineTo(15, 0); ctx.lineTo(10, 5);    // Frente
+                    }
+                    ctx.stroke();
 
                 } else if (cell.type === 'generator') {
                     ctx.fillStyle = '#a6e3a1';
@@ -1057,7 +1187,7 @@
                     ctx.fillStyle = '#2e3440';
                     ctx.beginPath(); ctx.moveTo(18, -6); ctx.lineTo(28, 0); ctx.lineTo(18, 6); ctx.fill();
                 } else if (cell.type === 'crafter') {
-                    ctx.fillStyle = '#cba6f7';
+                    ctx.fillStyle = '#d946ef';
                     ctx.fillRect(-TILE_SIZE/2 + 2, -TILE_SIZE/2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
                     ctx.fillStyle = '#11111b'; ctx.font = 'bold 16px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
                     ctx.fillText('Ens', 0, -5);
@@ -1099,28 +1229,23 @@
 
                 let color = '#fff';
                 if (state.tool === 'conveyor') color = '#89b4fa';
+                if (state.tool === 'splitter2') color = '#4f46e5';
+                if (state.tool === 'splitter3') color = '#7e22ce';
                 if (state.tool === 'generator') color = '#a6e3a1';
                 if (state.tool === 'seller') color = '#f38ba8';
                 if (state.tool === 'smelter') color = '#fab387';
-                if (state.tool === 'crafter') color = '#cba6f7';
+                if (state.tool === 'crafter') color = '#d946ef';
                 
                 ctx.fillStyle = color;
                 ctx.fillRect(-TILE_SIZE/2, -TILE_SIZE/2, TILE_SIZE, TILE_SIZE);
                 
+                ctx.rotate(DIRECTIONS[state.buildDir].angle);
                 if (state.tool === 'conveyor') {
-                    // Fantasma específico para la cinta
-                    ctx.rotate(DIRECTIONS[state.buildDir].angle);
-                    ctx.strokeStyle = '#11111b';
-                    ctx.lineWidth = 3;
-                    ctx.lineCap = 'round';
-                    ctx.lineJoin = 'round';
-                    ctx.beginPath(); 
-                    ctx.moveTo(-5, -5); ctx.lineTo(0, 0); ctx.lineTo(-5, 5);
-                    ctx.moveTo(5, -5); ctx.lineTo(10, 0); ctx.lineTo(5, 5);
-                    ctx.stroke();
+                    ctx.strokeStyle = '#11111b'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                    ctx.beginPath(); ctx.moveTo(-5, -5); ctx.lineTo(0, 0); ctx.lineTo(-5, 5); ctx.moveTo(5, -5); ctx.lineTo(10, 0); ctx.lineTo(5, 5); ctx.stroke();
+                } else if (state.tool.startsWith('splitter')) {
+                    ctx.fillStyle = '#11111b'; ctx.beginPath(); ctx.arc(0,0,8,0,Math.PI*2); ctx.fill();
                 } else {
-                    // Fantasma general para el resto de máquinas
-                    ctx.rotate(DIRECTIONS[state.buildDir].angle);
                     ctx.fillStyle = '#11111b'; ctx.beginPath(); ctx.moveTo(5, -10); ctx.lineTo(25, 0); ctx.lineTo(5, 10); ctx.fill();
                 }
                 
@@ -1136,7 +1261,6 @@
             mouseHoverX = g.gx; mouseHoverY = g.gy;
         });
 
-        // Loop
         let lastTime = 0;
         function loop(ts) {
             let dt = (ts - lastTime) / 1000;
