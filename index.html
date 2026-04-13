@@ -34,6 +34,7 @@
             
             <!-- Enlace a Factory -->
             <a href="https://logise1.github.io/animojisext/factory.html" 
+               id="factory-link"
                class="hover-scale flex items-center justify-center w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold text-lg py-4 px-6 rounded-2xl shadow-md cursor-pointer text-decoration-none">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -46,5 +47,22 @@
         
     </div>
 
+    <!-- Script para pasar los parámetros de la URL -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const link = document.getElementById('factory-link');
+            const currentParams = window.location.search;
+            
+            if (currentParams) {
+                // Si la URL destino ya tuviera algún parámetro propio (?) lo concatenamos con '&'
+                if (link.href.includes('?')) {
+                    // Quitamos el '?' inicial de currentParams para evitar tener dos interrogaciones
+                    link.href += '&' + currentParams.substring(1);
+                } else {
+                    link.href += currentParams;
+                }
+            }
+        });
+    </script>
 </body>
 </html>
