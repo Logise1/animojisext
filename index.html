@@ -52,7 +52,7 @@
 
     function getUsername() {
       const params = new URLSearchParams(window.location.search);
-      return params.get("username") || "Desconocido";
+      return params.get("user") || "Desconocido";
     }
 
     function updateCountdown() {
