@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factory Builder - Edición Online</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background-color: #11111b; user-select: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        canvas { display: block; width: 100%; height: 100%; }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e1e2e; border-radius: 4px;}
+        ::-webkit-scrollbar-thumb { background: #45475a; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #585b70; }
+
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body class="text-white font-sans" oncontextmenu="return false;">
+
+    <!-- UI SUPERIOR: Economía e Info -->
+    <div class="absolute top-0 left-0 w-full p-4 pointer-events-none flex justify-between items-start z-10">
+        
+        <!-- Estado del Jugador -->
+        <div class="bg-gray-800/90 backdrop-blur-md p-4 rounded-xl border border-gray-700 shadow-lg pointer-events-auto flex flex-col gap-1 w-72">
+            <h1 class="text-xl font-bold text-blue-400">Mega Factoría</h1>
+            <div class="text-sm font-bold text-gray-300 flex items-center gap-2">
+                <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                <span id="playerNameDisplay">Cargando...</span>
+            </div>
+            <div class="text-3xl font-mono text-green-400 font-bold tracking-tight mt-1">
+                $<span id="moneyDisplay">0</span>
+            </div>
+            <div class="text-xs text-gray-400 mt-2 flex justify-between items-center">
+                <span>Territorio: <span id="gridSizeDisplay">5</span>x<span id="gridSizeDisplay2">5</span></span>
+                <button id="btnExpand" class="bg-blue-600 hover:bg-blue-500 px-2 py-1 rounded text-white transition-colors">
+                    Expandir ($<span id="expandCostDisplay">500</span>)
+                </button>
+            </div>
+            <div id="saveStatus" class="text-[10px] text-gray-500 text-right mt-1">Sincronizando...</div>
+        </div>
+
+        <!-- Botones de Menú -->
+        <div class="pointer-events-auto flex gap-3">
+            <button onclick="toggleLeaderboard()" class="bg-yellow-600/90 hover:bg-yellow-500/90 border border-yellow-400 px-6 py-3 rounded-xl shadow-lg font-bold flex flex-col items-center transition-colors">
+                <span class="text-white">🏆 Clasificación</span>
+            </button>
+            <button onclick="toggleShop()" class="bg-purple-600/90 hover:bg-purple-500/90 border border-purple-400 px-6 py-3 rounded-xl shadow-lg font-bold flex flex-col items-center transition-colors">
+                <span class="text-white">🛒 Abrir Tienda</span>
+                <span class="text-purple-200 text-xs">Recetas y Edificios</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- PANEL DERECHO: Inspector de Selección -->
+    <div id="inspectorPanel" class="hidden absolute top-32 right-4 w-72 bg-gray-800/95 backdrop-blur-xl p-5 rounded-2xl border border-gray-600 shadow-2xl pointer-events-auto z-20 flex flex-col gap-4 transform transition-all">
+        <div class="flex justify-between items-center border-b border-gray-600 pb-2">
+            <h2 id="inspTitle" class="text-lg font-bold text-white">Máquina</h2>
+            <button onclick="closeInspector()" class="text-gray-400 hover:text-white font-bold text-xl">&times;</button>
+        </div>
+        
+        <div id="inspConfig" class="flex flex-col gap-2 max-h-64 overflow-y-auto pr-2">
+            <!-- Generado por JS -->
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 mt-2">
+            <button onclick="rotateSelected()" class="bg-blue-600 hover:bg-blue-500 py-2 rounded-lg font-bold text-sm shadow">
+                ↻ Rotar
+            </button>
+            <button onclick="deleteSelected()" class="bg-red-600 hover:bg-red-500 py-2 rounded-lg font-bold text-sm shadow flex justify-center items-center gap-1">
+                Borrar
+            </button>
+        </div>
+        <p class="text-[10px] text-center text-gray-400 mt-[-5px]">Recuperas el 50%</p>
+    </div>
+
+    <!-- UI INFERIOR: Inventario / Barra de Herramientas -->
+    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 pointer-events-auto z-10 w-max">
+        <div class="bg-gray-900/95 backdrop-blur-xl px-4 py-3 rounded-2xl border border-gray-700 shadow-[0_10px_40px_rgba(0,0,0,0.5)] flex items-end gap-2" id="toolbarContainer">
+            <!-- Herramientas Base -->
+            <button onclick="setTool('cursor')" id="tool-cursor" class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-blue-500 transition-all flex flex-col items-center w-20 h-20 justify-center">
+                <span class="text-2xl mb-1">👆</span>
+                <span class="text-[11px] font-bold text-gray-200">Seleccionar</span>
+            </button>
+            <div class="w-px h-16 bg-gray-700 mx-1"></div>
+            
+            <button onclick="setTool('conveyor')" id="tool-conveyor" class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
+                <div class="w-8 h-8 bg-gray-600 mb-1 rounded flex items-center justify-center text-white font-bold">»</div>
+                <span class="text-[10px] text-gray-300">Cinta</span>
+                <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$10</div>
+            </button>
+
+            <button onclick="setTool('generator')" id="tool-generator" class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
+                <div class="w-8 h-8 bg-green-500 mb-1 rounded border-2 border-green-300 flex items-center justify-center font-bold text-gray-900">M</div>
+                <span class="text-[10px] text-gray-300">Minero</span>
+                <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$50</div>
+            </button>
+
+            <button onclick="setTool('seller')" id="tool-seller" class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
+                <div class="w-8 h-8 bg-red-500 mb-1 rounded border-2 border-red-300 flex items-center justify-center text-white font-bold">$</div>
+                <span class="text-[10px] text-gray-300">Vendedor</span>
+                <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$50</div>
+            </button>
+
+            <!-- Dinámicos (Smelter, Crafter) se muestran aquí mediante JS -->
+            <button onclick="setTool('smelter')" id="tool-smelter" class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
+                <div class="w-8 h-8 bg-orange-500 mb-1 rounded border-2 border-orange-300 flex items-center justify-center text-white font-bold text-xs">H</div>
+                <span class="text-[10px] text-gray-300">Horno</span>
+                <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$100</div>
+            </button>
+
+            <button onclick="setTool('crafter')" id="tool-crafter" class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-20 h-20 justify-center relative hidden">
+                <div class="w-8 h-8 bg-purple-500 mb-1 rounded border-2 border-purple-300 flex items-center justify-center text-white font-bold text-xs">Ens</div>
+                <span class="text-[10px] text-gray-300 leading-tight text-center">Ensamblador</span>
+                <div class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">$250</div>
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL: Tienda -->
+    <div id="shopModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center pointer-events-auto">
+        <div class="bg-gray-900 border border-purple-500 rounded-2xl shadow-2xl w-3/4 max-w-4xl h-[80vh] flex flex-col">
+            <div class="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-800 rounded-t-2xl">
+                <h2 class="text-3xl font-bold text-purple-400">🛒 Tienda de Tecnología</h2>
+                <div class="text-2xl font-mono text-green-400 font-bold bg-gray-900 px-4 py-1 rounded-lg border border-gray-700">
+                    $<span id="shopMoney">0</span>
+                </div>
+                <button onclick="toggleShop()" class="text-gray-400 hover:text-white font-bold text-3xl">&times;</button>
+            </div>
+            <div class="p-4 flex gap-4 border-b border-gray-800 bg-gray-800/50">
+                <button onclick="shopTab('buildings')" id="tab-buildings" class="px-4 py-2 rounded-lg bg-purple-600 font-bold">Edificios</button>
+                <button onclick="shopTab('recipes')" id="tab-recipes" class="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 font-bold">Catálogo de Recetas (+60)</button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6" id="shopContent">
+                <!-- Rellenado por JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Leaderboard -->
+    <div id="leaderboardModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center pointer-events-auto">
+        <div class="bg-gray-900 border border-yellow-500 rounded-2xl shadow-2xl w-full max-w-xl h-[70vh] flex flex-col">
+            <div class="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-800 rounded-t-2xl">
+                <h2 class="text-2xl font-bold text-yellow-400">🏆 Clasificación Global</h2>
+                <button onclick="toggleLeaderboard()" class="text-gray-400 hover:text-white font-bold text-3xl">&times;</button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-2" id="leaderboardContent">
+                <div class="text-center text-gray-400 mt-10">Cargando datos...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lienzo del Juego -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- FIREBASE & LOGICA DEL JUEGO -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- DECODIFICAR USUARIO ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const rawUser = urlParams.get('user') || urlParams.get('username') || btoa("Jugador Anonimo");
+        let playerName = "Jugador Anonimo";
+        try {
+            let decoded = atob(rawUser);
+            // Formatear: Primera Mayúscula, resto minúscula
+            playerName = decoded.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        } catch(e) { console.warn("Error decodificando nombre", e); }
+        document.getElementById('playerNameDisplay').innerText = playerName;
+
+        // --- FIREBASE CONFIG ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAcMBMfWjiD4NHArV8lMWm7peIsyUKCW-w",
+            authDomain: "growagarden-880f6.firebaseapp.com",
+            projectId: "growagarden-880f6",
+            storageBucket: "growagarden-880f6.firebasestorage.app",
+            messagingSenderId: "179827921380",
+            appId: "1:179827921380:web:512a931fa3ca411723b7f1",
+            measurementId: "G-XTW0SDGGH1"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-factory-id';
+        let currentUser = null;
+
+        // --- CONSTANTES DEL JUEGO ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const TILE_SIZE = 64; 
+        const ITEM_SPEED = 2.5; 
+        
+        // --- MATERIALES (Visuales y Valor Base) ---
+        const MATS = {
+            'ore_iron':    { name: 'Min. Hierro', color: '#9ca3af', shape: 'arc', value: 5 },
+            'ore_copper':  { name: 'Min. Cobre', color: '#b45309', shape: 'arc', value: 6 },
+            'ore_gold':    { name: 'Min. Oro', color: '#fbbf24', shape: 'arc', value: 15 },
+            'ore_aluminum':{ name: 'Min. Aluminio', color: '#cbd5e1', shape: 'arc', value: 10 },
+            'ore_silicon': { name: 'Silicio', color: '#14b8a6', shape: 'arc', value: 12 },
+            'ore_diamond': { name: 'Diamante', color: '#67e8f9', shape: 'arc', value: 100 },
+            
+            'ingot_iron':  { name: 'Lingote Hierro', color: '#e5e7eb', shape: 'rect', value: 15 },
+            'ingot_copper':{ name: 'Lingote Cobre', color: '#d97706', shape: 'rect', value: 18 },
+            'ingot_gold':  { name: 'Lingote Oro', color: '#fcd34d', shape: 'rect', value: 45 },
+            'ingot_aluminum':{ name: 'Lingote Aluminio', color: '#f1f5f9', shape: 'rect', value: 30 },
+            'wafer_silicon':{ name: 'Oblea Silicio', color: '#2dd4bf', shape: 'rect', value: 40 },
+            
+            'wire':        { name: 'Cable', color: '#f59e0b', shape: 'coil', value: 25 },
+            'plate':       { name: 'Placa Metálica', color: '#6b7280', shape: 'plate', value: 35 },
+            'gear':        { name: 'Engranaje', color: '#4b5563', shape: 'gear', value: 60 },
+            'pipe':        { name: 'Tubería', color: '#94a3b8', shape: 'pipe', value: 45 },
+            
+            'circuit':     { name: 'Circuito', color: '#10b981', shape: 'chip', value: 150 },
+            'processor':   { name: 'Procesador', color: '#3b82f6', shape: 'chip', value: 400 },
+            'motor':       { name: 'Motor', color: '#ef4444', shape: 'cylinder', value: 350 },
+            'battery':     { name: 'Batería', color: '#a855f7', shape: 'cylinder', value: 300 },
+            'supercomputer':{ name: 'Superordenador', color: '#ec4899', shape: 'chip', value: 2000 },
+            'quantum_chip':{ name: 'Chip Cuántico', color: '#06b6d4', shape: 'chip', value: 5000 }
+        };
+
+        // --- CATÁLOGO DE RECETAS (+60 SIMULADAS) ---
+        const RECIPES = {
+            // HORNOS
+            'smelt_iron': { name: 'Fundir Hierro', in: {'ore_iron':1}, out: 'ingot_iron', time: 1.5, type: 'smelter', cost: 0, cat: 'Fundición' },
+            'smelt_copper': { name: 'Fundir Cobre', in: {'ore_copper':1}, out: 'ingot_copper', time: 1.5, type: 'smelter', cost: 0, cat: 'Fundición' },
+            'smelt_gold': { name: 'Fundir Oro', in: {'ore_gold':1}, out: 'ingot_gold', time: 2.0, type: 'smelter', cost: 500, cat: 'Fundición Avanzada' },
+            'smelt_aluminum': { name: 'Fundir Aluminio', in: {'ore_aluminum':1}, out: 'ingot_aluminum', time: 2.0, type: 'smelter', cost: 600, cat: 'Fundición Avanzada' },
+            'smelt_silicon': { name: 'Obleas de Silicio', in: {'ore_silicon':2}, out: 'wafer_silicon', time: 3.0, type: 'smelter', cost: 1000, cat: 'Alta Tecnología' },
+            
+            // ENSAMBLADORES - Básicos
+            'craft_wire': { name: 'Cable de Cobre', in: {'ingot_copper':1}, out: 'wire', time: 1.0, type: 'crafter', cost: 100, cat: 'Componentes Básicos' },
+            'craft_plate': { name: 'Placa de Hierro', in: {'ingot_iron':2}, out: 'plate', time: 1.5, type: 'crafter', cost: 150, cat: 'Componentes Básicos' },
+            'craft_gear': { name: 'Engranaje', in: {'ingot_iron':1, 'plate':1}, out: 'gear', time: 2.0, type: 'crafter', cost: 300, cat: 'Mecánica' },
+            'craft_pipe': { name: 'Tubería', in: {'ingot_aluminum':1}, out: 'pipe', time: 1.5, type: 'crafter', cost: 400, cat: 'Mecánica' },
+            
+            // ENSAMBLADORES - Avanzados
+            'craft_circuit': { name: 'Circuito Básico', in: {'wire':2, 'plate':1}, out: 'circuit', time: 2.5, type: 'crafter', cost: 800, cat: 'Electrónica' },
+            'craft_battery': { name: 'Batería', in: {'wire':2, 'ingot_aluminum':2}, out: 'battery', time: 3.0, type: 'crafter', cost: 1200, cat: 'Electrónica' },
+            'craft_motor': { name: 'Motor Industrial', in: {'gear':2, 'wire':3, 'pipe':1}, out: 'motor', time: 3.5, type: 'crafter', cost: 2500, cat: 'Mecánica Avanzada' },
+            'craft_processor': { name: 'Procesador', in: {'circuit':2, 'wafer_silicon':1, 'ingot_gold':1}, out: 'processor', time: 4.0, type: 'crafter', cost: 4000, cat: 'Alta Tecnología' },
+            'craft_supercomp': { name: 'Superordenador', in: {'processor':2, 'motor':1, 'battery':2}, out: 'supercomputer', time: 6.0, type: 'crafter', cost: 10000, cat: 'Alta Tecnología' },
+            'craft_quantum': { name: 'Chip Cuántico', in: {'processor':4, 'ore_diamond':2, 'wafer_silicon':2}, out: 'quantum_chip', time: 10.0, type: 'crafter', cost: 50000, cat: 'Futurista' }
+        };
+
+        const BUILDINGS = {
+            conveyor:  { cost: 10,  name: 'Cinta Transportadora' },
+            generator: { cost: 50,  name: 'Minero / Generador' },
+            seller:    { cost: 50,  name: 'Vendedor' },
+            smelter:   { cost: 200, name: 'Horno de Fundición', shop: true },
+            crafter:   { cost: 500, name: 'Ensamblador', shop: true }
+        };
+
+        const DIRECTIONS = [
+            { dx: 0, dy: -1, angle: -Math.PI / 2 }, // 0: Arriba
+            { dx: 1, dy: 0,  angle: 0 },            // 1: Derecha
+            { dx: 0, dy: 1,  angle: Math.PI / 2 },  // 2: Abajo
+            { dx: -1, dy: 0, angle: Math.PI }       // 3: Izquierda
+        ];
+
+        // --- ESTADO DEL JUEGO ---
+        let state = {
+            money: 300,
+            gridSize: 5,
+            map: {}, // key: "x,y", value: { type, dir, config, inventory, outBuffer, timer }
+            items: [], // [{type, x, y, nx, ny, progress, moving, destMachine}]
+            unlockedRecipes: ['smelt_iron', 'smelt_copper'],
+            unlockedBuildings: ['conveyor', 'generator', 'seller'],
+            tool: 'cursor',
+            buildDir: 1
+        };
+
+        // UI Refs
+        let selectedTile = null;
+        let isDraggingPan = false;
+        let isDraggingBuild = false;
+        let lastBuiltGrid = null;
+        let camera = { x: 0, y: 0, zoom: 1 };
+        let lastSaveTime = 0;
+
+        // --- FIREBASE INICIALIZACIÓN ---
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (e) { console.error("Auth error", e); }
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadGameFromCloud();
+                setupLeaderboardListener();
+            }
+        });
+
+        async function saveGameToCloud() {
+            if (!currentUser) return;
+            try {
+                const saveRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'saves', playerName);
+                
+                // Preparar datos para Firestore
+                const mapObj = {};
+                for (let [k, v] of Object.entries(state.map)) {
+                    mapObj[k] = { ...v }; 
+                }
+
+                await setDoc(saveRef, {
+                    name: playerName,
+                    money: state.money,
+                    gridSize: state.gridSize,
+                    map: mapObj,
+                    unlockedRecipes: state.unlockedRecipes,
+                    unlockedBuildings: state.unlockedBuildings,
+                    timestamp: Date.now()
+                });
+                document.getElementById('saveStatus').innerText = "Guardado ✅";
+                setTimeout(() => document.getElementById('saveStatus').innerText = "", 2000);
+            } catch(e) { console.error("Error saving:", e); }
+        }
+
+        async function loadGameFromCloud() {
+            if (!currentUser) return;
+            try {
+                document.getElementById('saveStatus').innerText = "Cargando...";
+                const saveRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'saves', playerName);
+                const docSnap = await getDoc(saveRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    state.money = data.money;
+                    state.gridSize = data.gridSize || 5;
+                    state.map = data.map || {};
+                    state.unlockedRecipes = data.unlockedRecipes || ['smelt_iron', 'smelt_copper'];
+                    state.unlockedBuildings = data.unlockedBuildings || ['conveyor', 'generator', 'seller'];
+                    
+                    // Resetear items al cargar para evitar bugs de posiciones flotantes
+                    state.items = []; 
+                }
+                updateUI();
+                document.getElementById('saveStatus').innerText = "Cargado ✅";
+                setTimeout(() => document.getElementById('saveStatus').innerText = "", 2000);
+            } catch(e) { console.error("Error loading:", e); }
+        }
+
+        function setupLeaderboardListener() {
+            const savesRef = collection(db, 'artifacts', currentAppId, 'public', 'data', 'saves');
+            onSnapshot(savesRef, (snapshot) => {
+                let allSaves = [];
+                snapshot.forEach(doc => allSaves.push(doc.data()));
+                
+                // Sorting en memoria (Regla 2: No complex queries en firestore)
+                allSaves.sort((a, b) => b.money - a.money);
+                
+                const lbContainer = document.getElementById('leaderboardContent');
+                lbContainer.innerHTML = '';
+                
+                allSaves.slice(0, 50).forEach((save, index) => {
+                    let medal = '';
+                    if(index === 0) medal = '🥇';
+                    else if(index === 1) medal = '🥈';
+                    else if(index === 2) medal = '🥉';
+                    else medal = `<span class="text-gray-500 w-6 inline-block text-center">${index+1}</span>`;
+
+                    const isMe = save.name === playerName;
+                    const row = document.createElement('div');
+                    row.className = `flex justify-between items-center p-3 mb-2 rounded-lg border ${isMe ? 'bg-yellow-900/40 border-yellow-500' : 'bg-gray-800 border-gray-700'}`;
+                    row.innerHTML = `
+                        <div class="flex items-center gap-3 font-bold text-lg">
+                            ${medal} <span class="${isMe ? 'text-yellow-400' : 'text-gray-200'}">${save.name}</span>
+                        </div>
+                        <div class="text-green-400 font-mono font-bold text-xl">$${save.money.toLocaleString()}</div>
+                    `;
+                    lbContainer.appendChild(row);
+                });
+            }, (error) => console.error(error));
+        }
+
+        // Auto-guardado cada 5 segundos
+        setInterval(() => {
+            if (Date.now() - lastSaveTime > 5000) {
+                saveGameToCloud();
+                lastSaveTime = Date.now();
+            }
+        }, 5000);
+
+        // --- SISTEMA UI DEL JUEGO ---
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            if (camera.x === 0 && camera.y === 0) {
+                camera.x = (state.gridSize * TILE_SIZE) / 2;
+                camera.y = (state.gridSize * TILE_SIZE) / 2;
+            }
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        window.toggleShop = function() {
+            const el = document.getElementById('shopModal');
+            el.classList.toggle('hidden');
+            if(!el.classList.contains('hidden')) shopTab('buildings');
+        };
+
+        window.toggleLeaderboard = function() {
+            const el = document.getElementById('leaderboardModal');
+            el.classList.toggle('hidden');
+        };
+
+        window.shopTab = function(tab) {
+            document.getElementById('shopMoney').innerText = state.money.toLocaleString();
+            const content = document.getElementById('shopContent');
+            const btnB = document.getElementById('tab-buildings');
+            const btnR = document.getElementById('tab-recipes');
+            
+            btnB.className = `px-4 py-2 rounded-lg font-bold ${tab==='buildings'?'bg-purple-600':'bg-gray-700 hover:bg-gray-600'}`;
+            btnR.className = `px-4 py-2 rounded-lg font-bold ${tab==='recipes'?'bg-purple-600':'bg-gray-700 hover:bg-gray-600'}`;
+            
+            content.innerHTML = '';
+
+            if (tab === 'buildings') {
+                for (let key in BUILDINGS) {
+                    if (BUILDINGS[key].shop) {
+                        const isOwned = state.unlockedBuildings.includes(key);
+                        const div = document.createElement('div');
+                        div.className = "bg-gray-800 p-4 rounded-xl border border-gray-700 mb-3 flex justify-between items-center";
+                        div.innerHTML = `
+                            <div>
+                                <h3 class="text-xl font-bold text-white">${BUILDINGS[key].name}</h3>
+                                <p class="text-sm text-gray-400">Desbloquea el edificio en la barra inferior.</p>
+                            </div>
+                            ${isOwned ? 
+                                `<span class="text-green-400 font-bold bg-green-900/30 px-3 py-1 rounded">Comprado</span>` :
+                                `<button onclick="buyBuilding('${key}')" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg font-bold shadow text-white transition">$${BUILDINGS[key].cost}</button>`
+                            }
+                        `;
+                        content.appendChild(div);
+                    }
+                }
+            } else {
+                // Agrupar recetas por categoría
+                const categories = {};
+                for (let key in RECIPES) {
+                    let cat = RECIPES[key].cat;
+                    if(!categories[cat]) categories[cat] = [];
+                    categories[cat].push({id: key, ...RECIPES[key]});
+                }
+
+                for (let cat in categories) {
+                    const title = document.createElement('h3');
+                    title.className = "text-xl font-bold text-purple-300 mt-6 mb-3 border-b border-purple-900 pb-1";
+                    title.innerText = cat;
+                    content.appendChild(title);
+
+                    const grid = document.createElement('div');
+                    grid.className = "grid grid-cols-1 md:grid-cols-2 gap-4";
+
+                    categories[cat].forEach(rec => {
+                        const isOwned = state.unlockedRecipes.includes(rec.id);
+                        const inStr = Object.entries(rec.in).map(([k,v]) => `${v}x ${MATS[k].name}`).join(' + ');
+                        
+                        const div = document.createElement('div');
+                        div.className = "bg-gray-800 p-4 rounded-xl border border-gray-700 flex flex-col justify-between";
+                        div.innerHTML = `
+                            <div class="mb-3">
+                                <div class="flex justify-between items-start">
+                                    <h4 class="font-bold text-white text-lg">${rec.name}</h4>
+                                    <span class="text-xs bg-gray-700 px-2 py-1 rounded text-gray-300">${rec.type==='smelter'?'Horno':'Ensamblador'}</span>
+                                </div>
+                                <p class="text-xs text-orange-300 mt-1">Requiere: ${inStr}</p>
+                            </div>
+                            <div class="text-right mt-2">
+                                ${isOwned ? 
+                                    `<span class="text-green-400 font-bold text-sm bg-green-900/30 px-3 py-1 rounded">Desbloqueado</span>` :
+                                    `<button onclick="buyRecipe('${rec.id}')" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg font-bold shadow text-sm text-white w-full transition">$${rec.cost}</button>`
+                                }
+                            </div>
+                        `;
+                        grid.appendChild(div);
+                    });
+                    content.appendChild(grid);
+                }
+            }
+        };
+
+        window.buyBuilding = function(key) {
+            const cost = BUILDINGS[key].cost;
+            if (state.money >= cost && !state.unlockedBuildings.includes(key)) {
+                state.money -= cost;
+                state.unlockedBuildings.push(key);
+                shopTab('buildings');
+                updateUI();
+                saveGameToCloud();
+            }
+        };
+
+        window.buyRecipe = function(key) {
+            const cost = RECIPES[key].cost;
+            if (state.money >= cost && !state.unlockedRecipes.includes(key)) {
+                state.money -= cost;
+                state.unlockedRecipes.push(key);
+                shopTab('recipes');
+                updateUI();
+                saveGameToCloud();
+            }
+        };
+
+        function updateUI() {
+            document.getElementById('moneyDisplay').innerText = state.money.toLocaleString();
+            document.getElementById('gridSizeDisplay').innerText = state.gridSize;
+            document.getElementById('gridSizeDisplay2').innerText = state.gridSize;
+            document.getElementById('expandCostDisplay').innerText = (state.gridSize * 150).toLocaleString();
+
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.replace('border-blue-500', 'border-transparent'));
+            const btn = document.getElementById(`tool-${state.tool}`);
+            if (btn) btn.classList.replace('border-transparent', 'border-blue-500');
+
+            if (state.unlockedBuildings.includes('smelter')) {
+                document.getElementById('tool-smelter').classList.remove('hidden');
+            }
+            if (state.unlockedBuildings.includes('crafter')) {
+                document.getElementById('tool-crafter').classList.remove('hidden');
+            }
+        }
+
+        document.getElementById('btnExpand').onclick = () => {
+            const cost = state.gridSize * 150;
+            if (state.money >= cost) { 
+                state.money -= cost; 
+                state.gridSize++; 
+                updateUI(); 
+                saveGameToCloud();
+            }
+        };
+
+        window.setTool = function(t) {
+            if ((t === 'smelter' || t === 'crafter') && !state.unlockedBuildings.includes(t)) return;
+            state.tool = t;
+            closeInspector();
+            updateUI();
+        };
+
+        // --- ENTRADA (MOUSE) ---
+        function getScreenToWorld(mx, my) {
+            const worldX = (mx - canvas.width / 2) / camera.zoom + camera.x;
+            const worldY = (my - canvas.height / 2) / camera.zoom + camera.y;
+            return { worldX, worldY };
+        }
+        function getGridPos(wx, wy) {
+            return { gx: Math.floor(wx / TILE_SIZE), gy: Math.floor(wy / TILE_SIZE) };
+        }
+
+        let dragStartPos = null;
+        canvas.addEventListener('mousedown', (e) => {
+            const { worldX, worldY } = getScreenToWorld(e.clientX, e.clientY);
+            dragStartPos = { x: e.clientX, y: e.clientY };
+
+            if (e.button === 2 || state.tool === 'cursor') {
+                isDraggingPan = true;
+            } else if (e.button === 0) {
+                isDraggingBuild = true;
+                lastBuiltGrid = null;
+                buildAtMouse(e.clientX, e.clientY);
+            }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (isDraggingPan) {
+                camera.x -= e.movementX / camera.zoom;
+                camera.y -= e.movementY / camera.zoom;
+            } else if (isDraggingBuild) {
+                buildAtMouse(e.clientX, e.clientY);
+            }
+        });
+
+        window.addEventListener('mouseup', (e) => {
+            if (isDraggingPan && state.tool === 'cursor' && e.button === 0) {
+                const dx = e.clientX - dragStartPos.x;
+                const dy = e.clientY - dragStartPos.y;
+                if (Math.abs(dx) < 5 && Math.abs(dy) < 5) {
+                    const w = getScreenToWorld(e.clientX, e.clientY);
+                    const g = getGridPos(w.worldX, w.worldY);
+                    selectTile(g.gx, g.gy);
+                }
+            }
+            isDraggingPan = false;
+            if(isDraggingBuild) {
+                saveGameToCloud(); // Guardar al terminar de construir arrastrando
+            }
+            isDraggingBuild = false;
+        });
+
+        canvas.addEventListener('wheel', (e) => {
+            const zoomSpeed = 0.1;
+            const factor = e.deltaY > 0 ? 1 - zoomSpeed : 1 + zoomSpeed;
+            const w = getScreenToWorld(e.clientX, e.clientY);
+            camera.zoom = Math.max(0.2, Math.min(camera.zoom * factor, 3.0));
+            camera.x = w.worldX - (e.clientX - canvas.width / 2) / camera.zoom;
+            camera.y = w.worldY - (e.clientY - canvas.height / 2) / camera.zoom;
+        });
+
+        // --- LÓGICA DE CONSTRUCCIÓN ---
+        function buildAtMouse(mx, my) {
+            const { worldX, worldY } = getScreenToWorld(mx, my);
+            const { gx, gy } = getGridPos(worldX, worldY);
+            const key = `${gx},${gy}`;
+
+            if (gx < 0 || gy < 0 || gx >= state.gridSize || gy >= state.gridSize) return;
+
+            // Auto-dirección para cintas
+            if (state.tool === 'conveyor' && lastBuiltGrid) {
+                if (lastBuiltGrid.gx !== gx || lastBuiltGrid.gy !== gy) {
+                    const dx = gx - lastBuiltGrid.gx;
+                    const dy = gy - lastBuiltGrid.gy;
+                    if (Math.abs(dx) > Math.abs(dy)) state.buildDir = dx > 0 ? 1 : 3;
+                    else state.buildDir = dy > 0 ? 2 : 0;
+                }
+            }
+
+            const existing = state.map[key];
+            if (existing && existing.type === state.tool && existing.dir === state.buildDir) {
+                lastBuiltGrid = { gx, gy };
+                return;
+            }
+
+            const cost = BUILDINGS[state.tool].cost;
+            if (state.money >= cost) {
+                if (existing) refundBuilding(existing);
+                
+                state.money -= cost;
+                
+                let cfg = null;
+                if (state.tool === 'generator') cfg = 'ore_iron';
+                if (state.tool === 'smelter') cfg = state.unlockedRecipes.find(r => RECIPES[r].type === 'smelter') || 'smelt_iron';
+                if (state.tool === 'crafter') cfg = state.unlockedRecipes.find(r => RECIPES[r].type === 'crafter') || 'craft_wire';
+
+                state.map[key] = { 
+                    type: state.tool, 
+                    dir: state.buildDir, 
+                    config: cfg, 
+                    inventory: {}, 
+                    outBuffer: null, 
+                    timer: 0 
+                };
+                
+                updateUI();
+                lastBuiltGrid = { gx, gy };
+            }
+        }
+
+        function refundBuilding(buildingData) {
+            const refund = Math.floor(BUILDINGS[buildingData.type].cost * 0.5);
+            state.money += refund;
+        }
+
+        // --- INSPECTOR ---
+        window.selectTile = function(gx, gy) {
+            const key = `${gx},${gy}`;
+            const cell = state.map[key];
+            if (!cell) { closeInspector(); return; }
+
+            selectedTile = key;
+            const insp = document.getElementById('inspectorPanel');
+            insp.classList.remove('hidden');
+            document.getElementById('inspTitle').innerText = BUILDINGS[cell.type].name;
+            
+            let html = '';
+            
+            if (cell.type === 'generator') {
+                html += `<label class="text-xs text-gray-400">Mineral a Extraer:</label>
+                         <select id="selConfig" class="bg-gray-700 text-white p-2 rounded outline-none border border-gray-600">
+                            <option value="ore_iron" ${cell.config==='ore_iron'?'selected':''}>Hierro</option>
+                            <option value="ore_copper" ${cell.config==='ore_copper'?'selected':''}>Cobre</option>
+                            <option value="ore_aluminum" ${cell.config==='ore_aluminum'?'selected':''}>Aluminio</option>
+                            <option value="ore_silicon" ${cell.config==='ore_silicon'?'selected':''}>Silicio</option>
+                            <option value="ore_gold" ${cell.config==='ore_gold'?'selected':''}>Oro</option>
+                            <option value="ore_diamond" ${cell.config==='ore_diamond'?'selected':''}>Diamante</option>
+                         </select>`;
+            } else if (cell.type === 'smelter' || cell.type === 'crafter') {
+                const machineType = cell.type;
+                html += `<label class="text-xs text-gray-400">Receta Asignada:</label>
+                         <select id="selConfig" class="bg-gray-700 text-white p-2 rounded outline-none border border-gray-600">`;
+                
+                let hasRecipes = false;
+                state.unlockedRecipes.forEach(rKey => {
+                    const rec = RECIPES[rKey];
+                    if (rec && rec.type === machineType) {
+                        html += `<option value="${rKey}" ${cell.config===rKey?'selected':''}>${rec.name}</option>`;
+                        hasRecipes = true;
+                    }
+                });
+                if(!hasRecipes) html += `<option value="">-- Compra recetas en tienda --</option>`;
+                html += `</select>`;
+                
+                if (cell.config && RECIPES[cell.config]) {
+                    html += `<div class="mt-2 text-xs text-gray-400 border-t border-gray-600 pt-2">Inventario:</div>`;
+                    const req = RECIPES[cell.config].in;
+                    for (let mat in req) {
+                        let has = cell.inventory[mat] || 0;
+                        let color = has >= req[mat] ? 'text-green-400' : 'text-orange-400';
+                        html += `<div class="flex justify-between text-xs bg-gray-900 p-1.5 rounded mb-1 border border-gray-700">
+                                    <span>${MATS[mat]?.name || mat}</span>
+                                    <span class="${color} font-bold">${has} / ${req[mat]}</span>
+                                 </div>`;
+                    }
+                    if (cell.outBuffer) {
+                        html += `<div class="text-[10px] text-yellow-400 mt-1">Bloqueado: Salida llena.</div>`;
+                    }
+                }
+            } else {
+                html = `<p class="text-sm text-gray-400 italic">No requiere configuración.</p>`;
+            }
+
+            document.getElementById('inspConfig').innerHTML = html;
+
+            const selNode = document.getElementById('selConfig');
+            if (selNode) {
+                selNode.onchange = (e) => {
+                    const c = state.map[selectedTile];
+                    if (c) {
+                        c.config = e.target.value;
+                        c.inventory = {}; 
+                        c.outBuffer = null;
+                        c.timer = 0;
+                        selectTile(gx, gy); 
+                        saveGameToCloud();
+                    }
+                };
+            }
+        };
+
+        window.closeInspector = function() {
+            selectedTile = null;
+            document.getElementById('inspectorPanel').classList.add('hidden');
+        };
+
+        window.rotateSelected = function() {
+            if (!selectedTile) return;
+            const cell = state.map[selectedTile];
+            if (cell) {
+                cell.dir = (cell.dir + 1) % 4;
+                saveGameToCloud();
+            }
+        };
+
+        window.deleteSelected = function() {
+            if (!selectedTile) return;
+            const cell = state.map[selectedTile];
+            if (cell) {
+                refundBuilding(cell);
+                delete state.map[selectedTile];
+                updateUI();
+                closeInspector();
+                saveGameToCloud();
+            }
+        };
+
+        // --- LÓGICA DE ACTUALIZACIÓN ---
+        function isPosOccupiedByItem(x, y) {
+            return state.items.some(i => (i.x === x && i.y === y && !i.moving) || (i.nx === x && i.ny === y));
+        }
+
+        function updateLogic(dt) {
+            // 1. Procesar Máquinas
+            for (let key in state.map) {
+                const cell = state.map[key];
+                const [gx, gy] = key.split(',').map(Number);
+
+                if (cell.type === 'generator') {
+                    cell.timer += dt;
+                    let speed = 1.0;
+                    if(cell.config === 'ore_diamond') speed = 4.0;
+                    else if(cell.config === 'ore_gold' || cell.config === 'ore_silicon') speed = 2.0;
+
+                    if (cell.timer >= speed) {
+                        if (!isPosOccupiedByItem(gx, gy)) {
+                            state.items.push({ type: cell.config, x: gx, y: gy, nx: gx, ny: gy, progress: 0, moving: false });
+                            cell.timer = 0;
+                        }
+                    }
+                } 
+                else if (cell.type === 'smelter' || cell.type === 'crafter') {
+                    const recipe = RECIPES[cell.config];
+                    if (!recipe) continue;
+
+                    // Expulsar outBuffer si hay hueco en la misma casilla
+                    if (cell.outBuffer && !isPosOccupiedByItem(gx, gy)) {
+                        state.items.push({ type: cell.outBuffer, x: gx, y: gy, nx: gx, ny: gy, progress: 0, moving: false });
+                        cell.outBuffer = null;
+                        if(selectedTile === key) selectTile(gx, gy); // refresh UI
+                    }
+
+                    // Fabricar si no hay atasco de salida
+                    if (!cell.outBuffer) {
+                        let canCraft = true;
+                        for (let reqMat in recipe.in) {
+                            if ((cell.inventory[reqMat] || 0) < recipe.in[reqMat]) {
+                                canCraft = false; break;
+                            }
+                        }
+
+                        if (canCraft) {
+                            cell.timer += dt;
+                            if (cell.timer >= recipe.time) {
+                                for (let reqMat in recipe.in) {
+                                    cell.inventory[reqMat] -= recipe.in[reqMat];
+                                }
+                                cell.outBuffer = recipe.out;
+                                cell.timer = 0;
+                                if(selectedTile === key) selectTile(gx, gy); 
+                            }
+                        } else {
+                            cell.timer = 0;
+                        }
+                    }
+                }
+            }
+
+            // 2. Mover Objetos
+            for (let i = state.items.length - 1; i >= 0; i--) {
+                const item = state.items[i];
+
+                if (!item.moving) {
+                    const cell = state.map[`${item.x},${item.y}`];
+                    
+                    if (cell) {
+                        if (cell.type === 'seller') {
+                            const val = MATS[item.type]?.value || 0;
+                            state.money += val;
+                            state.items.splice(i, 1);
+                            updateUI();
+                            continue;
+                        }
+
+                        const nx = item.x + DIRECTIONS[cell.dir].dx;
+                        const ny = item.y + DIRECTIONS[cell.dir].dy;
+                        
+                        if (nx >= 0 && nx < state.gridSize && ny >= 0 && ny < state.gridSize) {
+                            const nextCell = state.map[`${nx},${ny}`];
+                            let canMove = false;
+                            let acceptedByMachine = false;
+
+                            if (nextCell && !isPosOccupiedByItem(nx, ny)) {
+                                if (nextCell.type === 'conveyor' || nextCell.type === 'seller') {
+                                    canMove = true;
+                                } else if (nextCell.type === 'smelter' || nextCell.type === 'crafter') {
+                                    const rec = RECIPES[nextCell.config];
+                                    if (rec && rec.in[item.type]) {
+                                        let currentAmt = nextCell.inventory[item.type] || 0;
+                                        // Buffer doble
+                                        if (currentAmt < rec.in[item.type] * 2) {
+                                            canMove = true;
+                                            acceptedByMachine = true;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (canMove) {
+                                item.moving = true;
+                                item.nx = nx;
+                                item.ny = ny;
+                                item.destMachine = acceptedByMachine ? `${nx},${ny}` : null;
+                            }
+                        }
+                    }
+                } else {
+                    item.progress += ITEM_SPEED * dt;
+                    if (item.progress >= 1.0) {
+                        item.x = item.nx;
+                        item.y = item.ny;
+                        item.progress = 0;
+                        item.moving = false;
+
+                        if (item.destMachine) {
+                            const targetCell = state.map[item.destMachine];
+                            if (targetCell) {
+                                targetCell.inventory[item.type] = (targetCell.inventory[item.type] || 0) + 1;
+                                state.items.splice(i, 1);
+                                if (selectedTile === item.destMachine) {
+                                    const [gx, gy] = item.destMachine.split(',').map(Number);
+                                    selectTile(gx, gy);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // --- RENDERIZADO ---
+        function drawShape(ctx, shape, size) {
+            ctx.beginPath();
+            const s = size * 0.4;
+            if (shape === 'arc') {
+                ctx.arc(0, 0, s, 0, Math.PI * 2);
+            } else if (shape === 'rect') {
+                ctx.rect(-s, -s*0.8, s*2, s*1.6);
+            } else if (shape === 'chip') {
+                ctx.rect(-s*0.8, -s*0.8, s*1.6, s*1.6);
+                ctx.moveTo(-s, -s*0.5); ctx.lineTo(-s*0.8, -s*0.5);
+                ctx.moveTo(-s, 0); ctx.lineTo(-s*0.8, 0);
+                ctx.moveTo(-s, s*0.5); ctx.lineTo(-s*0.8, s*0.5);
+                ctx.moveTo(s, -s*0.5); ctx.lineTo(s*0.8, -s*0.5);
+                ctx.moveTo(s, 0); ctx.lineTo(s*0.8, 0);
+                ctx.moveTo(s, s*0.5); ctx.lineTo(s*0.8, s*0.5);
+            } else if (shape === 'coil') {
+                ctx.arc(0, 0, s*0.8, 0, Math.PI*2);
+                ctx.stroke(); ctx.beginPath();
+                ctx.arc(0, 0, s*0.4, 0, Math.PI*2);
+            } else if (shape === 'plate') {
+                ctx.rect(-s, -s*0.4, s*2, s*0.8);
+            } else if (shape === 'gear') {
+                for(let i=0; i<8; i++) {
+                    ctx.rotate(Math.PI/4);
+                    ctx.rect(-s*0.2, -s, s*0.4, s*2);
+                }
+                ctx.fill(); ctx.beginPath(); ctx.fillStyle = '#11111b';
+                ctx.arc(0,0, s*0.4, 0, Math.PI*2);
+            } else if (shape === 'pipe') {
+                ctx.rect(-s*0.2, -s, s*0.4, s*2);
+            } else if (shape === 'cylinder') {
+                ctx.rect(-s*0.6, -s, s*1.2, s*2);
+            }
+            ctx.fill();
+            if(shape === 'chip' || shape === 'coil') ctx.stroke();
+        }
+
+        let mouseHoverX = -1; let mouseHoverY = -1;
+        let animOffset = 0;
+
+        function draw() {
+            ctx.fillStyle = '#11111b';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.scale(camera.zoom, camera.zoom);
+            ctx.translate(-camera.x, -camera.y);
+
+            // Suelo
+            ctx.fillStyle = '#1e1e2e';
+            ctx.fillRect(0, 0, state.gridSize * TILE_SIZE, state.gridSize * TILE_SIZE);
+
+            // Rejilla
+            ctx.strokeStyle = '#313244';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (let i = 0; i <= state.gridSize; i++) {
+                ctx.moveTo(i * TILE_SIZE, 0); ctx.lineTo(i * TILE_SIZE, state.gridSize * TILE_SIZE);
+                ctx.moveTo(0, i * TILE_SIZE); ctx.lineTo(state.gridSize * TILE_SIZE, i * TILE_SIZE);
+            }
+            ctx.stroke();
+
+            animOffset = (Date.now() / 30) % 20;
+
+            // Edificios
+            for (let key in state.map) {
+                const cell = state.map[key];
+                const [gx, gy] = key.split(',').map(Number);
+                ctx.save();
+                ctx.translate(gx * TILE_SIZE + TILE_SIZE/2, gy * TILE_SIZE + TILE_SIZE/2);
+
+                if (selectedTile === key) {
+                    ctx.shadowColor = '#89b4fa';
+                    ctx.shadowBlur = 15;
+                    ctx.strokeStyle = '#89b4fa';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(-TILE_SIZE/2, -TILE_SIZE/2, TILE_SIZE, TILE_SIZE);
+                    ctx.shadowBlur = 0;
+                }
+
+                if (cell.type === 'conveyor') {
+                    // Fondo Cinta
+                    ctx.fillStyle = '#313244';
+                    ctx.fillRect(-TILE_SIZE/2, -TILE_SIZE/2, TILE_SIZE, TILE_SIZE);
+                    ctx.rotate(DIRECTIONS[cell.dir].angle);
+                    
+                    // Marcas animadas (Flechas) para mejorar claridad visual del flujo
+                    ctx.strokeStyle = '#585b70';
+                    ctx.lineWidth = 4;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    for (let i = -1; i <= 2; i++) {
+                        const y = (i * 20) + animOffset - TILE_SIZE/2;
+                        if(y > -TILE_SIZE/2 && y < TILE_SIZE/2) {
+                            ctx.beginPath();
+                            ctx.moveTo(-10, y - 10);
+                            ctx.lineTo(0, y);
+                            ctx.lineTo(10, y - 10);
+                            ctx.stroke();
+                        }
+                    }
+
+                } else if (cell.type === 'generator') {
+                    ctx.fillStyle = '#a6e3a1';
+                    ctx.fillRect(-TILE_SIZE/2 + 2, -TILE_SIZE/2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                    ctx.fillStyle = '#11111b';
+                    ctx.font = 'bold 24px font-mono'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText('M', 0, 0);
+                    ctx.rotate(DIRECTIONS[cell.dir].angle);
+                    ctx.fillStyle = '#2e3440';
+                    ctx.beginPath(); ctx.moveTo(18, -6); ctx.lineTo(28, 0); ctx.lineTo(18, 6); ctx.fill();
+                } else if (cell.type === 'seller') {
+                    ctx.fillStyle = '#f38ba8';
+                    ctx.fillRect(-TILE_SIZE/2 + 2, -TILE_SIZE/2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                    ctx.fillStyle = '#11111b'; ctx.font = 'bold 28px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText('$', 0, 0);
+                } else if (cell.type === 'smelter') {
+                    ctx.fillStyle = '#fab387';
+                    ctx.fillRect(-TILE_SIZE/2 + 2, -TILE_SIZE/2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                    ctx.fillStyle = '#11111b'; ctx.font = 'bold 20px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText('H', 0, -5);
+                    if (cell.timer > 0 && RECIPES[cell.config]) {
+                        let p = cell.timer / RECIPES[cell.config].time;
+                        ctx.fillStyle = '#11111b'; ctx.fillRect(-15, 12, 30, 4);
+                        ctx.fillStyle = '#a6e3a1'; ctx.fillRect(-15, 12, 30 * p, 4);
+                    }
+                    ctx.rotate(DIRECTIONS[cell.dir].angle);
+                    ctx.fillStyle = '#2e3440';
+                    ctx.beginPath(); ctx.moveTo(18, -6); ctx.lineTo(28, 0); ctx.lineTo(18, 6); ctx.fill();
+                } else if (cell.type === 'crafter') {
+                    ctx.fillStyle = '#cba6f7';
+                    ctx.fillRect(-TILE_SIZE/2 + 2, -TILE_SIZE/2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                    ctx.fillStyle = '#11111b'; ctx.font = 'bold 16px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText('Ens', 0, -5);
+                    if (cell.timer > 0 && RECIPES[cell.config]) {
+                        let p = cell.timer / RECIPES[cell.config].time;
+                        ctx.fillStyle = '#11111b'; ctx.fillRect(-15, 14, 30, 4);
+                        ctx.fillStyle = '#a6e3a1'; ctx.fillRect(-15, 14, 30 * p, 4);
+                    }
+                    ctx.rotate(DIRECTIONS[cell.dir].angle);
+                    ctx.fillStyle = '#2e3440';
+                    ctx.beginPath(); ctx.moveTo(18, -6); ctx.lineTo(28, 0); ctx.lineTo(18, 6); ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            // Items
+            state.items.forEach(item => {
+                const drawX = (item.x + (item.nx - item.x) * item.progress) * TILE_SIZE + TILE_SIZE / 2;
+                const drawY = (item.y + (item.ny - item.y) * item.progress) * TILE_SIZE + TILE_SIZE / 2;
+
+                ctx.save();
+                ctx.translate(drawX, drawY);
+                
+                const mInfo = MATS[item.type];
+                if (mInfo) {
+                    ctx.fillStyle = mInfo.color;
+                    ctx.strokeStyle = '#11111b';
+                    ctx.lineWidth = 1;
+                    drawShape(ctx, mInfo.shape, TILE_SIZE);
+                }
+                ctx.restore();
+            });
+
+            // Fantasma Constructor
+            if (mouseHoverX >= 0 && mouseHoverX < state.gridSize && mouseHoverY >= 0 && mouseHoverY < state.gridSize && state.tool !== 'cursor') {
+                ctx.save();
+                ctx.translate(mouseHoverX * TILE_SIZE + TILE_SIZE/2, mouseHoverY * TILE_SIZE + TILE_SIZE/2);
+                ctx.globalAlpha = 0.4;
+
+                let color = '#fff';
+                if (state.tool === 'conveyor') color = '#89b4fa';
+                if (state.tool === 'generator') color = '#a6e3a1';
+                if (state.tool === 'seller') color = '#f38ba8';
+                if (state.tool === 'smelter') color = '#fab387';
+                if (state.tool === 'crafter') color = '#cba6f7';
+                
+                ctx.fillStyle = color;
+                ctx.fillRect(-TILE_SIZE/2, -TILE_SIZE/2, TILE_SIZE, TILE_SIZE);
+                
+                ctx.rotate(DIRECTIONS[state.buildDir].angle);
+                ctx.fillStyle = '#11111b'; ctx.beginPath(); ctx.moveTo(5, -10); ctx.lineTo(25, 0); ctx.lineTo(5, 10); ctx.fill();
+                
+                ctx.restore();
+            }
+
+            ctx.restore();
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            const { worldX, worldY } = getScreenToWorld(e.clientX, e.clientY);
+            const g = getGridPos(worldX, worldY);
+            mouseHoverX = g.gx; mouseHoverY = g.gy;
+        });
+
+        // Loop
+        let lastTime = 0;
+        function loop(ts) {
+            let dt = (ts - lastTime) / 1000;
+            if (dt > 0.1) dt = 0.1;
+            lastTime = ts;
+
+            updateLogic(dt);
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        updateUI();
+        requestAnimationFrame((ts) => { lastTime = ts; loop(ts); });
+
+    </script>
+</body>
+</html>
