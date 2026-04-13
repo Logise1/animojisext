@@ -47,6 +47,10 @@
             background-color: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(5px);
         }
+
+        img {
+            image-rendering: pixelated;
+        }
     </style>
 </head>
 
@@ -77,19 +81,14 @@
 
             <div class="text-xs text-gray-400 mt-1 flex justify-between items-center bg-gray-900/50 p-2 rounded">
                 <span>Terreno: <span id="gridSizeDisplay">5</span>x<span id="gridSizeDisplay2">5</span></span>
-                <button id="btnExpand"
-                    class="bg-blue-600 hover:bg-blue-500 px-2 py-1 rounded text-white transition-colors shadow">
-                    Expandir ($<span id="expandCostDisplay">500</span>)
-                </button>
             </div>
             <div id="saveStatus" class="text-[10px] text-gray-500 text-right mt-1">Sincronizando...</div>
         </div>
 
         <div class="pointer-events-auto flex gap-3">
             <button id="btnPause" onclick="togglePause()"
-                class="bg-blue-600/90 hover:bg-blue-500/90 border border-blue-400 px-4 py-3 rounded-xl shadow-lg font-bold flex items-center transition-colors">
-                <span id="pauseIcon" class="text-xl mr-2">⏸️</span>
-                <span id="pauseText">Pausar</span>
+                class="bg-blue-600/90 hover:bg-blue-500/90 border border-blue-400 p-2 rounded-xl shadow-lg flex items-center justify-center transition-colors w-12 h-12">
+                <img id="pauseIcon" src="textures/factory/pausebtn.png" class="w-8 h-8 object-contain" style="image-rendering: pixelated;">
             </button>
             <button onclick="clearAllItems()"
                 class="bg-red-600/90 hover:bg-red-500/90 border border-red-400 px-4 py-3 rounded-xl shadow-lg font-bold flex items-center transition-colors">
@@ -154,8 +153,7 @@
 
             <button onclick="setTool('conveyor')" id="tool-conveyor"
                 class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
-                <div class="w-8 h-8 bg-gray-600 mb-1 rounded flex items-center justify-center text-white font-bold">»
-                </div>
+                <img src="textures/factory/belt_horizontal.png" class="w-8 h-8 mb-1 object-contain">
                 <span class="text-[10px] text-gray-300">Cinta</span>
                 <div
                     class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
@@ -165,9 +163,7 @@
             <!-- Nuevos Divisores -->
             <button onclick="setTool('splitter2')" id="tool-splitter2"
                 class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
-                <div
-                    class="w-8 h-8 bg-indigo-500 mb-1 rounded border-2 border-indigo-300 flex items-center justify-center text-white font-bold text-xs leading-none text-center">
-                    1:2<br>Div</div>
+                <img src="textures/factory/splitter_down.png" class="w-8 h-8 mb-1 object-contain">
                 <span class="text-[10px] text-gray-300">Div 1/2</span>
                 <div
                     class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
@@ -176,9 +172,7 @@
 
             <button onclick="setTool('splitter3')" id="tool-splitter3"
                 class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
-                <div
-                    class="w-8 h-8 bg-purple-600 mb-1 rounded border-2 border-purple-400 flex items-center justify-center text-white font-bold text-xs leading-none text-center">
-                    1:3<br>Div</div>
+                <img src="textures/factory/splitter_up.png" class="w-8 h-8 mb-1 object-contain">
                 <span class="text-[10px] text-gray-300">Div 1/3</span>
                 <div
                     class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
@@ -189,9 +183,7 @@
 
             <button onclick="setTool('generator')" id="tool-generator"
                 class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
-                <div
-                    class="w-8 h-8 bg-green-500 mb-1 rounded border-2 border-green-300 flex items-center justify-center font-bold text-gray-900">
-                    M</div>
+                <img src="textures/factory/miner_basic.png" class="w-8 h-8 mb-1 object-contain">
                 <span class="text-[10px] text-gray-300">Minero</span>
                 <div
                     class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
@@ -200,9 +192,7 @@
 
             <button onclick="setTool('seller')" id="tool-seller"
                 class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
-                <div
-                    class="w-8 h-8 bg-red-500 mb-1 rounded border-2 border-red-300 flex items-center justify-center text-white font-bold">
-                    $</div>
+                <img src="textures/factory/chest_iron.png" class="w-8 h-8 mb-1 object-contain">
                 <span class="text-[10px] text-gray-300">Vendedor</span>
                 <div
                     class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
@@ -211,9 +201,7 @@
 
             <button onclick="setTool('smelter')" id="tool-smelter"
                 class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
-                <div
-                    class="w-8 h-8 bg-orange-500 mb-1 rounded border-2 border-orange-300 flex items-center justify-center text-white font-bold text-xs">
-                    H</div>
+                <img src="textures/factory/furnace_iron.png" class="w-8 h-8 mb-1 object-contain">
                 <span class="text-[10px] text-gray-300">Horno</span>
                 <div
                     class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
@@ -222,9 +210,7 @@
 
             <button onclick="setTool('crafter')" id="tool-crafter"
                 class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-20 h-20 justify-center relative hidden">
-                <div
-                    class="w-8 h-8 bg-fuchsia-500 mb-1 rounded border-2 border-fuchsia-300 flex items-center justify-center text-white font-bold text-xs">
-                    Ens</div>
+                <img src="textures/factory/assembler_basic.png" class="w-8 h-8 mb-1 object-contain">
                 <span class="text-[10px] text-gray-300 leading-tight text-center">Ensamblador</span>
                 <div
                     class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
@@ -316,31 +302,58 @@
 
         // --- MATERIALES (Visuales y Valor Base) ---
         const MATS = {
-            'ore_iron': { name: 'Min. Hierro', color: '#9ca3af', shape: 'arc', value: 5 },
-            'ore_copper': { name: 'Min. Cobre', color: '#b45309', shape: 'arc', value: 6 },
-            'ore_gold': { name: 'Min. Oro', color: '#fbbf24', shape: 'arc', value: 15 },
-            'ore_aluminum': { name: 'Min. Aluminio', color: '#cbd5e1', shape: 'arc', value: 10 },
-            'ore_silicon': { name: 'Silicio', color: '#14b8a6', shape: 'arc', value: 12 },
-            'ore_diamond': { name: 'Diamante', color: '#67e8f9', shape: 'arc', value: 100 },
+            'ore_iron': { name: 'Min. Hierro', color: '#9ca3af', shape: 'arc', value: 5, sprite: 'ore_iron' },
+            'ore_copper': { name: 'Min. Cobre', color: '#b45309', shape: 'arc', value: 6, sprite: 'ore_copper' },
+            'ore_gold': { name: 'Min. Oro', color: '#fbbf24', shape: 'arc', value: 15, sprite: 'ore_gold' },
+            'ore_aluminum': { name: 'Min. Aluminio', color: '#cbd5e1', shape: 'arc', value: 10, sprite: 'ore_aluminum' },
+            'ore_silicon': { name: 'Silicio', color: '#14b8a6', shape: 'arc', value: 12, sprite: 'ore_silicon' },
+            'ore_diamond': { name: 'Diamante', color: '#67e8f9', shape: 'arc', value: 100, sprite: 'ore_diamond' },
 
-            'ingot_iron': { name: 'Lingote Hierro', color: '#e5e7eb', shape: 'rect', value: 15 },
-            'ingot_copper': { name: 'Lingote Cobre', color: '#d97706', shape: 'rect', value: 18 },
-            'ingot_gold': { name: 'Lingote Oro', color: '#fcd34d', shape: 'rect', value: 45 },
-            'ingot_aluminum': { name: 'Lingote Aluminio', color: '#f1f5f9', shape: 'rect', value: 30 },
-            'wafer_silicon': { name: 'Oblea Silicio', color: '#2dd4bf', shape: 'rect', value: 40 },
+            'ingot_iron': { name: 'Lingote Hierro', color: '#e5e7eb', shape: 'rect', value: 15, sprite: 'ingot_iron' },
+            'ingot_copper': { name: 'Lingote Cobre', color: '#d97706', shape: 'rect', value: 18, sprite: 'ingot_copper' },
+            'ingot_gold': { name: 'Lingote Oro', color: '#fcd34d', shape: 'rect', value: 45, sprite: 'ingot_gold' },
+            'ingot_aluminum': { name: 'Lingote Aluminio', color: '#f1f5f9', shape: 'rect', value: 30, sprite: 'ingot_aluminum' },
+            'wafer_silicon': { name: 'Oblea Silicio', color: '#2dd4bf', shape: 'rect', value: 40, sprite: 'wafer_silicon' },
 
-            'wire': { name: 'Cable', color: '#f59e0b', shape: 'coil', value: 25 },
-            'plate': { name: 'Placa Metálica', color: '#6b7280', shape: 'plate', value: 40 },
-            'gear': { name: 'Engranaje', color: '#4b5563', shape: 'gear', value: 70 },
-            'pipe': { name: 'Tubería', color: '#94a3b8', shape: 'pipe', value: 50 },
+            'wire': { name: 'Cable', color: '#f59e0b', shape: 'coil', value: 25, sprite: 'wire' },
+            'plate': { name: 'Placa Metálica', color: '#6b7280', shape: 'plate', value: 40, sprite: 'plate' },
+            'gear': { name: 'Engranaje', color: '#4b5563', shape: 'gear', value: 70, sprite: 'gear' },
+            'pipe': { name: 'Tubería', color: '#94a3b8', shape: 'pipe', value: 50, sprite: 'pipe' },
 
-            'circuit': { name: 'Circuito', color: '#10b981', shape: 'chip', value: 150 },
-            'processor': { name: 'Procesador', color: '#3b82f6', shape: 'chip', value: 450 },
-            'motor': { name: 'Motor', color: '#ef4444', shape: 'cylinder', value: 400 },
-            'battery': { name: 'Batería', color: '#a855f7', shape: 'cylinder', value: 350 },
-            'supercomputer': { name: 'Superordenador', color: '#ec4899', shape: 'chip', value: 2500 },
-            'quantum_chip': { name: 'Chip Cuántico', color: '#06b6d4', shape: 'chip', value: 6000 }
+            'circuit': { name: 'Circuito', color: '#10b981', shape: 'chip', value: 250, sprite: 'circuit' },
+            'processor': { name: 'Procesador', color: '#3b82f6', shape: 'chip', value: 1000, sprite: 'processor' },
+            'motor': { name: 'Motor', color: '#ef4444', shape: 'cylinder', value: 500, sprite: 'motor' },
+            'battery': { name: 'Batería', color: '#a855f7', shape: 'cylinder', value: 400, sprite: 'battery' },
+            'supercomputer': { name: 'Superordenador', color: '#ec4899', shape: 'chip', value: 5000, sprite: 'supercomputer' },
+            'quantum_chip': { name: 'Chip Cuántico', color: '#06b6d4', shape: 'chip', value: 10000, sprite: 'quantum_chip' },
+
+            'tank_water': { name: 'Tanque de Agua', color: '#3b82f6', shape: 'cylinder', value: 120, sprite: 'tank_water' },
+            'tank_chemical': { name: 'Químicos Industriales', color: '#10b981', shape: 'cylinder', value: 350, sprite: 'tank_chemical' }
         };
+
+        // --- SPRITES ---
+        const SPRITES = {};
+        const spriteNames = [
+            'assembler_advanced', 'assembler_basic', 'assembler_mega', 'battery',
+            'belt_corner_1', 'belt_corner_2', 'belt_cross', 'belt_horizontal', 'belt_vertical',
+            'chest_gold', 'chest_iron', 'chest_wood', 'circuit', 'furnace_industrial',
+            'furnace_iron', 'furnace_iron_on', 'furnace_mega', 'furnace_stone', 'furnace_stone_on',
+            'gear', 'ingot_aluminum', 'ingot_copper', 'ingot_gold', 'ingot_iron',
+            'miner_basic', 'miner_drill', 'motor', 'ore_aluminum', 'ore_copper', 'ore_diamond',
+            'ore_gold', 'ore_iron', 'ore_silicon', 'pipe', 'plate', 'processor', 'quantum_chip',
+            'splitter_down', 'splitter_up', 'supercomputer', 'tank_chemical', 'tank_water',
+            'wafer_silicon', 'wire'
+        ];
+
+        let spritesLoaded = 0;
+        spriteNames.forEach(name => {
+            const img = new Image();
+            img.src = `textures/factory/${name}.png`;
+            img.onload = () => {
+                spritesLoaded++;
+                SPRITES[name] = img;
+            };
+        });
 
         // --- RECETAS PROGRESIVAS ---
         const RECIPES = {
@@ -358,12 +371,16 @@
             'craft_gear': { name: 'Engranaje', in: { 'ingot_iron': 1, 'plate': 1 }, out: 'gear', time: 2.0, type: 'crafter', cost: 300, cat: 'Mecánica' },
 
             'craft_circuit': { name: 'Circuito Básico', in: { 'wire': 2, 'plate': 1 }, out: 'circuit', time: 2.5, type: 'crafter', cost: 800, cat: 'Electrónica' },
-            'craft_battery': { name: 'Batería', in: { 'wire': 2, 'ingot_aluminum': 2 }, out: 'battery', time: 3.0, type: 'crafter', cost: 1200, cat: 'Electrónica' },
+            'craft_battery': { name: 'Batería', in: { 'wire': 2, 'tank_chemical': 1 }, out: 'battery', time: 3.0, type: 'crafter', cost: 1200, cat: 'Electrónica' },
             'craft_motor': { name: 'Motor Industrial', in: { 'gear': 2, 'wire': 3, 'pipe': 1 }, out: 'motor', time: 3.5, type: 'crafter', cost: 2500, cat: 'Mecánica Avanzada' },
 
             'craft_processor': { name: 'Procesador', in: { 'circuit': 2, 'wafer_silicon': 1, 'ingot_gold': 1 }, out: 'processor', time: 4.0, type: 'crafter', cost: 4000, cat: 'Alta Tecnología' },
             'craft_supercomp': { name: 'Superordenador', in: { 'processor': 2, 'motor': 1, 'battery': 2 }, out: 'supercomputer', time: 6.0, type: 'crafter', cost: 10000, cat: 'Alta Tecnología' },
-            'craft_quantum': { name: 'Chip Cuántico', in: { 'processor': 4, 'ore_diamond': 2, 'wafer_silicon': 2 }, out: 'quantum_chip', time: 10.0, type: 'crafter', cost: 50000, cat: 'Futurista' }
+            'craft_quantum': { name: 'Chip Cuántico', in: { 'processor': 4, 'ore_diamond': 2, 'wafer_silicon': 2 }, out: 'quantum_chip', time: 10.0, type: 'crafter', cost: 50000, cat: 'Futurista' },
+
+            // QUÍMICA
+            'craft_water': { name: 'Embotelladora (Agua)', in: { 'pipe': 1, 'plate': 1 }, out: 'tank_water', time: 2.0, type: 'crafter', cost: 800, cat: 'Química Básica' },
+            'craft_chemical': { name: 'Síntesis Química', in: { 'tank_water': 1, 'ore_aluminum': 2 }, out: 'tank_chemical', time: 4.0, type: 'crafter', cost: 2500, cat: 'Química Avanzada' }
         };
 
         const BUILDINGS = {
@@ -544,13 +561,11 @@
             if (state.isPaused) {
                 btn.classList.replace('bg-blue-600/90', 'bg-orange-600/90');
                 btn.classList.replace('border-blue-400', 'border-orange-400');
-                icon.innerText = '▶️';
-                text.innerText = 'Reanudar';
+                icon.src = 'textures/factory/playbtn.png';
             } else {
                 btn.classList.replace('bg-orange-600/90', 'bg-blue-600/90');
                 btn.classList.replace('border-orange-400', 'border-blue-400');
-                icon.innerText = '⏸️';
-                text.innerText = 'Pausar';
+                icon.src = 'textures/factory/pausebtn.png';
             }
         };
 
@@ -563,6 +578,7 @@
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+            ctx.imageSmoothingEnabled = false; // Pixel Perfect rendering
             if (camera.x === 0 && camera.y === 0) {
                 camera.x = (state.gridSize * TILE_SIZE) / 2;
                 camera.y = (state.gridSize * TILE_SIZE) / 2;
@@ -592,30 +608,61 @@
             content.innerHTML = '';
 
             if (tab === 'buildings') {
-                // Tarjeta Especial: Mejora de Límite de Mineros
                 const upgCost = state.maxGenerators * 500;
-                const upgDiv = document.createElement('div');
-                upgDiv.className = "bg-indigo-900/40 p-4 rounded-xl border border-indigo-500 mb-6 flex justify-between items-center shadow-[0_0_15px_rgba(99,102,241,0.2)]";
-                upgDiv.innerHTML = `
-                    <div>
+                const mapUpgCost = Math.floor(Math.pow(state.gridSize, 2) * 200);
+
+                const upgContainer = document.createElement('div');
+                upgContainer.className = "grid grid-cols-1 md:grid-cols-2 gap-4 mb-6";
+
+                // Tarjeta Mineros
+                const genDiv = document.createElement('div');
+                genDiv.className = "bg-indigo-900/40 p-4 rounded-xl border border-indigo-500 flex flex-col justify-between shadow-[0_0_15px_rgba(99,102,241,0.2)]";
+                genDiv.innerHTML = `
+                    <div class="mb-3">
                         <h3 class="text-xl font-bold text-indigo-300">📈 Expandir Límite de Mineros (+1)</h3>
-                        <p class="text-sm text-indigo-200/70">Aumenta la cantidad máxima de generadores que puedes tener simultáneamente.</p>
-                        <p class="text-xs text-white mt-1">Límite actual: ${state.maxGenerators}</p>
+                        <p class="text-sm text-indigo-200/70 mt-1">Aumenta la cantidad máxima de generadores que puedes tener simultáneamente.</p>
+                        <p class="text-xs text-white mt-2 bg-indigo-950/50 inline-block px-2 py-1 rounded">Límite actual: ${state.maxGenerators}</p>
                     </div>
                     <button onclick="buyGenLimit()" class="bg-indigo-600 hover:bg-indigo-500 px-6 py-2 rounded-lg font-bold shadow text-white transition whitespace-nowrap">$${upgCost.toLocaleString()}</button>
                 `;
-                content.appendChild(upgDiv);
+
+                // Tarjeta Mapa
+                const mapDiv = document.createElement('div');
+                mapDiv.className = "bg-emerald-900/40 p-4 rounded-xl border border-emerald-500 flex flex-col justify-between shadow-[0_0_15px_rgba(16,185,129,0.2)]";
+                mapDiv.innerHTML = `
+                    <div class="mb-3">
+                        <h3 class="text-xl font-bold text-emerald-300">🗺️ Expandir Terreno (+1)</h3>
+                        <p class="text-sm text-emerald-200/70 mt-1">Aumenta el tamaño del mapa de la fábrica añadiendo una fila y una columna nueva.</p>
+                        <p class="text-xs text-white mt-2 bg-emerald-950/50 inline-block px-2 py-1 rounded">Tamaño actual: ${state.gridSize}x${state.gridSize}</p>
+                    </div>
+                    <button onclick="buyMapSize()" class="bg-emerald-600 hover:bg-emerald-500 px-6 py-2 rounded-lg font-bold shadow text-white transition whitespace-nowrap">$${mapUpgCost.toLocaleString()}</button>
+                `;
+
+                upgContainer.appendChild(genDiv);
+                upgContainer.appendChild(mapDiv);
+                content.appendChild(upgContainer);
 
                 // Edificios normales
                 for (let key in BUILDINGS) {
                     if (BUILDINGS[key].shop) {
                         const isOwned = state.unlockedBuildings.includes(key);
+                        let spriteKey = 'belt_horizontal';
+                        if (key === 'splitter2') spriteKey = 'splitter_down';
+                        if (key === 'splitter3') spriteKey = 'splitter_up';
+                        if (key === 'smelter') spriteKey = 'furnace_iron';
+                        if (key === 'crafter') spriteKey = 'assembler_basic';
+
                         const div = document.createElement('div');
                         div.className = "bg-gray-800 p-4 rounded-xl border border-gray-700 mb-3 flex justify-between items-center";
                         div.innerHTML = `
-                            <div>
-                                <h3 class="text-xl font-bold text-white">${BUILDINGS[key].name}</h3>
-                                <p class="text-sm text-gray-400">${BUILDINGS[key].info}</p>
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-gray-900 rounded-lg flex items-center justify-center border border-gray-700">
+                                    <img src="textures/factory/${spriteKey}.png" class="w-10 h-10 object-contain">
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-white">${BUILDINGS[key].name}</h3>
+                                    <p class="text-sm text-gray-400">${BUILDINGS[key].info}</p>
+                                </div>
                             </div>
                             ${isOwned ?
                                 `<span class="text-green-400 font-bold bg-green-900/30 px-3 py-1 rounded">Comprado</span>` :
@@ -645,26 +692,34 @@
 
                     categories[cat].forEach(rec => {
                         const isOwned = state.unlockedRecipes.includes(rec.id);
+                        const outMat = MATS[rec.out];
                         const inStr = Object.entries(rec.in).map(([k, v]) => `${v}x ${MATS[k].name}`).join(' + ');
 
                         // Calcular rentabilidad
-                        const outValue = MATS[rec.out].value;
+                        const outValue = outMat.value;
                         let inValue = 0;
                         for (let k in rec.in) inValue += MATS[k].value * rec.in[k];
                         const profit = outValue - inValue;
+                        const profitStr = profit >= 0 ? `+$${profit}` : `-$${Math.abs(profit)}`;
+                        const profitClass = profit >= 0 ? 'bg-green-900/40 text-green-400 border-green-800' : 'bg-red-900/40 text-red-500 border-red-800';
 
                         const div = document.createElement('div');
                         div.className = "bg-gray-800 p-4 rounded-xl border border-gray-700 flex flex-col justify-between";
                         div.innerHTML = `
                             <div class="mb-3">
                                 <div class="flex justify-between items-start">
-                                    <h4 class="font-bold text-white text-lg">${rec.name}</h4>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center border border-gray-700">
+                                            <img src="textures/factory/${outMat.sprite}.png" class="w-8 h-8 object-contain">
+                                        </div>
+                                        <h4 class="font-bold text-white text-lg">${rec.name}</h4>
+                                    </div>
                                     <span class="text-xs bg-gray-700 px-2 py-1 rounded text-gray-300">${rec.type === 'smelter' ? 'Horno' : 'Ensamblador'}</span>
                                 </div>
                                 <p class="text-xs text-orange-300 mt-2">Requiere: ${inStr}</p>
                                 <div class="mt-2 flex gap-2 text-xs">
                                     <span class="bg-gray-900 px-2 py-1 rounded border border-gray-600">Venta final: $${outValue}</span>
-                                    <span class="bg-green-900/40 text-green-400 font-bold px-2 py-1 rounded border border-green-800">Beneficio Neto: +$${profit}</span>
+                                    <span class="${profitClass} font-bold px-2 py-1 rounded border">Beneficio Neto: ${profitStr}</span>
                                 </div>
                             </div>
                             <div class="text-right mt-2">
@@ -690,6 +745,20 @@
                 updateUI();
                 saveGameToCloud();
                 showToast("¡Límite de mineros ampliado!");
+            } else {
+                showToast("No tienes suficiente dinero.");
+            }
+        };
+
+        window.buyMapSize = function () {
+            const cost = Math.floor(Math.pow(state.gridSize, 2) * 200);
+            if (state.money >= cost) {
+                state.money -= cost;
+                state.gridSize++;
+                shopTab('buildings');
+                updateUI();
+                saveGameToCloud();
+                showToast("¡Terreno expandido!");
             } else {
                 showToast("No tienes suficiente dinero.");
             }
@@ -721,7 +790,6 @@
             document.getElementById('moneyDisplay').innerText = state.money.toLocaleString();
             document.getElementById('gridSizeDisplay').innerText = state.gridSize;
             document.getElementById('gridSizeDisplay2').innerText = state.gridSize;
-            document.getElementById('expandCostDisplay').innerText = (state.gridSize * 150).toLocaleString();
 
             // Stats Mineros
             document.getElementById('genCountDisplay').innerText = countGenerators();
@@ -739,18 +807,6 @@
                 }
             });
         }
-
-        document.getElementById('btnExpand').onclick = () => {
-            const cost = state.gridSize * 150;
-            if (state.money >= cost) {
-                state.money -= cost;
-                state.gridSize++;
-                updateUI();
-                saveGameToCloud();
-            } else {
-                showToast("Falta dinero para expandir.");
-            }
-        };
 
         window.setTool = function (t) {
             if (BUILDINGS[t]?.shop && !state.unlockedBuildings.includes(t)) return;
@@ -814,6 +870,43 @@
             camera.zoom = Math.max(0.2, Math.min(camera.zoom * factor, 3.0));
             camera.x = w.worldX - (e.clientX - canvas.width / 2) / camera.zoom;
             camera.y = w.worldY - (e.clientY - canvas.height / 2) / camera.zoom;
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (!selectedTile) return;
+
+            let dx = 0;
+            let dy = 0;
+
+            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') dy = -1;
+            else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') dy = 1;
+            else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') dx = -1;
+            else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') dx = 1;
+
+            if (dx !== 0 || dy !== 0) {
+                // Prevenir scroll si usamos las flechitas, a menos que estemos en un combobox
+                if (e.key.startsWith('Arrow')) {
+                    if (document.activeElement && document.activeElement.tagName === 'SELECT') {
+                        return; // Dejar que el select nativo cambie de opción
+                    }
+                    e.preventDefault();
+                }
+                
+                const [gx, gy] = selectedTile.split(',').map(Number);
+                const nx = gx + dx;
+                const ny = gy + dy;
+
+                if (nx >= 0 && nx < state.gridSize && ny >= 0 && ny < state.gridSize) {
+                    const nextKey = `${nx},${ny}`;
+                    // Mover la máquina seleccionada físicamente en el mapa si la celda destino está libre
+                    if (!state.map[nextKey] && state.map[selectedTile]) {
+                        state.map[nextKey] = state.map[selectedTile];
+                        delete state.map[selectedTile];
+                        selectTile(nx, ny); // Mantiene el componente seleccionado y actualiza la UI
+                        saveGameToCloud();
+                    }
+                }
+            }
         });
 
         // --- LÓGICA DE CONSTRUCCIÓN ---
@@ -884,11 +977,16 @@
         // --- INSPECTOR ---
         window.selectTile = function (gx, gy) {
             const key = `${gx},${gy}`;
-            const cell = state.map[key];
-            if (!cell) { closeInspector(); return; }
+            selectedTile = key; // Siempre guardamos donde está el cursor visual
 
-            selectedTile = key;
+            const cell = state.map[key];
             const insp = document.getElementById('inspectorPanel');
+
+            if (!cell) { 
+                insp.classList.add('hidden'); // Ocultar UI pero mantener cursor en mapa
+                return; 
+            }
+
             insp.classList.remove('hidden');
             document.getElementById('inspTitle').innerText = BUILDINGS[cell.type].name;
 
@@ -926,8 +1024,12 @@
                     for (let mat in req) {
                         let has = cell.inventory[mat] || 0;
                         let color = has >= req[mat] ? 'text-green-400' : 'text-orange-400';
-                        html += `<div class="flex justify-between text-xs bg-gray-900 p-1.5 rounded mb-1 border border-gray-700">
-                                    <span>${MATS[mat]?.name || mat}</span>
+                        let mInfo = MATS[mat];
+                        html += `<div class="flex justify-between items-center text-xs bg-gray-900 p-1.5 rounded mb-1 border border-gray-700">
+                                    <div class="flex items-center gap-2">
+                                        <img src="textures/factory/${mInfo?.sprite}.png" class="w-5 h-5 object-contain">
+                                        <span>${mInfo?.name || mat}</span>
+                                    </div>
                                     <span class="${color} font-bold">${has} / ${req[mat]}</span>
                                  </div>`;
                     }
@@ -935,6 +1037,23 @@
                         html += `<div class="text-[10px] text-yellow-400 mt-1">Bloqueado: Salida llena.</div>`;
                     }
                 }
+                
+                // SISTEMA DE MEJORAS (Velocidad)
+                const upgLvl = cell.upgradeLevel || 0;
+                const baseCosta = cell.type === 'smelter' ? 500 : 1000;
+                const upgCost = baseCosta * Math.pow(2, upgLvl);
+                const speedMult = Math.pow(1.4, upgLvl).toFixed(1);
+                
+                html += `<div class="mt-4 border-t border-gray-600 pt-3">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs text-purple-300 font-bold">Nivel: ${upgLvl + 1}</span>
+                                <span class="text-[10px] text-gray-400 px-2 py-0.5 bg-gray-900 rounded border border-gray-700">Velocidad: x${speedMult}</span>
+                            </div>
+                            <button onclick="upgradeMachine('${gx}', '${gy}')" class="w-full bg-purple-600 hover:bg-purple-500 py-2 rounded-lg text-xs font-bold shadow text-white transition-colors">
+                                Mejorar ($${upgCost.toLocaleString()})
+                            </button>
+                         </div>`;
+
             } else {
                 html = `<p class="text-sm text-gray-400 italic">No requiere configuración extra.</p>`;
             }
@@ -960,6 +1079,26 @@
         window.closeInspector = function () {
             selectedTile = null;
             document.getElementById('inspectorPanel').classList.add('hidden');
+        };
+
+        window.upgradeMachine = function (gx, gy) {
+            const key = `${gx},${gy}`;
+            const cell = state.map[key];
+            if (cell && (cell.type === 'smelter' || cell.type === 'crafter')) {
+                const upgLvl = cell.upgradeLevel || 0;
+                const baseCost = cell.type === 'smelter' ? 500 : 1000;
+                const upgCost = baseCost * Math.pow(2, upgLvl);
+                if (state.money >= upgCost) {
+                    state.money -= upgCost;
+                    cell.upgradeLevel = upgLvl + 1;
+                    updateUI();
+                    selectTile(gx, gy); // Refrescar el inspector visualmente
+                    saveGameToCloud();
+                    showToast("¡Máquina acelerada!");
+                } else {
+                    showToast("No tienes suficiente dinero.");
+                }
+            }
         };
 
         window.rotateSelected = function () {
@@ -1027,12 +1166,15 @@
 
                         if (canCraft) {
                             cell.timer += dt;
-                            if (cell.timer >= recipe.time) {
+                            const speedMultiplier = Math.pow(1.4, cell.upgradeLevel || 0);
+                            const actualTimeRequired = recipe.time / speedMultiplier;
+                            
+                            if (cell.timer >= actualTimeRequired) {
                                 for (let reqMat in recipe.in) {
                                     cell.inventory[reqMat] -= recipe.in[reqMat];
                                 }
                                 cell.outBuffer = recipe.out;
-                                cell.timer = 0;
+                                cell.timer -= actualTimeRequired; // mantener excedente si va rapido
                                 if (selectedTile === key) selectTile(gx, gy);
                             }
                         } else {
@@ -1222,107 +1364,208 @@
                 }
 
                 if (cell.type === 'conveyor') {
-                    ctx.fillStyle = '#313244';
-                    ctx.fillRect(-TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
-                    ctx.rotate(DIRECTIONS[cell.dir].angle);
+                    // Lógica avanzada de conexión de cintas
+                    const outDir = cell.dir;
+                    const inDirs = [];
+                    const neighbors = [
+                        { dx: 0, dy: -1, dirInto: 2, label: 0 }, // Arriba
+                        { dx: 1, dy: 0, dirInto: 3, label: 1 },  // Derecha
+                        { dx: 0, dy: 1, dirInto: 0, label: 2 },  // Abajo
+                        { dx: -1, dy: 0, dirInto: 1, label: 3 }  // Izquierda
+                    ];
 
-                    ctx.strokeStyle = '#585b70';
-                    ctx.lineWidth = 3;
-                    ctx.lineCap = 'round';
-                    ctx.lineJoin = 'round';
-                    const arrowSize = 5;
-                    for (let i = -1; i <= 3; i++) {
-                        const x = (i * 20) + animOffset - TILE_SIZE / 2;
-                        if (x > -TILE_SIZE / 2 && x < TILE_SIZE / 2) {
-                            let distance = Math.abs(x);
-                            let opacity = (32 - distance) / 12;
-                            ctx.globalAlpha = Math.max(0, Math.min(1, opacity));
+                    neighbors.forEach(n => {
+                        const neighbor = state.map[`${gx + n.dx},${gy + n.dy}`];
+                        if (neighbor) {
+                            let pointsToUs = false;
+                            const nt = neighbor.type;
+                            const nd = neighbor.dir;
+                            
+                            if (nt === 'conveyor' || nt === 'generator' || nt === 'smelter' || nt === 'crafter') {
+                                pointsToUs = (nd === n.dirInto);
+                            } else if (nt === 'splitter2') {
+                                // Splitter2 sale por los lados (L y R relativo a su dir)
+                                pointsToUs = (n.dirInto === (nd + 3) % 4 || n.dirInto === (nd + 1) % 4);
+                            } else if (nt === 'splitter3') {
+                                // Splitter3 sale por L, R y Frente
+                                pointsToUs = (n.dirInto === (nd + 3) % 4 || n.dirInto === nd || n.dirInto === (nd + 1) % 4);
+                            }
+                            
+                            if (pointsToUs) inDirs.push(n.label);
+                        }
+                    });
 
-                            ctx.beginPath();
-                            ctx.moveTo(x - arrowSize, -arrowSize);
-                            ctx.lineTo(x, 0);
-                            ctx.lineTo(x - arrowSize, arrowSize);
-                            ctx.stroke();
+                    const oppositeDir = (outDir + 2) % 4;
+                    const sideL = (outDir + 3) % 4;
+                    const sideR = (outDir + 1) % 4;
+
+                    const maskL = inDirs.includes(sideL);
+                    const maskR = inDirs.includes(sideR);
+                    const maskOpp = inDirs.includes(oppositeDir);
+
+                    let spriteName = '';
+                    let angle = 0;
+                    let scaleX = 1;
+
+                    // Lógica Maestra de Conexiones
+                    if (maskL && maskR && maskOpp) {
+                        spriteName = 'belt_cross';
+                        angle = DIRECTIONS[outDir].angle;
+                    } else if (maskL && maskR) {
+                        spriteName = 'belt_corner_2';
+                        // In: L+R, Out: Forward(outDir)
+                        angle = (outDir === 0) ? 0 :
+                                (outDir === 1) ? Math.PI / 2 :
+                                (outDir === 2) ? Math.PI : -Math.PI / 2;
+                    } else if (maskL && !maskOpp) {
+                        spriteName = 'belt_corner_1';
+                        // Base: In Up(0), Out Right(1)
+                        angle = (outDir === 1) ? 0 :
+                                (outDir === 2) ? Math.PI/2 :
+                                (outDir === 3) ? Math.PI : -Math.PI/2;
+                    } else if (maskR && !maskOpp) {
+                        spriteName = 'belt_corner_1';
+                        // Use scaleX = -1
+                        angle = (outDir === 3) ? 0 :
+                                (outDir === 0) ? Math.PI/2 :
+                                (outDir === 1) ? Math.PI : -Math.PI/2;
+                        scaleX = -1;
+                    } else {
+                        // RECTA: Usamos siempre belt_horizontal ajustado según la dirección
+                        // (belt_vertical era un sprite incorrecto que causaba los triples)
+                        spriteName = 'belt_horizontal';
+                        angle = DIRECTIONS[outDir].angle;
+                    }
+
+                    if (SPRITES[spriteName]) {
+                        ctx.rotate(angle);
+                        ctx.scale(scaleX, 1);
+                        ctx.drawImage(SPRITES[spriteName], -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+                    } else {
+                        // Fallback con flechas animadas
+                        ctx.fillStyle = '#313244';
+                        ctx.fillRect(-TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+                        ctx.rotate(DIRECTIONS[outDir].angle);
+                        ctx.strokeStyle = '#585b70'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+                        const arrowSize = 5;
+                        for (let i = -1; i <= 3; i++) {
+                            const x = (i * 20) + animOffset - TILE_SIZE / 2;
+                            if (x > -TILE_SIZE / 2 && x < TILE_SIZE / 2) {
+                                ctx.beginPath(); ctx.moveTo(x - arrowSize, -arrowSize); ctx.lineTo(x, 0); ctx.lineTo(x - arrowSize, arrowSize); ctx.stroke();
+                            }
                         }
                     }
-                    ctx.globalAlpha = 1.0;
-
                 } else if (cell.type === 'splitter2' || cell.type === 'splitter3') {
-                    // Diseño Visual Divisores
-                    ctx.fillStyle = cell.type === 'splitter2' ? '#4f46e5' : '#7e22ce'; // Indigo vs Purple
-                    ctx.fillRect(-TILE_SIZE / 2 + 2, -TILE_SIZE / 2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
-
-                    ctx.rotate(DIRECTIONS[cell.dir].angle);
-
-                    // Flechas interiores
-                    ctx.strokeStyle = '#c4b5fd';
-                    ctx.lineWidth = 3;
-                    ctx.lineCap = 'round';
-                    ctx.lineJoin = 'round';
-                    ctx.beginPath();
-
-                    // Entrada centro
-                    ctx.moveTo(-15, 0); ctx.lineTo(0, 0);
-
-                    if (cell.type === 'splitter2') {
-                        // Derivan a Izq y Der
-                        ctx.moveTo(0, 0); ctx.lineTo(0, -15);
-                        ctx.moveTo(0, 0); ctx.lineTo(0, 15);
-                        // Flechas
-                        ctx.moveTo(-5, -10); ctx.lineTo(0, -15); ctx.lineTo(5, -10); // Arriba(Izq)
-                        ctx.moveTo(-5, 10); ctx.lineTo(0, 15); ctx.lineTo(5, 10);    // Abajo(Der)
+                    let spriteName = cell.type === 'splitter2' ? 'splitter_down' : 'splitter_up';
+                    if (SPRITES[spriteName]) {
+                        ctx.rotate(DIRECTIONS[cell.dir].angle);
+                        ctx.drawImage(SPRITES[spriteName], -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
                     } else {
-                        // Derivan a Izq, Frente y Der
-                        ctx.moveTo(0, 0); ctx.lineTo(0, -15);
-                        ctx.moveTo(0, 0); ctx.lineTo(15, 0);
-                        ctx.moveTo(0, 0); ctx.lineTo(0, 15);
-                        // Flechas
-                        ctx.moveTo(-5, -10); ctx.lineTo(0, -15); ctx.lineTo(5, -10); // Arriba(Izq)
-                        ctx.moveTo(-5, 10); ctx.lineTo(0, 15); ctx.lineTo(5, 10);    // Abajo(Der)
-                        ctx.moveTo(10, -5); ctx.lineTo(15, 0); ctx.lineTo(10, 5);    // Frente
+                        // Diseño Visual Divisores (Fallback)
+                        ctx.fillStyle = cell.type === 'splitter2' ? '#4f46e5' : '#7e22ce';
+                        ctx.fillRect(-TILE_SIZE / 2 + 2, -TILE_SIZE / 2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                        ctx.rotate(DIRECTIONS[cell.dir].angle);
+                        ctx.strokeStyle = '#c4b5fd'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                        ctx.beginPath();
+                        ctx.moveTo(-15, 0); ctx.lineTo(0, 0);
+                        if (cell.type === 'splitter2') {
+                            ctx.moveTo(0, 0); ctx.lineTo(0, -15); ctx.moveTo(0, 0); ctx.lineTo(0, 15);
+                            ctx.moveTo(-5, -10); ctx.lineTo(0, -15); ctx.lineTo(5, -10);
+                            ctx.moveTo(-5, 10); ctx.lineTo(0, 15); ctx.lineTo(5, 10);
+                        } else {
+                            ctx.moveTo(0, 0); ctx.lineTo(0, -15); ctx.moveTo(0, 0); ctx.lineTo(15, 0); ctx.moveTo(0, 0); ctx.lineTo(0, 15);
+                            ctx.moveTo(-5, -10); ctx.lineTo(0, -15); ctx.lineTo(5, -10);
+                            ctx.moveTo(-5, 10); ctx.lineTo(0, 15); ctx.lineTo(5, 10);
+                            ctx.moveTo(10, -5); ctx.lineTo(15, 0); ctx.lineTo(10, 5);
+                        }
+                        ctx.stroke();
                     }
-                    ctx.stroke();
 
                 } else if (cell.type === 'generator') {
-                    ctx.fillStyle = '#a6e3a1';
-                    ctx.fillRect(-TILE_SIZE / 2 + 2, -TILE_SIZE / 2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
-                    ctx.fillStyle = '#11111b';
-                    ctx.font = 'bold 24px font-mono'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                    ctx.fillText('M', 0, 0);
-                    ctx.rotate(DIRECTIONS[cell.dir].angle);
-                    ctx.fillStyle = '#2e3440';
-                    ctx.beginPath(); ctx.moveTo(18, -6); ctx.lineTo(28, 0); ctx.lineTo(18, 6); ctx.fill();
+                    let spriteName = 'miner_basic';
+                    if (cell.config === 'ore_diamond' || cell.config === 'ore_gold') spriteName = 'miner_drill';
+
+                    if (SPRITES[spriteName]) {
+                        ctx.rotate(DIRECTIONS[cell.dir].angle);
+                        ctx.drawImage(SPRITES[spriteName], -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+                    } else {
+                        ctx.fillStyle = '#a6e3a1';
+                        ctx.fillRect(-TILE_SIZE / 2 + 2, -TILE_SIZE / 2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                        ctx.fillStyle = '#11111b';
+                        ctx.font = 'bold 24px font-mono'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        ctx.fillText('M', 0, 0);
+                        ctx.rotate(DIRECTIONS[cell.dir].angle);
+                        ctx.fillStyle = '#2e3440';
+                        ctx.beginPath(); ctx.moveTo(18, -6); ctx.lineTo(28, 0); ctx.lineTo(18, 6); ctx.fill();
+                    }
                 } else if (cell.type === 'seller') {
-                    ctx.fillStyle = '#f38ba8';
-                    ctx.fillRect(-TILE_SIZE / 2 + 2, -TILE_SIZE / 2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
-                    ctx.fillStyle = '#11111b'; ctx.font = 'bold 28px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                    ctx.fillText('$', 0, 0);
+                    let spriteName = 'chest_iron';
+                    if (state.money > 50000) spriteName = 'chest_gold';
+                    else if (state.money < 1000) spriteName = 'chest_wood';
+
+                    if (SPRITES[spriteName]) {
+                        ctx.drawImage(SPRITES[spriteName], -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+                    } else {
+                        ctx.fillStyle = '#f38ba8';
+                        ctx.fillRect(-TILE_SIZE / 2 + 2, -TILE_SIZE / 2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                        ctx.fillStyle = '#11111b'; ctx.font = 'bold 28px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        ctx.fillText('$', 0, 0);
+                    }
                 } else if (cell.type === 'smelter') {
-                    ctx.fillStyle = '#fab387';
-                    ctx.fillRect(-TILE_SIZE / 2 + 2, -TILE_SIZE / 2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
-                    ctx.fillStyle = '#11111b'; ctx.font = 'bold 20px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                    ctx.fillText('H', 0, -5);
+                    let spriteName = (cell.timer > 0) ? 'furnace_iron_on' : 'furnace_iron';
+                    if (cell.config === 'smelt_silicon' || cell.config === 'smelt_gold') {
+                        spriteName = 'furnace_mega';
+                    } else if (cell.config === 'smelt_aluminum') {
+                        spriteName = 'furnace_industrial';
+                    }
+
+                    if (SPRITES[spriteName]) {
+                        ctx.rotate(DIRECTIONS[cell.dir].angle);
+                        ctx.drawImage(SPRITES[spriteName], -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+                    } else {
+                        ctx.fillStyle = '#fab387';
+                        ctx.fillRect(-TILE_SIZE / 2 + 2, -TILE_SIZE / 2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                        ctx.fillStyle = '#11111b'; ctx.font = 'bold 20px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        ctx.fillText('H', 0, -5);
+                        ctx.rotate(DIRECTIONS[cell.dir].angle);
+                        ctx.fillStyle = '#2e3440';
+                        ctx.beginPath(); ctx.moveTo(18, -6); ctx.lineTo(28, 0); ctx.lineTo(18, 6); ctx.fill();
+                    }
+                    // Progress bar overlay
                     if (cell.timer > 0 && RECIPES[cell.config]) {
-                        let p = cell.timer / RECIPES[cell.config].time;
+                        const speedMult = Math.pow(1.4, cell.upgradeLevel || 0);
+                        const actualTime = RECIPES[cell.config].time / speedMult;
+                        let p = Math.min(cell.timer / actualTime, 1.0);
                         ctx.fillStyle = '#11111b'; ctx.fillRect(-15, 12, 30, 4);
                         ctx.fillStyle = '#a6e3a1'; ctx.fillRect(-15, 12, 30 * p, 4);
                     }
-                    ctx.rotate(DIRECTIONS[cell.dir].angle);
-                    ctx.fillStyle = '#2e3440';
-                    ctx.beginPath(); ctx.moveTo(18, -6); ctx.lineTo(28, 0); ctx.lineTo(18, 6); ctx.fill();
                 } else if (cell.type === 'crafter') {
-                    ctx.fillStyle = '#d946ef';
-                    ctx.fillRect(-TILE_SIZE / 2 + 2, -TILE_SIZE / 2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
-                    ctx.fillStyle = '#11111b'; ctx.font = 'bold 16px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                    ctx.fillText('Ens', 0, -5);
+                    let spriteName = 'assembler_basic';
+                    if (cell.config === 'craft_quantum' || cell.config === 'craft_supercomp') {
+                        spriteName = 'assembler_mega';
+                    } else if (cell.config === 'craft_processor' || cell.config === 'craft_motor') {
+                        spriteName = 'assembler_advanced';
+                    }
+
+                    if (SPRITES[spriteName]) {
+                        ctx.rotate(DIRECTIONS[cell.dir].angle);
+                        ctx.drawImage(SPRITES[spriteName], -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+                    } else {
+                        ctx.fillStyle = '#d946ef';
+                        ctx.fillRect(-TILE_SIZE / 2 + 2, -TILE_SIZE / 2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                        ctx.fillStyle = '#11111b'; ctx.font = 'bold 16px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        ctx.fillText('Ens', 0, -5);
+                        ctx.rotate(DIRECTIONS[cell.dir].angle);
+                        ctx.fillStyle = '#2e3440';
+                        ctx.beginPath(); ctx.moveTo(18, -6); ctx.lineTo(28, 0); ctx.lineTo(18, 6); ctx.fill();
+                    }
                     if (cell.timer > 0 && RECIPES[cell.config]) {
-                        let p = cell.timer / RECIPES[cell.config].time;
+                        const speedMult = Math.pow(1.4, cell.upgradeLevel || 0);
+                        const actualTime = RECIPES[cell.config].time / speedMult;
+                        let p = Math.min(cell.timer / actualTime, 1.0);
                         ctx.fillStyle = '#11111b'; ctx.fillRect(-15, 14, 30, 4);
                         ctx.fillStyle = '#a6e3a1'; ctx.fillRect(-15, 14, 30 * p, 4);
                     }
-                    ctx.rotate(DIRECTIONS[cell.dir].angle);
-                    ctx.fillStyle = '#2e3440';
-                    ctx.beginPath(); ctx.moveTo(18, -6); ctx.lineTo(28, 0); ctx.lineTo(18, 6); ctx.fill();
                 }
                 ctx.restore();
             }
@@ -1337,10 +1580,18 @@
 
                 const mInfo = MATS[item.type];
                 if (mInfo) {
-                    ctx.fillStyle = mInfo.color;
-                    ctx.strokeStyle = '#11111b';
-                    ctx.lineWidth = 1;
-                    drawShape(ctx, mInfo.shape, TILE_SIZE);
+                    ctx.shadowColor = 'rgba(255, 255, 255, 0.6)';
+                    ctx.shadowBlur = 8;
+
+                    if (SPRITES[mInfo.sprite]) {
+                        ctx.drawImage(SPRITES[mInfo.sprite], -TILE_SIZE / 4, -TILE_SIZE / 4, TILE_SIZE / 2, TILE_SIZE / 2);
+                    } else {
+                        ctx.fillStyle = mInfo.color;
+                        ctx.strokeStyle = '#11111b';
+                        ctx.lineWidth = 1;
+                        drawShape(ctx, mInfo.shape, TILE_SIZE);
+                    }
+                    ctx.shadowBlur = 0; // Resetear brillo para no afectar otros renders si acaso
                 }
                 ctx.restore();
             });
@@ -1349,30 +1600,61 @@
             if (mouseHoverX >= 0 && mouseHoverX < state.gridSize && mouseHoverY >= 0 && mouseHoverY < state.gridSize && state.tool !== 'cursor') {
                 ctx.save();
                 ctx.translate(mouseHoverX * TILE_SIZE + TILE_SIZE / 2, mouseHoverY * TILE_SIZE + TILE_SIZE / 2);
-                ctx.globalAlpha = 0.4;
+                ctx.globalAlpha = 0.5;
 
-                let color = '#fff';
-                if (state.tool === 'conveyor') color = '#89b4fa';
-                if (state.tool === 'splitter2') color = '#4f46e5';
-                if (state.tool === 'splitter3') color = '#7e22ce';
-                if (state.tool === 'generator') color = '#a6e3a1';
-                if (state.tool === 'seller') color = '#f38ba8';
-                if (state.tool === 'smelter') color = '#fab387';
-                if (state.tool === 'crafter') color = '#d946ef';
+                let spriteKey = null;
+                if (state.tool === 'conveyor') spriteKey = (state.buildDir % 2 === 0) ? 'belt_vertical' : 'belt_horizontal';
+                if (state.tool === 'splitter2') spriteKey = 'splitter_down';
+                if (state.tool === 'splitter3') spriteKey = 'splitter_up';
+                if (state.tool === 'generator') spriteKey = 'miner_basic';
+                if (state.tool === 'seller') spriteKey = 'chest_iron';
+                if (state.tool === 'smelter') spriteKey = 'furnace_iron';
+                if (state.tool === 'crafter') spriteKey = 'assembler_basic';
 
-                ctx.fillStyle = color;
-                ctx.fillRect(-TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
-
-                ctx.rotate(DIRECTIONS[state.buildDir].angle);
-                if (state.tool === 'conveyor') {
-                    ctx.strokeStyle = '#11111b'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-                    ctx.beginPath(); ctx.moveTo(-5, -5); ctx.lineTo(0, 0); ctx.lineTo(-5, 5); ctx.moveTo(5, -5); ctx.lineTo(10, 0); ctx.lineTo(5, 5); ctx.stroke();
-                } else if (state.tool.startsWith('splitter')) {
-                    ctx.fillStyle = '#11111b'; ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fill();
+                if (spriteKey && SPRITES[spriteKey]) {
+                    if (state.tool !== 'seller') ctx.rotate(DIRECTIONS[state.buildDir].angle);
+                    ctx.drawImage(SPRITES[spriteKey], -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
                 } else {
-                    ctx.fillStyle = '#11111b'; ctx.beginPath(); ctx.moveTo(5, -10); ctx.lineTo(25, 0); ctx.lineTo(5, 10); ctx.fill();
+                    let color = '#fff';
+                    if (state.tool === 'conveyor') color = '#89b4fa';
+                    if (state.tool === 'splitter2') color = '#4f46e5';
+                    if (state.tool === 'splitter3') color = '#7e22ce';
+                    if (state.tool === 'generator') color = '#a6e3a1';
+                    if (state.tool === 'seller') color = '#f38ba8';
+                    if (state.tool === 'smelter') color = '#fab387';
+                    if (state.tool === 'crafter') color = '#d946ef';
+
+                    ctx.fillStyle = color;
+                    ctx.fillRect(-TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+
+                    ctx.rotate(DIRECTIONS[state.buildDir].angle);
+                    if (state.tool === 'conveyor') {
+                        ctx.strokeStyle = '#11111b'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                        ctx.beginPath(); ctx.moveTo(-5, -5); ctx.lineTo(0, 0); ctx.lineTo(-5, 5); ctx.moveTo(5, -5); ctx.lineTo(10, 0); ctx.lineTo(5, 5); ctx.stroke();
+                    } else if (state.tool.startsWith('splitter')) {
+                        ctx.fillStyle = '#11111b'; ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fill();
+                    } else {
+                        ctx.fillStyle = '#11111b'; ctx.beginPath(); ctx.moveTo(5, -10); ctx.lineTo(25, 0); ctx.lineTo(5, 10); ctx.fill();
+                    }
                 }
 
+                ctx.restore();
+            }
+
+            // Resaltar tile seleccionado
+            if (selectedTile) {
+                const [gx, gy] = selectedTile.split(',').map(Number);
+                ctx.save();
+                ctx.translate(gx * TILE_SIZE + TILE_SIZE / 2, gy * TILE_SIZE + TILE_SIZE / 2);
+                ctx.strokeStyle = '#cba6f7'; // Morado
+                ctx.lineWidth = 3;
+                
+                // Efecto de pulso
+                const pulse = Math.sin(Date.now() / 150) * 0.5 + 0.5;
+                ctx.fillStyle = `rgba(203, 166, 247, ${0.1 + pulse * 0.2})`;
+                
+                ctx.fillRect(-TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+                ctx.strokeRect(-TILE_SIZE / 2 + 1.5, -TILE_SIZE / 2 + 1.5, TILE_SIZE - 3, TILE_SIZE - 3);
                 ctx.restore();
             }
 
