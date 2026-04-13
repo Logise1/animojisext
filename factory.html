@@ -1458,7 +1458,10 @@
                 } else if (cell.type === 'splitter2' || cell.type === 'splitter3') {
                     let spriteName = cell.type === 'splitter2' ? 'splitter_down' : 'splitter_up';
                     if (SPRITES[spriteName]) {
-                        ctx.rotate(DIRECTIONS[cell.dir].angle);
+                        let drawAngle = DIRECTIONS[cell.dir].angle;
+                        if (cell.type === 'splitter2') drawAngle -= Math.PI / 2;
+                        
+                        ctx.rotate(drawAngle);
                         ctx.drawImage(SPRITES[spriteName], -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
                     } else {
                         // Diseño Visual Divisores (Fallback)
@@ -1612,7 +1615,11 @@
                 if (state.tool === 'crafter') spriteKey = 'assembler_basic';
 
                 if (spriteKey && SPRITES[spriteKey]) {
-                    if (state.tool !== 'seller') ctx.rotate(DIRECTIONS[state.buildDir].angle);
+                    if (state.tool !== 'seller') {
+                        let drawAngle = DIRECTIONS[state.buildDir].angle;
+                        if (state.tool === 'splitter2') drawAngle -= Math.PI / 2;
+                        ctx.rotate(drawAngle);
+                    }
                     ctx.drawImage(SPRITES[spriteKey], -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
                 } else {
                     let color = '#fff';
