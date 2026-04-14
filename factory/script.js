@@ -33,7 +33,7 @@ let currentUser = null;
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const TILE_SIZE = 64;
-const ITEM_SPEED = 2.5;
+const BASE_ITEM_SPEED = 2.5;
 
 // --- MATERIALES (Visuales y Valor Base) ---
 const MATS = {
@@ -65,12 +65,11 @@ const MATS = {
     'tank_water': { name: 'Tanque de Agua', color: '#3b82f6', shape: 'cylinder', value: 120, sprite: 'tank_water' },
     'tank_chemical': { name: 'Químicos Industriales', color: '#10b981', shape: 'cylinder', value: 350, sprite: 'tank_chemical' },
 
-    'core_ai': { name: 'Núcleo de IA', color: '#14b8a6', shape: 'chip', value: 25000, sprite: 'core_ai' },
-    'matter_compressor': { name: 'Compresor de Materia', color: '#8b5cf6', shape: 'gear', value: 40000, sprite: 'matter_compressor' },
-    'plasma_reactor': { name: 'Reactor de Plasma', color: '#ef4444', shape: 'cylinder', value: 120000, sprite: 'plasma_reactor' },
-    'dyson_part': { name: 'Panel de Dyson', color: '#f59e0b', shape: 'plate', value: 300000, sprite: 'dyson_part' },
-    'singularity_drive': { name: 'Motor de Singularidad', color: '#333333', shape: 'arc', value: 1000000, sprite: 'singularity_drive' },
-    'universe_core': { name: 'Núcleo del Universo', color: '#ffffff', shape: 'arc', value: 5000000, sprite: 'universe_core' }
+    'cristal_cuantico': { name: 'Cristal Cuántico', color: '#a78bfa', shape: 'arc', value: 50000, sprite: 'quantic/cristal_cuantico' },
+    'lingote_cuantico': { name: 'Lingote Cuántico', color: '#c084fc', shape: 'rect', value: 200000, sprite: 'quantic/lingote_cuantico' },
+    'chip_cuantico_reforzado': { name: 'Chip Cuántico Reforzado', color: '#818cf8', shape: 'chip', value: 1000000, sprite: 'quantic/chip_cuantico_reforzado' },
+    'disco_cuantico': { name: 'Disco Cuántico', color: '#6366f1', shape: 'plate', value: 5000000, sprite: 'quantic/disco_cuantico' },
+    'agujero_cuantico': { name: 'Agujero Cuántico', color: '#312e81', shape: 'arc', value: 50000000, sprite: 'quantic/agujero_cuantico' }
 };
 
 // --- SPRITES ---
@@ -84,7 +83,9 @@ const spriteNames = [
     'miner_basic', 'miner_drill', 'motor', 'ore_aluminum', 'ore_copper', 'ore_diamond',
     'ore_gold', 'ore_iron', 'ore_silicon', 'pipe', 'plate', 'processor', 'quantum_chip',
     'splitter_down', 'splitter_up', 'supercomputer', 'tank_chemical', 'tank_water',
-    'wafer_silicon', 'wire'
+    'wafer_silicon', 'wire', 
+    'quantic/cristal_cuantico', 'quantic/lingote_cuantico', 'quantic/chip_cuantico_reforzado',
+    'quantic/disco_cuantico', 'quantic/generador_cuantico', 'quantic/agujero_cuantico'
 ];
 
 let spritesLoaded = 0;
@@ -116,20 +117,20 @@ const RECIPES = {
     'craft_battery': { name: 'Batería', in: { 'wire': 2, 'tank_chemical': 1 }, out: 'battery', time: 3.0, type: 'crafter', cost: 1200, cat: 'Electrónica' },
     'craft_motor': { name: 'Motor Industrial', in: { 'gear': 2, 'wire': 3, 'pipe': 1 }, out: 'motor', time: 3.5, type: 'crafter', cost: 2500, cat: 'Mecánica Avanzada' },
 
-    'craft_processor': { name: 'Procesador', in: { 'circuit': 2, 'wafer_silicon': 1, 'ingot_gold': 1 }, out: 'processor', time: 4.0, type: 'crafter', cost: 4000, cat: 'Alta Tecnología' },
-    'craft_supercomp': { name: 'Superordenador', in: { 'processor': 2, 'motor': 1, 'battery': 2 }, out: 'supercomputer', time: 6.0, type: 'crafter', cost: 10000, cat: 'Alta Tecnología' },
-    'craft_quantum': { name: 'Chip Cuántico', in: { 'processor': 4, 'ore_diamond': 2, 'wafer_silicon': 2 }, out: 'quantum_chip', time: 10.0, type: 'crafter', cost: 50000, cat: 'Futurista' },
+    'craft_processor': { name: 'Procesador', in: { 'circuit': 2, 'wafer_silicon': 1, 'ingot_gold': 1 }, out: 'processor', time: 8.0, type: 'crafter', cost: 10000, cat: 'Alta Tecnología' },
+    'craft_supercomp': { name: 'Superordenador', in: { 'processor': 2, 'motor': 1, 'battery': 2 }, out: 'supercomputer', time: 15.0, type: 'crafter', cost: 50000, cat: 'Alta Tecnología' },
+    'craft_quantum': { name: 'Chip Cuántico', in: { 'processor': 4, 'ore_diamond': 2, 'wafer_silicon': 2 }, out: 'quantum_chip', time: 45.0, type: 'crafter', cost: 500000, cat: 'Futurista' },
 
     // QUÍMICA
     'craft_water': { name: 'Embotelladora (Agua)', in: { 'pipe': 1, 'plate': 1 }, out: 'tank_water', time: 2.0, type: 'crafter', cost: 800, cat: 'Química Básica' },
     'craft_chemical': { name: 'Síntesis Química', in: { 'tank_water': 1, 'ore_aluminum': 2 }, out: 'tank_chemical', time: 4.0, type: 'crafter', cost: 2500, cat: 'Química Avanzada' },
     
-    'craft_ai_core': { name: 'Núcleo de IA', in: { 'quantum_chip': 2, 'supercomputer': 1, 'battery': 5 }, out: 'core_ai', time: 15.0, type: 'crafter', cost: 150000, cat: 'Hipertecnología' },
-    'craft_matter_compressor': { name: 'Compresor de Materia', in: { 'quantum_chip': 1, 'tank_chemical': 5, 'motor': 4 }, out: 'matter_compressor', time: 20.0, type: 'crafter', cost: 300000, cat: 'Hipertecnología' },
-    'craft_plasma_reactor': { name: 'Reactor de Plasma', in: { 'core_ai': 2, 'matter_compressor': 1, 'wafer_silicon': 10 }, out: 'plasma_reactor', time: 30.0, type: 'crafter', cost: 800000, cat: 'Tecnología Cuántica' },
-    'craft_dyson_part': { name: 'Panel de Dyson', in: { 'plasma_reactor': 1, 'plate': 20, 'wire': 20 }, out: 'dyson_part', time: 45.0, type: 'crafter', cost: 2000000, cat: 'Megaestructuras' },
-    'craft_singularity': { name: 'Motor de Singularidad', in: { 'plasma_reactor': 3, 'core_ai': 5, 'supercomputer': 10 }, out: 'singularity_drive', time: 60.0, type: 'crafter', cost: 7500000, cat: 'Multiverso' },
-    'craft_universe': { name: 'Núcleo Cósmico', in: { 'singularity_drive': 2, 'dyson_part': 5, 'quantum_chip': 20 }, out: 'universe_core', time: 120.0, type: 'crafter', cost: 25000000, cat: 'Kardashev' }
+    'smelt_cristal_cuantico': { name: 'Cristal Cuántico', in: { 'ore_diamond': 3, 'wafer_silicon': 2, 'quantum_chip': 1 }, out: 'cristal_cuantico', time: 30.0, type: 'smelter', cost: 3000000, cat: 'Fundición Cuántica' },
+    'smelt_lingote_cuantico': { name: 'Lingote Cuántico', in: { 'cristal_cuantico': 2, 'quantum_chip': 2 }, out: 'lingote_cuantico', time: 60.0, type: 'smelter', cost: 10000000, cat: 'Fundición Cuántica' },
+
+    'craft_chip_reforzado': { name: 'Chip Cuántico Reforzado', in: { 'quantum_chip': 3, 'lingote_cuantico': 2, 'processor': 1 }, out: 'chip_cuantico_reforzado', time: 120.0, type: 'crafter', cost: 35000000, cat: 'Tecnología Cuántica' },
+    'craft_disco_cuantico': { name: 'Disco Cuántico', in: { 'chip_cuantico_reforzado': 2, 'cristal_cuantico': 3, 'supercomputer': 1 }, out: 'disco_cuantico', time: 300.0, type: 'crafter', cost: 100000000, cat: 'Tecnología Cuántica' },
+    'craft_agujero_cuantico': { name: 'Agujero Cuántico', in: { 'disco_cuantico': 3, 'chip_cuantico_reforzado': 5, 'lingote_cuantico': 10 }, out: 'agujero_cuantico', time: 900.0, type: 'crafter', cost: 300000000, cat: 'Singularidad' }
 };
 
 const BUILDINGS = {
@@ -139,7 +140,9 @@ const BUILDINGS = {
     splitter2: { cost: 150, name: 'Divisor Doble (1 a 2)', shop: true, info: 'Alterna items hacia su izquierda y derecha.' },
     splitter3: { cost: 300, name: 'Divisor Triple (1 a 3)', shop: true, info: 'Alterna items hacia izq, frente y derecha.' },
     smelter: { cost: 200, name: 'Horno de Fundición', shop: true, info: 'Funde minerales en lingotes.' },
-    crafter: { cost: 500, name: 'Ensamblador', shop: true, info: 'Combina items para crear objetos avanzados.' }
+    crafter: { cost: 500, name: 'Ensamblador', shop: true, info: 'Combina items para crear objetos avanzados.' },
+    merger: { cost: 200, name: 'Fusionador (2 a 1)', shop: true, info: 'Fusiona 2 líneas en 1. Acepta items por los lados y los empuja al frente.' },
+    quantum_generator: { cost: 1000000, name: 'Generador Cuántico', shop: true, info: 'Genera Chips Cuánticos cada 30s. Lento pero valioso.' }
 };
 
 const DIRECTIONS = [
@@ -148,6 +151,49 @@ const DIRECTIONS = [
     { dx: 0, dy: 1, angle: Math.PI / 2 },  // 2: Abajo
     { dx: -1, dy: 0, angle: Math.PI }       // 3: Izquierda
 ];
+
+// --- GENERACIÓN PROCEDURAL DE MENAS ---
+function hashSeed(str) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) {
+        h = ((h << 5) - h) + str.charCodeAt(i);
+        h |= 0;
+    }
+    return h;
+}
+
+function mulberry32(a) {
+    return function() {
+        a |= 0; a = a + 0x6D2B79F5 | 0;
+        let t = Math.imul(a ^ a >>> 15, 1 | a);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+}
+
+const WORLD_SEED = hashSeed("Antigravity");
+
+// Ore deposit colors for ground tiles
+const ORE_DEPOSIT_INFO = {
+    'ore_gold':     { name: 'Veta de Oro',      tint: 'rgba(251, 191, 36, 0.25)', border: 'rgba(251, 191, 36, 0.5)', sprite: 'ore_gold' },
+    'ore_aluminum': { name: 'Veta de Aluminio', tint: 'rgba(203, 213, 225, 0.25)', border: 'rgba(203, 213, 225, 0.5)', sprite: 'ore_aluminum' },
+    'ore_silicon':  { name: 'Veta de Silicio',  tint: 'rgba(20, 184, 166, 0.25)',  border: 'rgba(20, 184, 166, 0.5)',  sprite: 'ore_silicon' },
+    'ore_diamond':  { name: 'Veta de Diamante', tint: 'rgba(103, 232, 249, 0.25)', border: 'rgba(103, 232, 249, 0.5)', sprite: 'ore_diamond' }
+};
+
+function getOreDeposit(x, y) {
+    // Combine world seed with tile position for unique per-tile RNG
+    const tileSeed = WORLD_SEED ^ (x * 374761393 + y * 668265263 + x * y * 1013904223);
+    const rng = mulberry32(tileSeed);
+    const val = rng();
+
+    // Probabilidades ajustadas (Más difícil): Diamante 0.5%, Oro 1.5%, Silicio 3%, Aluminio 5%
+    if (val < 0.005) return 'ore_diamond';
+    if (val < 0.02) return 'ore_gold';
+    if (val < 0.05) return 'ore_silicon';
+    if (val < 0.10) return 'ore_aluminum';
+    return null;
+}
 
 // --- ESTADO DEL JUEGO ---
 let state = {
@@ -160,7 +206,8 @@ let state = {
     unlockedBuildings: ['conveyor', 'generator', 'seller'],
     tool: 'cursor',
     buildDir: 1,
-    isPaused: false
+    isPaused: false,
+    showBottlenecks: false
 };
 
 let selectedTile = null;
@@ -169,6 +216,20 @@ let isDraggingBuild = false;
 let lastBuiltGrid = null;
 let camera = { x: 0, y: 0, zoom: 1 };
 let lastSaveTime = 0;
+let earningsLog = [];
+
+function logEarning(amount) {
+    earningsLog.push({ time: Date.now(), amount });
+    const cutoff = Date.now() - 60000;
+    earningsLog = earningsLog.filter(e => e.time > cutoff);
+}
+
+function getEarningsRate() {
+    const now = Date.now();
+    const last10s = earningsLog.filter(e => e.time > now - 10000).reduce((s, e) => s + e.amount, 0);
+    const last60s = earningsLog.filter(e => e.time > now - 60000).reduce((s, e) => s + e.amount, 0);
+    return { per10s: last10s, perMin: last60s };
+}
 
 // Funciones Auxiliares
 function countGenerators() {
@@ -213,22 +274,10 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-let hasConfirmedEmptySave = false;
-let stopSaving = false;
+
 
 async function saveGameToCloud() {
-    if (!currentUser || stopSaving) return;
-
-    if (Object.keys(state.map).length === 0 && !hasConfirmedEmptySave) {
-        const isFirstTime = confirm("Tu fábrica está vacía. ¿Es tu primera vez jugando?\n\n⚠️ Si ya tenías progreso y ves esto por error, presiona CANCELAR e INMEDIATAMENTE recarga la página o perderás tu progreso anterior.");
-        if (!isFirstTime) {
-            stopSaving = true;
-            document.getElementById('saveStatus').innerText = "Guardado pausado (Protección)";
-            return;
-        } else {
-            hasConfirmedEmptySave = true;
-        }
-    }
+    if (!currentUser) return;
 
     try {
         const saveRef = doc(db, 'artifacts', currentAppId, 'public', 'data', 'saves', playerName);
@@ -333,6 +382,20 @@ window.togglePause = function () {
     }
 };
 
+window.toggleBottlenecks = function () {
+    state.showBottlenecks = !state.showBottlenecks;
+    const btn = document.getElementById('btnBottlenecks');
+    if (state.showBottlenecks) {
+        btn.classList.replace('bg-gray-600/80', 'bg-red-600/90');
+        btn.classList.replace('border-gray-400', 'border-red-400');
+        showToast("Visualización de cuellos de botella activada");
+    } else {
+        btn.classList.replace('bg-red-600/90', 'bg-gray-600/80');
+        btn.classList.replace('border-red-400', 'border-gray-400');
+        showToast("Visualización de cuellos de botella desactivada");
+    }
+};
+
 window.clearAllItems = function () {
     state.items = [];
     showToast("¡Todos los items eliminados!");
@@ -372,7 +435,7 @@ window.shopTab = function (tab) {
     content.innerHTML = '';
 
     if (tab === 'buildings') {
-        const upgCost = state.maxGenerators * 500;
+        const upgCost = Math.floor(500 * Math.pow(1.6, state.maxGenerators - 3));
         const mapUpgCost = Math.floor(Math.pow(state.gridSize, 2) * 200);
 
         const upgContainer = document.createElement('div');
@@ -415,6 +478,8 @@ window.shopTab = function (tab) {
                 if (key === 'splitter3') spriteKey = 'splitter_up';
                 if (key === 'smelter') spriteKey = 'furnace_iron';
                 if (key === 'crafter') spriteKey = 'assembler_basic';
+                if (key === 'merger') spriteKey = 'splitter_down';
+                if (key === 'quantum_generator') spriteKey = 'quantic/generador_cuantico';
 
                 const div = document.createElement('div');
                 div.className = "bg-gray-800 p-4 rounded-xl border border-gray-700 mb-3 flex justify-between items-center";
@@ -501,7 +566,7 @@ window.shopTab = function (tab) {
 };
 
 window.buyGenLimit = function () {
-    const cost = state.maxGenerators * 500;
+    const cost = Math.floor(500 * Math.pow(1.6, state.maxGenerators - 3));
     if (state.money >= cost) {
         state.money -= cost;
         state.maxGenerators++;
@@ -550,8 +615,28 @@ window.buyRecipe = function (key) {
     }
 };
 
+let smoothEarnings10s = 0;
+let smoothEarningsMin = 0;
+
+function updateEarningsDisplay() {
+    const rates = getEarningsRate();
+    const smooth = 8;
+    smoothEarnings10s += (rates.per10s - smoothEarnings10s) / smooth;
+    smoothEarningsMin += (rates.perMin - smoothEarningsMin) / smooth;
+    // Snap to target if very close to avoid floating forever
+    if (Math.abs(rates.per10s - smoothEarnings10s) < 0.5) smoothEarnings10s = rates.per10s;
+    if (Math.abs(rates.perMin - smoothEarningsMin) < 0.5) smoothEarningsMin = rates.perMin;
+    const el10s = document.getElementById('earnings10s');
+    const elMin = document.getElementById('earningsPerMin');
+    if (el10s) el10s.innerText = '$' + Math.round(smoothEarnings10s).toLocaleString();
+    if (elMin) elMin.innerText = '$' + Math.round(smoothEarningsMin).toLocaleString();
+}
+
+setInterval(updateEarningsDisplay, 100);
+
 function updateUI() {
     document.getElementById('moneyDisplay').innerText = state.money.toLocaleString();
+    updateEarningsDisplay();
     document.getElementById('gridSizeDisplay').innerText = state.gridSize;
     document.getElementById('gridSizeDisplay2').innerText = state.gridSize;
 
@@ -565,7 +650,7 @@ function updateUI() {
     if (btn) btn.classList.replace('border-transparent', 'border-blue-500');
 
     // Show unlocked buildings
-    ['smelter', 'crafter', 'splitter2', 'splitter3'].forEach(b => {
+    ['smelter', 'crafter', 'splitter2', 'splitter3', 'merger', 'quantum_generator'].forEach(b => {
         if (state.unlockedBuildings.includes(b)) {
             document.getElementById(`tool-${b}`).classList.remove('hidden');
         }
@@ -671,9 +756,17 @@ window.addEventListener('keydown', (e) => {
         if (nx >= 0 && nx < state.gridSize && ny >= 0 && ny < state.gridSize) {
             const nextKey = `${nx},${ny}`;
             // Mover la máquina seleccionada físicamente en el mapa si la celda destino está libre
-            if (!state.map[nextKey] && state.map[selectedTile]) {
-                state.map[nextKey] = state.map[selectedTile];
+            const cell = state.map[selectedTile];
+            if (!state.map[nextKey] && cell) {
+                state.map[nextKey] = cell;
                 delete state.map[selectedTile];
+                
+                // Recalcular si es un extractor
+                if (cell.type === 'generator') {
+                    const deposit = getOreDeposit(nx, ny);
+                    cell.config = deposit || 'ore_iron';
+                }
+                
                 selectTile(nx, ny); // Mantiene el componente seleccionado y actualiza la UI
                 saveGameToCloud();
             }
@@ -690,7 +783,7 @@ function buildAtMouse(mx, my) {
     if (gx < 0 || gy < 0 || gx >= state.gridSize || gy >= state.gridSize) return;
 
     // Auto-dirección de cintas (o divisores)
-    if ((state.tool === 'conveyor' || state.tool.startsWith('splitter')) && lastBuiltGrid) {
+    if ((state.tool === 'conveyor' || state.tool.startsWith('splitter') || state.tool === 'merger') && lastBuiltGrid) {
         if (lastBuiltGrid.gx !== gx || lastBuiltGrid.gy !== gy) {
             const dx = gx - lastBuiltGrid.gx;
             const dy = gy - lastBuiltGrid.gy;
@@ -720,14 +813,19 @@ function buildAtMouse(mx, my) {
         state.money -= cost;
 
         let cfg = null;
-        if (state.tool === 'generator') cfg = 'ore_iron';
+        if (state.tool === 'generator') {
+            const deposit = getOreDeposit(gx, gy);
+            cfg = deposit || 'ore_iron'; // Auto-detect deposit, default iron
+        }
         if (state.tool === 'smelter') cfg = state.unlockedRecipes.find(r => RECIPES[r].type === 'smelter') || 'smelt_iron';
         if (state.tool === 'crafter') cfg = state.unlockedRecipes.find(r => RECIPES[r].type === 'crafter') || 'craft_wire';
+        if (state.tool === 'merger') cfg = '1.0,1.0'; // leftTime,rightTime
 
         state.map[key] = {
             type: state.tool,
             dir: state.buildDir,
             config: cfg,
+            isActive: true, // Nuevo: Soporte para encender/apagar
             inventory: {},
             outBuffer: null,
             timer: 0,
@@ -765,15 +863,41 @@ window.selectTile = function (gx, gy) {
     let html = '';
 
     if (cell.type === 'generator') {
-        html += `<label class="text-xs text-gray-400">Mineral a Extraer:</label>
-                         <select id="selConfig" class="bg-gray-700 text-white p-2 rounded outline-none border border-gray-600">
-                            <option value="ore_iron" ${cell.config === 'ore_iron' ? 'selected' : ''}>Hierro</option>
-                            <option value="ore_copper" ${cell.config === 'ore_copper' ? 'selected' : ''}>Cobre</option>
-                            <option value="ore_aluminum" ${cell.config === 'ore_aluminum' ? 'selected' : ''}>Aluminio</option>
-                            <option value="ore_silicon" ${cell.config === 'ore_silicon' ? 'selected' : ''}>Silicio</option>
-                            <option value="ore_gold" ${cell.config === 'ore_gold' ? 'selected' : ''}>Oro</option>
-                            <option value="ore_diamond" ${cell.config === 'ore_diamond' ? 'selected' : ''}>Diamante</option>
-                         </select>`;
+        const deposit = getOreDeposit(gx, gy);
+        if (deposit) {
+            // Miner is on a deposit - locked to that ore
+            const depInfo = ORE_DEPOSIT_INFO[deposit];
+            const matInfo = MATS[deposit];
+            html += `<div class="flex items-center gap-2 bg-amber-900/30 p-2 rounded border border-amber-700 mb-2">
+                        <img src="textures/factory/${matInfo.sprite}.png" class="w-6 h-6 object-contain">
+                        <span class="text-sm text-amber-300 font-bold">Extrayendo: ${matInfo.name}</span>
+                     </div>
+                     <div class="text-xs text-gray-400">⛏️ Este minero está sobre una ${depInfo.name}. El mineral está fijado.</div>`;
+        } else {
+            // No deposit under miner
+            if (cell.config !== 'ore_iron' && cell.config !== 'ore_copper') {
+                // Persistent rare ore from before a world gen change
+                const matInfo = MATS[cell.config];
+                html += `<div class="flex items-center gap-2 bg-orange-900/30 p-2 rounded border border-orange-700 mb-2">
+                            <img src="textures/factory/${matInfo?.sprite}.png" class="w-6 h-6 object-contain">
+                            <span class="text-sm text-orange-300 font-bold">Inercia: ${matInfo?.name}</span>
+                         </div>
+                         <div class="text-[10px] text-orange-400/70 mb-2 italic">⚠️ La veta desapareció, pero la máquina conserva su configuración.</div>`;
+            }
+
+            html += `<label class="text-xs text-gray-400">Mineral a Extraer:</label>
+                     <select id="selConfig" class="bg-gray-700 text-white p-2 rounded outline-none border border-gray-600 w-full">
+                        <option value="ore_iron" ${cell.config === 'ore_iron' ? 'selected' : ''}>Hierro</option>
+                        <option value="ore_copper" ${cell.config === 'ore_copper' ? 'selected' : ''}>Cobre</option>
+                     </select>
+                     <div class="text-xs text-gray-500 mt-1">💡 Coloca un minero sobre una veta para extraer minerales raros.</div>`;
+        }
+    } else if (cell.type === 'quantum_generator') {
+        html += `<div class="flex items-center gap-2 bg-purple-900/30 p-2 rounded border border-purple-700">
+                    <img src="textures/factory/quantum_chip.png" class="w-6 h-6 object-contain">
+                    <span class="text-sm text-purple-300 font-bold">Produciendo: Chip Cuántico</span>
+                 </div>
+                 <div class="text-xs text-gray-400 mt-1">⏱️ Velocidad: 1 chip cada 30 segundos</div>`;
     } else if (cell.type === 'smelter' || cell.type === 'crafter') {
         const machineType = cell.type;
         html += `<label class="text-xs text-gray-400">Receta Asignada:</label>
@@ -826,8 +950,94 @@ window.selectTile = function (gx, gy) {
                             </button>
                          </div>`;
 
+
+    } else if (cell.type === 'conveyor' || cell.type === 'splitter2' || cell.type === 'splitter3') {
+        const upgLvl = cell.upgradeLevel || 0;
+        let baseCostCalc = 200;
+        if (cell.type.startsWith('splitter')) baseCostCalc = 500;
+        const upgCost = baseCostCalc * Math.pow(2, upgLvl);
+        const speedMult = Math.pow(1.4, upgLvl).toFixed(1);
+
+        let descText = cell.type === 'conveyor' ? 'Transporte básico de materiales.' : 'Divide el flujo de materiales.';
+
+        html += `<div class="mb-4">
+                    <p class="text-sm text-gray-300">${descText}</p>
+                 </div>
+                 <div class="mt-4 border-t border-gray-600 pt-3">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs text-purple-300 font-bold">Nivel: ${upgLvl + 1}</span>
+                        <span class="text-[10px] text-gray-400 px-2 py-0.5 bg-gray-900 rounded border border-gray-700">Velocidad: x${speedMult}</span>
+                    </div>
+                    <button onclick="upgradeMachine('${gx}', '${gy}')" class="w-full bg-purple-600 hover:bg-purple-500 py-2 rounded-lg text-xs font-bold shadow text-white transition-colors">
+                        Mejorar Velocidad ($${upgCost.toLocaleString()})
+                    </button>
+                 </div>`;
+
+    } else if (cell.type === 'merger') {
+        const parts = (cell.config || '1.0,1.0').split(',');
+        const leftTime = parseFloat(parts[0]) || 1.0;
+        const rightTime = parseFloat(parts[1]) || 1.0;
+        const activeSide = (cell.splitIndex || 0) % 2;
+        const sideLabels = ['⬅️ Izquierda', '➡️ Derecha'];
+        const timeOpts = [0.5, 1.0, 2.0, 3.0, 5.0];
+        const timeLabels = ['0.5s', '1.0s', '2.0s', '3.0s', '5.0s'];
+
+        let leftOpts = timeOpts.map((v, i) => `<option value="${v}" ${leftTime === v ? 'selected' : ''}>${timeLabels[i]}</option>`).join('');
+        let rightOpts = timeOpts.map((v, i) => `<option value="${v}" ${rightTime === v ? 'selected' : ''}>${timeLabels[i]}</option>`).join('');
+
+        html += `<div class="mb-3">
+                    <p class="text-sm text-gray-300">Fusiona 2 líneas laterales en 1. Cicla entre entradas con tiempo independiente.</p>
+                 </div>
+                 <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-xs text-emerald-400 font-bold">⬅️ Izquierda</label>
+                        <select id="selMergerLeft" class="bg-gray-700 text-white p-1.5 rounded outline-none border border-emerald-700 w-full mt-1 text-xs">
+                            ${leftOpts}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-blue-400 font-bold">➡️ Derecha</label>
+                        <select id="selMergerRight" class="bg-gray-700 text-white p-1.5 rounded outline-none border border-blue-700 w-full mt-1 text-xs">
+                            ${rightOpts}
+                        </select>
+                    </div>
+                 </div>
+                 <div class="mt-3 flex items-center gap-2 p-2 rounded border ${activeSide === 0 ? 'bg-emerald-900/30 border-emerald-700' : 'bg-blue-900/30 border-blue-700'}">
+                    <span class="text-lg">${activeSide === 0 ? '⬅️' : '➡️'}</span>
+                    <span class="text-sm font-bold ${activeSide === 0 ? 'text-emerald-300' : 'text-blue-300'}">Activo: ${sideLabels[activeSide]}</span>
+                 </div>`;
+
+        const upgLvl = cell.upgradeLevel || 0;
+        const upgCost = 300 * Math.pow(2, upgLvl);
+        const speedMult = Math.pow(1.4, upgLvl).toFixed(1);
+
+        html += `<div class="mt-4 border-t border-gray-600 pt-3">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs text-purple-300 font-bold">Nivel: ${upgLvl + 1}</span>
+                        <span class="text-[10px] text-gray-400 px-2 py-0.5 bg-gray-900 rounded border border-gray-700">Velocidad: x${speedMult}</span>
+                    </div>
+                    <button onclick="upgradeMachine('${gx}', '${gy}')" class="w-full bg-purple-600 hover:bg-purple-500 py-2 rounded-lg text-xs font-bold shadow text-white transition-colors">
+                        Mejorar Velocidad ($${upgCost.toLocaleString()})
+                    </button>
+                 </div>`;
     } else {
         html = `<p class="text-sm text-gray-400 italic">No requiere configuración extra.</p>`;
+    }
+
+    // Botón Global de Encendido/Apagado
+    const canPower = (cell.type !== 'conveyor' && !cell.type.startsWith('splitter') && cell.type !== 'merger' && cell.type !== 'seller');
+    if (canPower) {
+        const active = (cell.isActive !== false);
+        html += `<div class="mt-4 pt-4 border-t border-gray-700">
+                    <button onclick="toggleMachinePower('${gx}', '${gy}')" 
+                        class="w-full flex items-center justify-between p-3 rounded-xl border transition-all ${active ? 'bg-green-600/20 border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.3)]' : 'bg-red-600/20 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]'}">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full ${active ? 'bg-green-400 animate-pulse' : 'bg-red-500'}"></div>
+                            <span class="text-sm font-bold uppercase tracking-wider">${active ? 'Encendido' : 'Apagado'}</span>
+                        </div>
+                        <span class="text-xs ${active ? 'text-green-300' : 'text-red-300'} px-2 py-1 bg-black/30 rounded font-mono">${active ? 'ON' : 'OFF'}</span>
+                    </button>
+                 </div>`;
     }
 
     document.getElementById('inspConfig').innerHTML = html;
@@ -846,6 +1056,20 @@ window.selectTile = function (gx, gy) {
             }
         };
     }
+
+    const selLeft = document.getElementById('selMergerLeft');
+    const selRight = document.getElementById('selMergerRight');
+    if (selLeft && selRight) {
+        const updateMerger = () => {
+            const c = state.map[selectedTile];
+            if (c) {
+                c.config = `${selLeft.value},${selRight.value}`;
+                saveGameToCloud();
+            }
+        };
+        selLeft.onchange = updateMerger;
+        selRight.onchange = updateMerger;
+    }
 };
 
 window.closeInspector = function () {
@@ -856,9 +1080,14 @@ window.closeInspector = function () {
 window.upgradeMachine = function (gx, gy) {
     const key = `${gx},${gy}`;
     const cell = state.map[key];
-    if (cell && (cell.type === 'smelter' || cell.type === 'crafter')) {
+    if (cell && (cell.type === 'smelter' || cell.type === 'crafter' || cell.type === 'conveyor' || cell.type.startsWith('splitter') || cell.type === 'merger')) {
         const upgLvl = cell.upgradeLevel || 0;
-        const baseCost = cell.type === 'smelter' ? 500 : 1000;
+        let baseCost = 1000;
+        if (cell.type === 'smelter') baseCost = 500;
+        if (cell.type === 'conveyor') baseCost = 200;
+        if (cell.type.startsWith('splitter')) baseCost = 500;
+        if (cell.type === 'merger') baseCost = 300;
+        
         const upgCost = baseCost * Math.pow(2, upgLvl);
         if (state.money >= upgCost) {
             state.money -= upgCost;
@@ -870,6 +1099,17 @@ window.upgradeMachine = function (gx, gy) {
         } else {
             showToast("No tienes suficiente dinero.");
         }
+    }
+};
+
+window.toggleMachinePower = function (gx, gy) {
+    const key = `${gx},${gy}`;
+    const cell = state.map[key];
+    if (cell) {
+        cell.isActive = (cell.isActive === false) ? true : false;
+        selectTile(gx, gy);
+        saveGameToCloud();
+        showToast(cell.isActive ? "⚡ Máquina encendida" : "💤 Máquina apagada");
     }
 };
 
@@ -905,6 +1145,11 @@ function updateLogic(dt) {
         const cell = state.map[key];
         const [gx, gy] = key.split(',').map(Number);
 
+        // Omitir si la máquina está apagada
+        if (cell.isActive === false && cell.type !== 'conveyor' && !cell.type.startsWith('splitter') && cell.type !== 'merger') {
+            continue;
+        }
+
         if (cell.type === 'generator') {
             cell.timer += dt;
             let speed = 1.0;
@@ -912,17 +1157,23 @@ function updateLogic(dt) {
             else if (cell.config === 'ore_gold' || cell.config === 'ore_silicon') speed = 2.0;
 
             if (cell.timer >= speed) {
-                if (!isPosOccupiedByItem(gx, gy)) {
-                    state.items.push({ type: cell.config, x: gx, y: gy, nx: gx, ny: gy, progress: 0, moving: false, idleTime: 0 });
-                    cell.timer = 0;
-                }
+                state.items.push({ type: cell.config, x: gx, y: gy, nx: gx, ny: gy, progress: 0, moving: false, idleTime: 0 });
+                cell.timer = 0;
+            }
+        }
+        else if (cell.type === 'quantum_generator') {
+            cell.timer += dt;
+            const speed = 30.0;
+            if (cell.timer >= speed) {
+                state.items.push({ type: 'quantum_chip', x: gx, y: gy, nx: gx, ny: gy, progress: 0, moving: false, idleTime: 0 });
+                cell.timer = 0;
             }
         }
         else if (cell.type === 'smelter' || cell.type === 'crafter') {
             const recipe = RECIPES[cell.config];
             if (!recipe) continue;
 
-            if (cell.outBuffer && !isPosOccupiedByItem(gx, gy)) {
+            if (cell.outBuffer) {
                 state.items.push({ type: cell.outBuffer, x: gx, y: gy, nx: gx, ny: gy, progress: 0, moving: false, idleTime: 0 });
                 cell.outBuffer = null;
                 if (selectedTile === key) selectTile(gx, gy);
@@ -954,6 +1205,19 @@ function updateLogic(dt) {
                 }
             }
         }
+        // Merger: ciclar entre entradas con tiempos por lado
+        else if (cell.type === 'merger') {
+            cell.timer = (cell.timer || 0) + dt;
+            const parts = (cell.config || '1.0,1.0').split(',');
+            const times = [parseFloat(parts[0]) || 1.0, parseFloat(parts[1]) || 1.0];
+            const activeSide = (cell.splitIndex || 0) % 2;
+            const currentCycleTime = times[activeSide];
+            if (cell.timer >= currentCycleTime) {
+                cell.timer -= currentCycleTime;
+                cell.splitIndex = (activeSide + 1) % 2;
+                if (selectedTile === key) selectTile(gx, gy);
+            }
+        }
     }
 
     // 2. Mover Objetos
@@ -967,6 +1231,7 @@ function updateLogic(dt) {
                 if (cell.type === 'seller') {
                     const val = MATS[item.type]?.value || 0;
                     state.money += val;
+                    logEarning(val);
                     state.items.splice(i, 1);
                     updateUI();
                     continue;
@@ -996,9 +1261,21 @@ function updateLogic(dt) {
                     let canMove = false;
                     let acceptedByMachine = false;
 
-                    if (nextCell && !isPosOccupiedByItem(nx, ny)) {
+                    if (nextCell) {
                         if (nextCell.type === 'conveyor' || nextCell.type.startsWith('splitter') || nextCell.type === 'seller') {
                             canMove = true;
+                        } else if (nextCell.type === 'merger') {
+                            // Merger solo acepta del lado activo según su ciclo
+                            const mergerLeftDir = (nextCell.dir + 3) % 4;
+                            const mergerRightDir = (nextCell.dir + 1) % 4;
+                            const fromDx = item.x - nx;
+                            const fromDy = item.y - ny;
+                            const isFromLeft = (fromDx === DIRECTIONS[mergerLeftDir].dx && fromDy === DIRECTIONS[mergerLeftDir].dy);
+                            const isFromRight = (fromDx === DIRECTIONS[mergerRightDir].dx && fromDy === DIRECTIONS[mergerRightDir].dy);
+                            const activeSide = (nextCell.splitIndex || 0) % 2; // 0=left, 1=right
+                            if ((activeSide === 0 && isFromLeft) || (activeSide === 1 && isFromRight)) {
+                                canMove = true;
+                            }
                         } else if (nextCell.type === 'smelter' || nextCell.type === 'crafter') {
                             const rec = RECIPES[nextCell.config];
                             if (rec && rec.in[item.type]) {
@@ -1030,7 +1307,9 @@ function updateLogic(dt) {
                 }
             }
         } else {
-            item.progress += ITEM_SPEED * dt;
+            const currentCell = state.map[`${item.x},${item.y}`];
+            const beltSpeedMult = currentCell ? Math.pow(1.4, currentCell.upgradeLevel || 0) : 1;
+            item.progress += BASE_ITEM_SPEED * beltSpeedMult * dt;
             if (item.progress >= 1.0) {
                 item.x = item.nx;
                 item.y = item.ny;
@@ -1103,19 +1382,63 @@ function draw() {
     ctx.scale(camera.zoom, camera.zoom);
     ctx.translate(-camera.x, -camera.y);
 
-    // Suelo
-    ctx.fillStyle = '#1e1e2e';
-    ctx.fillRect(0, 0, state.gridSize * TILE_SIZE, state.gridSize * TILE_SIZE);
+    // Calcular tiles visibles en pantalla
+    const halfW = (canvas.width / 2) / camera.zoom;
+    const halfH = (canvas.height / 2) / camera.zoom;
+    const viewLeft = camera.x - halfW;
+    const viewRight = camera.x + halfW;
+    const viewTop = camera.y - halfH;
+    const viewBottom = camera.y + halfH;
+    const tileStartX = Math.floor(viewLeft / TILE_SIZE) - 1;
+    const tileEndX = Math.ceil(viewRight / TILE_SIZE) + 1;
+    const tileStartY = Math.floor(viewTop / TILE_SIZE) - 1;
+    const tileEndY = Math.ceil(viewBottom / TILE_SIZE) + 1;
 
-    // Rejilla
-    ctx.strokeStyle = '#313244';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    for (let i = 0; i <= state.gridSize; i++) {
-        ctx.moveTo(i * TILE_SIZE, 0); ctx.lineTo(i * TILE_SIZE, state.gridSize * TILE_SIZE);
-        ctx.moveTo(0, i * TILE_SIZE); ctx.lineTo(state.gridSize * TILE_SIZE, i * TILE_SIZE);
+    // Suelo infinito + menas procedurales
+    for (let ty = tileStartY; ty <= tileEndY; ty++) {
+        for (let tx = tileStartX; tx <= tileEndX; tx++) {
+            const px = tx * TILE_SIZE;
+            const py = ty * TILE_SIZE;
+            const inGrid = (tx >= 0 && tx < state.gridSize && ty >= 0 && ty < state.gridSize);
+
+            // Fondo del tile
+            ctx.fillStyle = inGrid ? '#1e1e2e' : '#16161e';
+            ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+
+            // Ore deposit tint
+            const deposit = getOreDeposit(tx, ty);
+            if (deposit && ORE_DEPOSIT_INFO[deposit]) {
+                const dInfo = ORE_DEPOSIT_INFO[deposit];
+                ctx.fillStyle = dInfo.tint;
+                ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+
+                // Small ore icon in center
+                if (SPRITES[dInfo.sprite]) {
+                    ctx.globalAlpha = 0.4;
+                    ctx.drawImage(SPRITES[dInfo.sprite], px + TILE_SIZE * 0.25, py + TILE_SIZE * 0.25, TILE_SIZE * 0.5, TILE_SIZE * 0.5);
+                    ctx.globalAlpha = 1.0;
+                } else {
+                    // Fallback: colored dot
+                    ctx.fillStyle = dInfo.border;
+                    ctx.beginPath();
+                    ctx.arc(px + TILE_SIZE / 2, py + TILE_SIZE / 2, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Grid lines
+            ctx.strokeStyle = inGrid ? '#313244' : '#1a1a2a';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(px, py, TILE_SIZE, TILE_SIZE);
+        }
     }
-    ctx.stroke();
+
+    // Borde del área construible
+    ctx.strokeStyle = '#585b70';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 4]);
+    ctx.strokeRect(0, 0, state.gridSize * TILE_SIZE, state.gridSize * TILE_SIZE);
+    ctx.setLineDash([]);
 
     animOffset = (Date.now() / 30) % 20;
 
@@ -1133,6 +1456,10 @@ function draw() {
             ctx.lineWidth = 3;
             ctx.strokeRect(-TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
             ctx.shadowBlur = 0;
+        }
+
+        if (cell.isActive === false && cell.type !== 'conveyor' && !cell.type.startsWith('splitter') && cell.type !== 'merger') {
+            ctx.filter = 'grayscale(100%) brightness(0.5)';
         }
 
         if (cell.type === 'conveyor') {
@@ -1153,7 +1480,7 @@ function draw() {
                     const nt = neighbor.type;
                     const nd = neighbor.dir;
 
-                    if (nt === 'conveyor' || nt === 'generator' || nt === 'smelter' || nt === 'crafter') {
+                    if (nt === 'conveyor' || nt === 'generator' || nt === 'smelter' || nt === 'crafter' || nt === 'merger') {
                         pointsToUs = (nd === n.dirInto);
                     } else if (nt === 'splitter2') {
                         // Splitter2 sale por los lados (L y R relativo a su dir)
@@ -1227,14 +1554,38 @@ function draw() {
                     }
                 }
             }
-        } else if (cell.type === 'splitter2' || cell.type === 'splitter3') {
-            let spriteName = cell.type === 'splitter2' ? 'splitter_down' : 'splitter_up';
+        } else if (cell.type === 'splitter2' || cell.type === 'splitter3' || cell.type === 'merger') {
+            let spriteName = cell.type === 'splitter2' ? 'splitter_down' : (cell.type === 'splitter3' ? 'splitter_up' : 'splitter_down');
             if (SPRITES[spriteName]) {
                 let drawAngle = DIRECTIONS[cell.dir].angle;
                 if (cell.type === 'splitter2') drawAngle -= Math.PI / 2;
+                if (cell.type === 'merger') drawAngle += Math.PI / 2;
 
+                if (cell.type === 'merger') {
+                    ctx.filter = 'hue-rotate(120deg) saturate(1.3)';
+                }
                 ctx.rotate(drawAngle);
                 ctx.drawImage(SPRITES[spriteName], -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+                if (cell.type === 'merger') {
+                    ctx.filter = 'none';
+                    // Flecha indicadora del lado activo
+                    const activeSide = (cell.splitIndex || 0) % 2;
+                    ctx.strokeStyle = activeSide === 0 ? '#34d399' : '#60a5fa';
+                    ctx.fillStyle = activeSide === 0 ? '#34d399' : '#60a5fa';
+                    ctx.lineWidth = 3;
+                    ctx.lineCap = 'round';
+                    // Flecha apuntando al lado activo (izq=arriba, der=abajo en espacio rotado)
+                    const arrowY = activeSide === 0 ? -18 : 18;
+                    const arrowTip = activeSide === 0 ? -24 : 24;
+                    ctx.beginPath();
+                    ctx.moveTo(-6, arrowY);
+                    ctx.lineTo(0, arrowTip);
+                    ctx.lineTo(6, arrowY);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(0, arrowTip, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
             } else {
                 // Diseño Visual Divisores (Fallback)
                 ctx.fillStyle = cell.type === 'splitter2' ? '#4f46e5' : '#7e22ce';
@@ -1316,7 +1667,7 @@ function draw() {
             }
         } else if (cell.type === 'crafter') {
             let spriteName = 'assembler_basic';
-            if (cell.config === 'craft_quantum' || cell.config === 'craft_supercomp') {
+            if (cell.config === 'craft_quantum' || cell.config === 'craft_supercomp' || cell.config === 'craft_chip_reforzado' || cell.config === 'craft_disco_cuantico' || cell.config === 'craft_agujero_cuantico') {
                 spriteName = 'assembler_mega';
             } else if (cell.config === 'craft_processor' || cell.config === 'craft_motor') {
                 spriteName = 'assembler_advanced';
@@ -1340,6 +1691,51 @@ function draw() {
                 let p = Math.min(cell.timer / actualTime, 1.0);
                 ctx.fillStyle = '#11111b'; ctx.fillRect(-15, 14, 30, 4);
                 ctx.fillStyle = '#a6e3a1'; ctx.fillRect(-15, 14, 30 * p, 4);
+            }
+        } else if (cell.type === 'quantum_generator') {
+            const qgSprite = 'quantic/generador_cuantico';
+            if (SPRITES[qgSprite]) {
+                ctx.rotate(DIRECTIONS[cell.dir].angle);
+                ctx.drawImage(SPRITES[qgSprite], -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+            } else {
+                ctx.fillStyle = '#7c3aed';
+                ctx.fillRect(-TILE_SIZE / 2 + 2, -TILE_SIZE / 2 + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                ctx.fillStyle = '#fff'; ctx.font = 'bold 14px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText('QG', 0, 0);
+                ctx.rotate(DIRECTIONS[cell.dir].angle);
+                ctx.fillStyle = '#2e3440';
+                ctx.beginPath(); ctx.moveTo(18, -6); ctx.lineTo(28, 0); ctx.lineTo(18, 6); ctx.fill();
+            }
+            if (cell.timer > 0) {
+                let p = Math.min(cell.timer / 5.0, 1.0);
+                ctx.fillStyle = '#11111b'; ctx.fillRect(-15, 14, 30, 4);
+                ctx.fillStyle = '#c084fc'; ctx.fillRect(-15, 14, 30 * p, 4);
+            }
+        }
+
+        if (state.showBottlenecks) {
+            let isBottleneck = false;
+            const recipe = RECIPES[cell.config];
+            if (recipe && recipe.in) {
+                for (let mat in recipe.in) {
+                    const has = cell.inventory[mat] || 0;
+                    const req = recipe.in[mat];
+                    if (has > req * 5) {
+                        isBottleneck = true;
+                        break;
+                    }
+                }
+            }
+            if (isBottleneck) {
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+                ctx.fillRect(-TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(-TILE_SIZE / 2 + 4, -TILE_SIZE / 2 + 4, TILE_SIZE - 8, TILE_SIZE - 8);
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('SATURADO', 0, 0);
             }
         }
         ctx.restore();
@@ -1385,14 +1781,23 @@ function draw() {
         if (state.tool === 'seller') spriteKey = 'chest_iron';
         if (state.tool === 'smelter') spriteKey = 'furnace_iron';
         if (state.tool === 'crafter') spriteKey = 'assembler_basic';
+        if (state.tool === 'merger') spriteKey = 'splitter_down';
+        if (state.tool === 'quantum_generator') spriteKey = 'quantic/generador_cuantico';
 
         if (spriteKey && SPRITES[spriteKey]) {
             if (state.tool !== 'seller') {
                 let drawAngle = DIRECTIONS[state.buildDir].angle;
                 if (state.tool === 'splitter2') drawAngle -= Math.PI / 2;
+                if (state.tool === 'merger') drawAngle += Math.PI / 2;
                 ctx.rotate(drawAngle);
             }
+            if (state.tool === 'merger') {
+                ctx.filter = 'hue-rotate(120deg) saturate(1.3)';
+            }
             ctx.drawImage(SPRITES[spriteKey], -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+            if (state.tool === 'merger') {
+                ctx.filter = 'none';
+            }
         } else {
             let color = '#fff';
             if (state.tool === 'conveyor') color = '#89b4fa';
@@ -1402,6 +1807,8 @@ function draw() {
             if (state.tool === 'seller') color = '#f38ba8';
             if (state.tool === 'smelter') color = '#fab387';
             if (state.tool === 'crafter') color = '#d946ef';
+            if (state.tool === 'quantum_generator') color = '#7c3aed';
+            if (state.tool === 'merger') color = '#22c55e';
 
             ctx.fillStyle = color;
             ctx.fillRect(-TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
