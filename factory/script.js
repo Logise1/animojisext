@@ -5,12 +5,25 @@ import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot } from "https
 
 // --- DECODIFICAR USUARIO ---
 const urlParams = new URLSearchParams(window.location.search);
-const rawUser = urlParams.get('user') || urlParams.get('username') || btoa("Jugador Anonimo");
+let rawUser = urlParams.get('user') || urlParams.get('username');
+
+// Auto-detección móvil y LocalStorage
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+if (!rawUser && localStorage.getItem('factory_user')) {
+    rawUser = localStorage.getItem('factory_user');
+    window.history.replaceState({}, '', window.location.pathname + "?user=" + rawUser);
+}
+
 let playerName = "Jugador Anonimo";
-try {
-    let decoded = atob(rawUser);
-    playerName = decoded.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-} catch (e) { console.warn("Error decodificando nombre", e); }
+if (rawUser) {
+    try {
+        let decoded = atob(rawUser);
+        playerName = decoded.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        localStorage.setItem('factory_user', rawUser);
+    } catch (e) { console.warn("Error decodificando nombre", e); }
+} else if (isMobile) {
+    // Si es móvil y no hay usuario, forzar login QR (implementado abajo)
+}
 document.getElementById('playerNameDisplay').innerText = playerName;
 
 // --- FIREBASE CONFIG ---
@@ -1864,6 +1877,73 @@ function loop(ts) {
     }
     draw();
     requestAnimationFrame(loop);
+}
+
+// --- CONTROLES MÓVILES ---
+window.moveSelected = function (dx, dy) {
+    if (!selectedTile) return;
+    const [gx, gy] = selectedTile.split(',').map(Number);
+    const nx = gx + dx;
+    const ny = gy + dy;
+    if (nx >= 0 && nx < state.gridSize && ny >= 0 && ny < state.gridSize) {
+        const nextKey = `${nx},${ny}`;
+        const cell = state.map[selectedTile];
+        if (!state.map[nextKey] && cell) {
+            state.map[nextKey] = cell;
+            delete state.map[selectedTile];
+            if (cell.type === 'generator') {
+                const deposit = getOreDeposit(nx, ny);
+                cell.config = deposit || 'ore_iron';
+            }
+            selectTile(nx, ny);
+            saveGameToCloud();
+        }
+    }
+};
+
+window.buildAtPointer = function() {
+    // Construir en el centro de la vista actual o donde esté el hover
+    const mx = window.innerWidth / 2;
+    const my = window.innerHeight / 2;
+    buildAtMouse(mx, my);
+};
+
+// --- QR SCANNER LOGIN ---
+if (isMobile && !rawUser) {
+    const loginOverlay = document.getElementById('mobileLoginOverlay');
+    loginOverlay.classList.remove('hidden');
+    
+    const html5QrCode = new Html5Qrcode("reader");
+    const qrConfig = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+    html5QrCode.start({ facingMode: "environment" }, qrConfig, (decodedText) => {
+        // Formato esperado: Time: ISOString | Params: ?user=... | User: ...
+        try {
+            const parts = decodedText.split('|');
+            const timePart = parts[0].replace('Time: ', '').trim();
+            const paramPart = parts[1].replace('Params: ', '').trim();
+            
+            // Validar timestamp (máximo 60 segundos de antigüedad)
+            const qrTime = new Date(timePart).getTime();
+            const now = new Date().getTime();
+            
+            if (now - qrTime > 60000) {
+                showToast("El código QR ha expirado. Genera uno nuevo.");
+                return;
+            }
+
+            const scanParams = new URLSearchParams(paramPart);
+            const user = scanParams.get('user');
+            
+            if (user) {
+                html5QrCode.stop();
+                localStorage.setItem('factory_user', user);
+                window.location.href = window.location.pathname + "?user=" + user;
+            }
+        } catch (e) {
+            console.error("Error procesando QR", e);
+        }
+    });
 }
 
 updateUI();
