@@ -1886,34 +1886,79 @@ function loop(ts) {
     requestAnimationFrame(loop);
 }
 
-// --- CONTROLES MÓVILES ---
-window.moveSelected = function (dx, dy) {
-    if (!selectedTile) return;
-    const [gx, gy] = selectedTile.split(',').map(Number);
-    const nx = gx + dx;
-    const ny = gy + dy;
-    if (nx >= 0 && nx < state.gridSize && ny >= 0 && ny < state.gridSize) {
-        const nextKey = `${nx},${ny}`;
-        const cell = state.map[selectedTile];
-        if (!state.map[nextKey] && cell) {
-            state.map[nextKey] = cell;
-            delete state.map[selectedTile];
-            if (cell.type === 'generator') {
-                const deposit = getOreDeposit(nx, ny);
-                cell.config = deposit || 'ore_iron';
-            }
-            selectTile(nx, ny);
-            saveGameToCloud();
-        }
-    }
-};
+// --- ENTRADA TÁCTIL (GESTOR DE GESTOS) ---
+let initialPinchDist = null;
+let lastTouchX = 0;
+let lastTouchY = 0;
+let isPanning = false;
+let touchMoved = false;
 
-window.buildAtPointer = function() {
-    // Construir en el centro de la vista actual o donde esté el hover
-    const mx = window.innerWidth / 2;
-    const my = window.innerHeight / 2;
-    buildAtMouse(mx, my);
-};
+canvas.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+        lastTouchX = e.touches[0].clientX;
+        lastTouchY = e.touches[0].clientY;
+        touchMoved = false;
+        isPanning = true;
+    } else if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        initialPinchDist = Math.hypot(dx, dy);
+        isPanning = false;
+    }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (e.touches.length === 1 && isPanning) {
+        const dx = e.touches[0].clientX - lastTouchX;
+        const dy = e.touches[0].clientY - lastTouchY;
+        camera.x -= dx / camera.zoom;
+        camera.y -= dy / camera.zoom;
+        lastTouchX = e.touches[0].clientX;
+        lastTouchY = e.touches[0].clientY;
+        if (Math.hypot(dx, dy) > 5) touchMoved = true;
+    } else if (e.touches.length === 2 && initialPinchDist !== null) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.hypot(dx, dy);
+        
+        // Factor de escala basado en el cambio de distancia
+        const factor = dist / initialPinchDist;
+        
+        // Zoom centrado en el punto medio de los dos dedos
+        const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        const w = getScreenToWorld(cx, cy);
+        
+        const oldZoom = camera.zoom;
+        camera.zoom = Math.max(0.2, Math.min(camera.zoom * factor, 4.0));
+        
+        // Ajustar cámara para que el punto central no se mueva visualmente
+        camera.x = w.worldX - (cx - canvas.width / 2) / camera.zoom;
+        camera.y = w.worldY - (cy - canvas.height / 2) / camera.zoom;
+        
+        initialPinchDist = dist;
+    }
+}, { passive: false });
+
+canvas.addEventListener('touchend', (e) => {
+    if (e.touches.length === 0) {
+        if (!touchMoved && isPanning) {
+            // Es un toque rápido (Tap)
+            const { worldX, worldY } = getScreenToWorld(lastTouchX, lastTouchY);
+            const { gx, gy } = getGridPos(worldX, worldY);
+            
+            if (state.tool === 'cursor') {
+                selectTile(gx, gy);
+            } else {
+                buildAtMouse(lastTouchX, lastTouchY);
+                saveGameToCloud();
+            }
+        }
+        isPanning = false;
+        initialPinchDist = null;
+    }
+});
 
 // --- QR SCANNER LOGIN ---
 if (isMobile && !rawUser) {
