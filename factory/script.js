@@ -13,29 +13,6 @@ try {
 } catch (e) { console.warn("Error decodificando nombre", e); }
 document.getElementById('playerNameDisplay').innerText = playerName;
 
-// --- DETECCIÓN MÓVIL Y STORAGE ---
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 800;
-
-if (isMobile) {
-    document.body.classList.add('mobile-mode');
-    // Si no hay usuario en la URL, intentamos recuperarlo de localStorage
-    if (!urlParams.get('user') && !urlParams.get('username')) {
-        const storedUser = localStorage.getItem('factory_user');
-        if (storedUser) {
-            window.location.search = `?user=${storedUser}`;
-        } else {
-            // Esperamos a que el DOM esté listo para mostrar el escáner
-            window.addEventListener('load', () => {
-                document.getElementById('qrScannerModalContainer').style.display = 'flex';
-                startQRScanner();
-            });
-        }
-    } else {
-        // Guardar el usuario de la URL para futuras sesiones móviles
-        localStorage.setItem('factory_user', urlParams.get('user') || urlParams.get('username'));
-    }
-}
-
 // --- FIREBASE CONFIG ---
 const firebaseConfig = {
     apiKey: "AIzaSyAcMBMfWjiD4NHArV8lMWm7peIsyUKCW-w",
@@ -1121,70 +1098,6 @@ window.upgradeMachine = function (gx, gy) {
             showToast("¡Máquina acelerada!");
         } else {
             showToast("No tienes suficiente dinero.");
-        }
-    }
-};
-
-// --- FUNCIONES MÓVILES Y QR ---
-window.showMobileSyncQR = function () {
-    const qrContainer = document.getElementById('qrCode');
-    qrContainer.innerHTML = '';
-    const syncUrl = window.location.href;
-    new QRCode(qrContainer, {
-        text: syncUrl,
-        width: 256,
-        height: 256,
-        colorDark: "#000000",
-        colorLight: "#ffffff"
-    });
-    document.getElementById('qrModal').classList.remove('hidden');
-};
-
-let html5QrCode = null;
-window.startQRScanner = function () {
-    html5QrCode = new Html5Qrcode("reader");
-    const config = { fps: 15, qrbox: { width: 250, height: 250 } };
-    html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
-        try {
-            const url = new URL(decodedText);
-            const user = url.searchParams.get('user') || url.searchParams.get('username');
-            if (user) {
-                localStorage.setItem('factory_user', user);
-                html5QrCode.stop().then(() => {
-                    window.location.href = decodedText;
-                });
-            }
-        } catch (e) { console.error("QR Inválido", e); }
-    });
-};
-
-window.skipLoginMobile = function () {
-    if (html5QrCode) {
-        html5QrCode.stop().catch(e => console.error(e));
-    }
-    document.getElementById('qrScannerModalContainer').style.display = 'none';
-};
-
-window.moveSelected = function (mdx, mdy) {
-    if (!selectedTile) return;
-    const [gx, gy] = selectedTile.split(',').map(Number);
-    const nx = gx + mdx;
-    const ny = gy + mdy;
-
-    if (nx >= 0 && nx < state.gridSize && ny >= 0 && ny < state.gridSize) {
-        const nextKey = `${nx},${ny}`;
-        const cell = state.map[selectedTile];
-        if (!state.map[nextKey] && cell) {
-            state.map[nextKey] = cell;
-            delete state.map[selectedTile];
-            if (cell.type === 'generator') {
-                const deposit = getOreDeposit(nx, ny);
-                cell.config = deposit || 'ore_iron';
-            }
-            selectTile(nx, ny);
-            saveGameToCloud();
-        } else if (state.map[nextKey]) {
-            selectTile(nx, ny);
         }
     }
 };
