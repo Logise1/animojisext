@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Factory Builder - Edición Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         body,
         html {
@@ -50,6 +52,56 @@
 
         img {
             image-rendering: pixelated;
+        }
+
+        /* Controles móviles */
+        #mobileControls {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            gap: 10px;
+        }
+
+        body.mobile-mode #mobileControls {
+            display: flex !important;
+        }
+        
+        body.mobile-mode .desktop-only {
+            display: none !important;
+        }
+
+        .joystick-btn {
+            width: 60px;
+            height: 60px;
+            background: rgba(31, 41, 55, 0.9);
+            border: 2px solid rgba(75, 85, 99, 0.5);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-center: center;
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        .joystick-btn:active {
+            background: rgba(55, 65, 81, 0.9);
+            transform: scale(0.95);
+        }
+
+        #qrScannerModalContainer {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 1000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
@@ -119,6 +171,12 @@
             <button onclick="toggleLeaderboard()" title="Ver Clasificación"
                 class="bg-yellow-600/80 hover:bg-yellow-500 border border-yellow-400 w-14 h-14 rounded-xl shadow-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95">
                 <span class="text-3xl">🏆</span>
+            </button>
+
+            <!-- Sincronizar Móvil -->
+            <button onclick="showMobileSyncQR()" title="Sincronizar con Móvil"
+                class="desktop-only bg-emerald-600/80 hover:bg-emerald-500 border border-emerald-400 w-14 h-14 rounded-xl shadow-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95">
+                <span class="text-3xl">📱</span>
             </button>
 
             <!-- Tienda -->
@@ -255,6 +313,53 @@
                     class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
                     $1M</div>
             </button>
+        </div>
+    </div>
+
+    <!-- CONTROLES MÓVILES -->
+    <div id="mobileControls" class="flex items-center gap-4">
+        <div class="grid grid-cols-3 gap-2">
+            <div></div>
+            <button class="joystick-btn" onclick="moveSelected(0, -1)">▲</button>
+            <div></div>
+            <button class="joystick-btn" onclick="moveSelected(-1, 0)">◀</button>
+            <button class="joystick-btn" onclick="rotateSelected()">↻</button>
+            <button class="joystick-btn" onclick="moveSelected(1, 0)">▶</button>
+            <div></div>
+            <button class="joystick-btn" onclick="moveSelected(0, 1)">▼</button>
+            <div></div>
+        </div>
+        <div class="flex flex-col gap-2">
+            <button class="joystick-btn w-24 bg-red-600/80 border-red-400" onclick="deleteSelected()">🗑️</button>
+            <button class="joystick-btn w-24 bg-blue-600/80 border-blue-400" onclick="setTool('cursor')">🖐️</button>
+        </div>
+    </div>
+
+    <!-- MODAL: QR SYNC (Para Escritorio) -->
+    <div id="qrModal" class="hidden fixed inset-0 modal-overlay z-[100] flex items-center justify-center pointer-events-auto">
+        <div class="bg-gray-900 border border-emerald-500 rounded-2xl p-8 max-w-sm w-full text-center">
+            <h2 class="text-2xl font-bold text-emerald-400 mb-4">Escanea para móvil</h2>
+            <div id="qrCode" class="bg-white p-4 rounded-xl inline-block mb-4"></div>
+            <p class="text-xs text-gray-400 mb-6">Escanea esto con tu móvil para cargar tu partida y controles táctiles.</p>
+            <button onclick="document.getElementById('qrModal').classList.add('hidden')" class="bg-gray-700 px-6 py-2 rounded-xl font-bold">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- PANTALLA: ESCÁNER MÓVIL (Para Móvil al inicio) -->
+    <div id="qrScannerModalContainer">
+        <div class="bg-gray-900 w-full h-full flex flex-col p-6">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-blue-400">Sincronización Móvil</h2>
+                <p class="text-sm text-gray-400">Escanea el código QR que aparece en tu ordenador</p>
+            </div>
+            
+            <div id="reader" class="w-full max-w-[400px] aspect-square bg-gray-800 rounded-2xl overflow-hidden border-2 border-dashed border-blue-500 mx-auto"></div>
+            
+            <div class="mt-8 text-center text-gray-500 text-xs px-10">
+                Paso: Pulsa el botón 📱 en tu ordenador para mostrar el código.
+            </div>
+            
+            <button onclick="skipLoginMobile()" class="mt-auto mb-4 text-gray-500 py-4 font-bold border-t border-gray-800">Jugar sin sincronizar (Anónimo)</button>
         </div>
     </div>
 
