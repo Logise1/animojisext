@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factory Builder - Edición Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #11111b;
+            user-select: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e1e2e;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #45475a;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #585b70;
+        }
+
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(5px);
+        }
+
+        img {
+            image-rendering: pixelated;
+        }
+    </style>
+</head>
+
+<body class="text-white font-sans" oncontextmenu="return false;">
+
+    <!-- UI SUPERIOR: Economía e Info -->
+    <div class="absolute top-0 left-0 w-full p-4 pointer-events-none flex justify-between items-start z-10">
+
+        <!-- Estado del Jugador -->
+        <div
+            class="bg-gray-800/90 backdrop-blur-md p-4 rounded-xl border border-gray-700 shadow-lg pointer-events-auto flex flex-col gap-1 w-72">
+            <h1 class="text-xl font-bold text-blue-400">Mega Factoría</h1>
+            <div class="text-sm font-bold text-gray-300 flex items-center gap-2">
+                <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                        clip-rule="evenodd"></path>
+                </svg>
+                <span id="playerNameDisplay">Cargando...</span>
+            </div>
+            <div class="text-3xl font-mono text-green-400 font-bold tracking-tight mt-1">
+                $<span id="moneyDisplay">0</span>
+            </div>
+
+            <div class="text-xs text-gray-400 mt-2 flex justify-between items-center bg-gray-900/50 p-2 rounded">
+                <span>Mineros: <span id="genCountDisplay" class="font-bold text-white">0</span>/<span
+                        id="maxGenDisplay">3</span></span>
+            </div>
+
+            <div class="text-xs text-gray-400 mt-1 flex justify-between items-center bg-gray-900/50 p-2 rounded">
+                <span>Terreno: <span id="gridSizeDisplay">5</span>x<span id="gridSizeDisplay2">5</span></span>
+            </div>
+            <div id="saveStatus" class="text-[10px] text-gray-500 text-right mt-1">Sincronizando...</div>
+        </div>
+
+        <div class="pointer-events-auto flex gap-3">
+            <button id="btnPause" onclick="togglePause()"
+                class="bg-blue-600/90 hover:bg-blue-500/90 border border-blue-400 p-2 rounded-xl shadow-lg flex items-center justify-center transition-colors w-12 h-12">
+                <img id="pauseIcon" src="textures/factory/pausebtn.png" class="w-8 h-8 object-contain"
+                    style="image-rendering: pixelated;">
+            </button>
+            <button onclick="clearAllItems()"
+                class="bg-red-600/90 hover:bg-red-500/90 border border-red-400 px-4 py-3 rounded-xl shadow-lg font-bold flex items-center transition-colors">
+                <span class="text-xl mr-2">🧹</span>
+                <span>Limpiar Items</span>
+            </button>
+            <button onclick="toggleLeaderboard()"
+                class="bg-yellow-600/90 hover:bg-yellow-500/90 border border-yellow-400 px-6 py-3 rounded-xl shadow-lg font-bold flex flex-col items-center transition-colors">
+                <span class="text-white">🏆 Clasificación</span>
+            </button>
+            <button onclick="toggleShop()"
+                class="bg-purple-600/90 hover:bg-purple-500/90 border border-purple-400 px-6 py-3 rounded-xl shadow-lg font-bold flex flex-col items-center transition-colors"
+                title="Ver Recetas y Mejoras">
+                <span class="text-white">🛒 Abrir Tienda</span>
+                <span class="text-purple-200 text-[10px]">Materiales y Máquinas</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION (Alertas sin bloquear UI) -->
+    <div id="toast"
+        class="fixed bottom-36 left-1/2 -translate-x-1/2 bg-red-600/95 border border-red-400 text-white px-6 py-3 rounded-full font-bold shadow-2xl opacity-0 translate-y-4 transition-all duration-300 pointer-events-none z-50 text-sm">
+        Mensaje
+    </div>
+
+    <!-- PANEL DERECHO: Inspector de Selección -->
+    <div id="inspectorPanel"
+        class="hidden absolute top-32 right-4 w-72 bg-gray-800/95 backdrop-blur-xl p-5 rounded-2xl border border-gray-600 shadow-2xl pointer-events-auto z-20 flex flex-col gap-4 transform transition-all">
+        <div class="flex justify-between items-center border-b border-gray-600 pb-2">
+            <h2 id="inspTitle" class="text-lg font-bold text-white">Máquina</h2>
+            <button onclick="closeInspector()" class="text-gray-400 hover:text-white font-bold text-xl">&times;</button>
+        </div>
+
+        <div id="inspConfig" class="flex flex-col gap-2 max-h-64 overflow-y-auto pr-2">
+            <!-- Generado por JS -->
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 mt-2">
+            <button onclick="rotateSelected()"
+                class="bg-blue-600 hover:bg-blue-500 py-2 rounded-lg font-bold text-sm shadow">
+                ↻ Rotar
+            </button>
+            <button onclick="deleteSelected()"
+                class="bg-red-600 hover:bg-red-500 py-2 rounded-lg font-bold text-sm shadow flex justify-center items-center gap-1">
+                Borrar
+            </button>
+        </div>
+        <p class="text-[10px] text-center text-gray-400 mt-[-5px]">Recuperas el 50%</p>
+    </div>
+
+    <!-- UI INFERIOR: Inventario / Barra de Herramientas -->
+    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 pointer-events-auto z-10 w-max">
+        <div class="bg-gray-900/95 backdrop-blur-xl px-4 py-3 rounded-2xl border border-gray-700 shadow-[0_10px_40px_rgba(0,0,0,0.5)] flex items-end gap-2"
+            id="toolbarContainer">
+
+            <button onclick="setTool('cursor')" id="tool-cursor"
+                class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-blue-500 transition-all flex flex-col items-center w-20 h-20 justify-center">
+                <span class="text-2xl mb-1">👆</span>
+                <span class="text-[11px] font-bold text-gray-200">Seleccionar</span>
+            </button>
+            <div class="w-px h-16 bg-gray-700 mx-1"></div>
+
+            <button onclick="setTool('conveyor')" id="tool-conveyor"
+                class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
+                <img src="textures/factory/belt_horizontal.png" class="w-8 h-8 mb-1 object-contain">
+                <span class="text-[10px] text-gray-300">Cinta</span>
+                <div
+                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
+                    $10</div>
+            </button>
+
+            <!-- Nuevos Divisores -->
+            <button onclick="setTool('splitter2')" id="tool-splitter2"
+                class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
+                <img src="textures/factory/splitter_down.png" class="w-8 h-8 mb-1 object-contain">
+                <span class="text-[10px] text-gray-300">Div 1/2</span>
+                <div
+                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
+                    $150</div>
+            </button>
+
+            <button onclick="setTool('splitter3')" id="tool-splitter3"
+                class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
+                <img src="textures/factory/splitter_up.png" class="w-8 h-8 mb-1 object-contain">
+                <span class="text-[10px] text-gray-300">Div 1/3</span>
+                <div
+                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
+                    $300</div>
+            </button>
+
+            <div class="w-px h-16 bg-gray-700 mx-1"></div>
+
+            <button onclick="setTool('generator')" id="tool-generator"
+                class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
+                <img src="textures/factory/miner_basic.png" class="w-8 h-8 mb-1 object-contain">
+                <span class="text-[10px] text-gray-300">Minero</span>
+                <div
+                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
+                    $50</div>
+            </button>
+
+            <button onclick="setTool('seller')" id="tool-seller"
+                class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
+                <img src="textures/factory/chest_iron.png" class="w-8 h-8 mb-1 object-contain">
+                <span class="text-[10px] text-gray-300">Vendedor</span>
+                <div
+                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
+                    $50</div>
+            </button>
+
+            <button onclick="setTool('smelter')" id="tool-smelter"
+                class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
+                <img src="textures/factory/furnace_iron.png" class="w-8 h-8 mb-1 object-contain">
+                <span class="text-[10px] text-gray-300">Horno</span>
+                <div
+                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
+                    $200</div>
+            </button>
+
+            <button onclick="setTool('crafter')" id="tool-crafter"
+                class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-20 h-20 justify-center relative hidden">
+                <img src="textures/factory/assembler_basic.png" class="w-8 h-8 mb-1 object-contain">
+                <span class="text-[10px] text-gray-300 leading-tight text-center">Ensamblador</span>
+                <div
+                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
+                    $500</div>
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL: Tienda -->
+    <div id="shopModal"
+        class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center pointer-events-auto">
+        <div class="bg-gray-900 border border-purple-500 rounded-2xl shadow-2xl w-3/4 max-w-5xl h-[85vh] flex flex-col">
+            <div class="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-800 rounded-t-2xl">
+                <h2 class="text-3xl font-bold text-purple-400">🛒 Centro de Investigación</h2>
+                <div
+                    class="text-2xl font-mono text-green-400 font-bold bg-gray-900 px-4 py-1 rounded-lg border border-gray-700">
+                    $<span id="shopMoney">0</span>
+                </div>
+                <button onclick="toggleShop()"
+                    class="text-gray-400 hover:text-white font-bold text-3xl">&times;</button>
+            </div>
+            <div class="p-4 flex gap-4 border-b border-gray-800 bg-gray-800/50">
+                <button onclick="shopTab('buildings')" id="tab-buildings"
+                    class="px-4 py-2 rounded-lg bg-purple-600 font-bold shadow">Edificios y Mejoras</button>
+                <button onclick="shopTab('recipes')" id="tab-recipes"
+                    class="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 font-bold shadow">Recetas de
+                    Ensamblaje</button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6" id="shopContent">
+                <!-- Rellenado por JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Leaderboard -->
+    <div id="leaderboardModal"
+        class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center pointer-events-auto">
+        <div class="bg-gray-900 border border-yellow-500 rounded-2xl shadow-2xl w-full max-w-xl h-[70vh] flex flex-col">
+            <div class="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-800 rounded-t-2xl">
+                <h2 class="text-2xl font-bold text-yellow-400">🏆 Clasificación Global</h2>
+                <button onclick="toggleLeaderboard()"
+                    class="text-gray-400 hover:text-white font-bold text-3xl">&times;</button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-2" id="leaderboardContent">
+                <div class="text-center text-gray-400 mt-10">Cargando datos...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lienzo del Juego -->
+    <canvas id="gameCanvas"></canvas>
+
+    <script type="module" src="script.js"></script>
+</body>
+
+</html>
