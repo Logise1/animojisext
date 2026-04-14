@@ -24,6 +24,13 @@ if (rawUser) {
 } else if (isMobile) {
     // Si es móvil y no hay usuario, forzar login QR (implementado abajo)
 }
+
+// Limpiar UI móvil si no es móvil
+if (!isMobile) {
+    const mCtrl = document.getElementById('mobileControls');
+    if (mCtrl) mCtrl.remove();
+}
+
 document.getElementById('playerNameDisplay').innerText = playerName;
 
 // --- FIREBASE CONFIG ---
