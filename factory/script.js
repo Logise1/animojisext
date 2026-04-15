@@ -244,7 +244,9 @@ let state = {
     tool: 'cursor',
     buildDir: 1,
     isPaused: false,
-    showBottlenecks: false
+    showBottlenecks: false,
+    backups: [], // Historial de copias de seguridad
+    lastBackupTime: Date.now()
 };
 
 let selectedTile = null;
@@ -329,6 +331,7 @@ async function saveGameToCloud() {
             map: mapObj,
             unlockedRecipes: state.unlockedRecipes,
             unlockedBuildings: state.unlockedBuildings,
+            backups: state.backups, // Guardar backups en la nube también
             timestamp: Date.now()
         });
         document.getElementById('saveStatus').innerText = "Guardado ✅";
@@ -351,6 +354,7 @@ async function loadGameFromCloud() {
             state.map = data.map || {};
             state.unlockedRecipes = data.unlockedRecipes || ['smelt_iron', 'smelt_copper'];
             state.unlockedBuildings = data.unlockedBuildings || ['conveyor', 'generator', 'seller'];
+            state.backups = data.backups || [];
             state.items = [];
         }
         updateUI();
@@ -400,7 +404,86 @@ setInterval(() => {
         saveGameToCloud();
         lastSaveTime = Date.now();
     }
+    // Backup cada 5 minutos
+    if (!state.lastBackupTime) state.lastBackupTime = Date.now();
+    if (Date.now() - state.lastBackupTime > 300000) {
+        createBackup();
+        state.lastBackupTime = Date.now();
+    }
 }, 5000);
+
+window.createBackup = function() {
+    const snapshot = {
+        money: state.money,
+        gridSize: state.gridSize,
+        maxGenerators: state.maxGenerators,
+        map: JSON.parse(JSON.stringify(state.map)),
+        unlockedRecipes: [...state.unlockedRecipes],
+        unlockedBuildings: [...state.unlockedBuildings],
+        time: Date.now()
+    };
+    
+    state.backups.unshift(snapshot);
+    if (state.backups.length > 6) state.backups.pop(); // Max 6 backups (30 min)
+    saveGameToCloud();
+    console.log("Backup creado automáticamente");
+};
+
+window.toggleSettings = function () {
+    const el = document.getElementById('settingsModal');
+    el.classList.toggle('hidden');
+    if (!el.classList.contains('hidden')) renderBackups();
+};
+
+function renderBackups() {
+    const container = document.getElementById('backupsList');
+    container.innerHTML = '';
+    
+    if (state.backups.length === 0) {
+        container.innerHTML = '<div class="text-center text-gray-500 italic py-8 border-2 border-dashed border-gray-800 rounded-xl">No hay backups disponibles aún...</div>';
+        return;
+    }
+
+    state.backups.forEach((b, i) => {
+        const date = new Date(b.time);
+        const diff = Math.round((Date.now() - b.time) / 60000);
+        const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        const div = document.createElement('div');
+        div.className = "bg-gray-800 border border-gray-700 p-4 rounded-xl flex justify-between items-center hover:border-blue-500 transition-colors group";
+        div.innerHTML = `
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-gray-200">${timeStr}</span>
+                    <span class="text-[10px] bg-gray-900 px-2 py-0.5 rounded text-gray-400">Hace ${diff} min</span>
+                </div>
+                <div class="text-xs text-green-400 font-mono mt-1">$${b.money.toLocaleString()} | ${b.gridSize}x${b.gridSize}</div>
+            </div>
+            <button onclick="restoreBackup(${i})" class="bg-blue-600 hover:bg-blue-500 group-hover:scale-105 transition-all px-4 py-2 rounded-lg font-bold text-xs shadow-lg text-white">
+                Restaurar
+            </button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+window.restoreBackup = function(index) {
+    if (!confirm("¿Estás seguro de que quieres restaurar este backup? Perderás el progreso actual desde esa hora.")) return;
+    
+    const b = state.backups[index];
+    state.money = b.money;
+    state.gridSize = b.gridSize;
+    state.maxGenerators = b.maxGenerators;
+    state.map = JSON.parse(JSON.stringify(b.map));
+    state.unlockedRecipes = [...b.unlockedRecipes];
+    state.unlockedBuildings = [...b.unlockedBuildings];
+    state.items = []; // Limpiar items sueltos para evitar inconsistencias
+    
+    updateUI();
+    saveGameToCloud();
+    toggleSettings();
+    showToast("¡Backup restaurado con éxito!");
+};
 
 window.togglePause = function () {
     state.isPaused = !state.isPaused;

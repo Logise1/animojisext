@@ -143,6 +143,12 @@
                 class="bg-purple-600/80 hover:bg-purple-500 border border-purple-400 w-14 h-14 rounded-xl shadow-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95">
                 <span class="text-3xl">🛒</span>
             </button>
+
+            <!-- Ajustes -->
+            <button onclick="toggleSettings()" title="Ajustes"
+                class="bg-slate-700/80 hover:bg-slate-600 border border-slate-500 w-14 h-14 rounded-xl shadow-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95">
+                <span class="text-3xl">⚙️</span>
+            </button>
         </div>
     </div>
 
@@ -178,99 +184,80 @@
     </div>
 
     <!-- UI INFERIOR: Inventario / Barra de Herramientas -->
-    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 pointer-events-auto z-10 w-max">
-        <div class="bg-gray-900/95 backdrop-blur-xl px-4 py-3 rounded-2xl border border-gray-700 shadow-[0_10px_40px_rgba(0,0,0,0.5)] flex items-end gap-2"
+    <div class="absolute bottom-2 left-1/2 -translate-x-1/2 pointer-events-auto z-10 w-max max-w-[95vw] overflow-x-auto no-scrollbar">
+        <div class="bg-gray-900/95 backdrop-blur-xl px-2 py-2 rounded-xl border border-gray-700 shadow-[0_10px_40px_rgba(0,0,0,0.5)] flex items-end gap-1.5"
             id="toolbarContainer">
 
             <button onclick="setTool('cursor')" id="tool-cursor"
-                class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-blue-500 transition-all flex flex-col items-center w-20 h-20 justify-center">
-                <span class="text-2xl mb-1">👆</span>
-                <span class="text-[11px] font-bold text-gray-200">Seleccionar</span>
+                class="tool-btn p-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 border-2 border-blue-500 transition-all flex flex-col items-center w-14 h-14 justify-center">
+                <span class="text-xl mb-0.5">👆</span>
+                <span class="text-[9px] font-bold text-gray-200">Cursor</span>
             </button>
-            <div class="w-px h-16 bg-gray-700 mx-1"></div>
+            <div class="w-px h-10 bg-gray-700 mx-0.5"></div>
 
             <button onclick="setTool('conveyor')" id="tool-conveyor"
-                class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
-                <img src="textures/factory/belt_horizontal.png" class="w-8 h-8 mb-1 object-contain">
-                <span class="text-[10px] text-gray-300">Cinta</span>
-                <div
-                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
-                    $10</div>
+                class="tool-btn p-1 rounded-lg bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-12 h-14 justify-center relative group">
+                <img src="textures/factory/belt_horizontal.png" class="w-6 h-6 mb-0.5 object-contain">
+                <span class="text-[8px] text-gray-300">Cinta</span>
+                <div class="absolute -top-2 -right-1 bg-gray-900 px-1 py-0.2 rounded text-[8px] text-yellow-400 font-mono border border-gray-700">$10</div>
             </button>
-
-            <!-- Nuevos Divisores -->
+ 
             <button onclick="setTool('splitter2')" id="tool-splitter2"
-                class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
-                <img src="textures/factory/splitter_down.png" class="w-8 h-8 mb-1 object-contain">
-                <span class="text-[10px] text-gray-300">Div 1/2</span>
-                <div
-                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
-                    $150</div>
+                class="tool-btn p-1 rounded-lg bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-12 h-14 justify-center relative hidden">
+                <img src="textures/factory/splitter_down.png" class="w-6 h-6 mb-0.5 object-contain">
+                <span class="text-[8px] text-gray-300">Div 1/2</span>
+                <div class="absolute -top-2 -right-1 bg-gray-900 px-1 py-0.2 rounded text-[8px] text-yellow-400 font-mono border border-gray-700">$150</div>
             </button>
-
+ 
             <button onclick="setTool('splitter3')" id="tool-splitter3"
-                class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
-                <img src="textures/factory/splitter_up.png" class="w-8 h-8 mb-1 object-contain">
-                <span class="text-[10px] text-gray-300">Div 1/3</span>
-                <div
-                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
-                    $300</div>
+                class="tool-btn p-1 rounded-lg bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-12 h-14 justify-center relative hidden">
+                <img src="textures/factory/splitter_up.png" class="w-6 h-6 mb-0.5 object-contain">
+                <span class="text-[8px] text-gray-300">Div 1/3</span>
+                <div class="absolute -top-2 -right-1 bg-gray-900 px-1 py-0.2 rounded text-[8px] text-yellow-400 font-mono border border-gray-700">$300</div>
             </button>
-
+ 
             <button onclick="setTool('merger')" id="tool-merger"
-                class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
-                <img src="textures/factory/splitter_down.png" class="w-8 h-8 mb-1 object-contain" style="filter: hue-rotate(120deg) saturate(1.3);">
-                <span class="text-[10px] text-gray-300">Fusión 2/1</span>
-                <div
-                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
-                    $200</div>
+                class="tool-btn p-1 rounded-lg bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-12 h-14 justify-center relative hidden">
+                <img src="textures/factory/splitter_down.png" class="w-6 h-6 mb-0.5 object-contain" style="filter: hue-rotate(120deg) saturate(1.3);">
+                <span class="text-[8px] text-gray-300">Fusión</span>
+                <div class="absolute -top-2 -right-1 bg-gray-900 px-1 py-0.2 rounded text-[8px] text-yellow-400 font-mono border border-gray-700">$200</div>
             </button>
-
-            <div class="w-px h-16 bg-gray-700 mx-1"></div>
-
+ 
+            <div class="w-px h-10 bg-gray-700 mx-0.5"></div>
+ 
             <button onclick="setTool('generator')" id="tool-generator"
-                class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
-                <img src="textures/factory/miner_basic.png" class="w-8 h-8 mb-1 object-contain">
-                <span class="text-[10px] text-gray-300">Minero</span>
-                <div
-                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
-                    $50</div>
+                class="tool-btn p-1 rounded-lg bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-12 h-14 justify-center relative group">
+                <img src="textures/factory/miner_basic.png" class="w-6 h-6 mb-0.5 object-contain">
+                <span class="text-[8px] text-gray-300">Minero</span>
+                <div class="absolute -top-2 -right-1 bg-gray-900 px-1 py-0.2 rounded text-[8px] text-yellow-400 font-mono border border-gray-700">$50</div>
             </button>
-
+ 
             <button onclick="setTool('seller')" id="tool-seller"
-                class="tool-btn p-2 rounded-xl bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative group">
-                <img src="textures/factory/chest_iron.png" class="w-8 h-8 mb-1 object-contain">
-                <span class="text-[10px] text-gray-300">Vendedor</span>
-                <div
-                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
-                    $50</div>
+                class="tool-btn p-1 rounded-lg bg-gray-800 hover:bg-gray-700 border-2 border-transparent transition-all flex flex-col items-center w-12 h-14 justify-center relative group">
+                <img src="textures/factory/chest_iron.png" class="w-6 h-6 mb-0.5 object-contain">
+                <span class="text-[8px] text-gray-300">Venta</span>
+                <div class="absolute -top-2 -right-1 bg-gray-900 px-1 py-0.2 rounded text-[8px] text-yellow-400 font-mono border border-gray-700">$50</div>
             </button>
-
+ 
             <button onclick="setTool('smelter')" id="tool-smelter"
-                class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-16 h-20 justify-center relative hidden">
-                <img src="textures/factory/furnace_iron.png" class="w-8 h-8 mb-1 object-contain">
-                <span class="text-[10px] text-gray-300">Horno</span>
-                <div
-                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
-                    $200</div>
+                class="tool-btn p-1 rounded-lg bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-12 h-14 justify-center relative hidden">
+                <img src="textures/factory/furnace_iron.png" class="w-6 h-6 mb-0.5 object-contain">
+                <span class="text-[8px] text-gray-300">Horno</span>
+                <div class="absolute -top-2 -right-1 bg-gray-900 px-1 py-0.2 rounded text-[8px] text-yellow-400 font-mono border border-gray-700">$200</div>
             </button>
-
+ 
             <button onclick="setTool('crafter')" id="tool-crafter"
-                class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-20 h-20 justify-center relative hidden">
-                <img src="textures/factory/assembler_basic.png" class="w-8 h-8 mb-1 object-contain">
-                <span class="text-[10px] text-gray-300 leading-tight text-center">Ensamblador</span>
-                <div
-                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
-                    $500</div>
+                class="tool-btn p-1 rounded-lg bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-12 h-14 justify-center relative hidden">
+                <img src="textures/factory/assembler_basic.png" class="w-6 h-6 mb-0.5 object-contain">
+                <span class="text-[8px] text-gray-300 leading-tight text-center">Ensamblar</span>
+                <div class="absolute -top-2 -right-1 bg-gray-900 px-1 py-0.2 rounded text-[8px] text-yellow-400 font-mono border border-gray-700">$500</div>
             </button>
-
+ 
             <button onclick="setTool('quantum_generator')" id="tool-quantum_generator"
-                class="tool-btn p-2 rounded-xl bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-20 h-20 justify-center relative hidden">
-                <img src="textures/factory/quantic/generador_cuantico.png" class="w-8 h-8 mb-1 object-contain">
-                <span class="text-[10px] text-gray-300 leading-tight text-center">Gen. Cuántico</span>
-                <div
-                    class="absolute -top-3 -right-2 bg-gray-900 px-1 py-0.5 rounded text-[10px] text-yellow-400 font-mono border border-gray-700">
-                    $1M</div>
+                class="tool-btn p-1 rounded-lg bg-gray-800 border-2 border-transparent transition-all flex flex-col items-center w-14 h-14 justify-center relative hidden">
+                <img src="textures/factory/quantic/generador_cuantico.png" class="w-6 h-6 mb-0.5 object-contain">
+                <span class="text-[8px] text-gray-300 leading-tight text-center">Gen. Cuant</span>
+                <div class="absolute -top-2 -right-1 bg-gray-900 px-1 py-0.2 rounded text-[8px] text-yellow-400 font-mono border border-gray-700">$1M</div>
             </button>
         </div>
     </div>
@@ -312,6 +299,29 @@
             </div>
             <div class="flex-1 overflow-y-auto p-2" id="leaderboardContent">
                 <div class="text-center text-gray-400 mt-10">Cargando datos...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Ajustes y Backups -->
+    <div id="settingsModal" class="hidden fixed inset-0 modal-overlay z-50 flex items-center justify-center pointer-events-auto">
+        <div class="bg-gray-900 border border-slate-500 rounded-2xl shadow-2xl w-full max-w-xl h-[70vh] flex flex-col">
+            <div class="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-800 rounded-t-2xl">
+                <h2 class="text-2xl font-bold text-slate-300">⚙️ Ajustes y Backups</h2>
+                <button onclick="toggleSettings()" class="text-gray-400 hover:text-white font-bold text-3xl">&times;</button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6">
+                <div class="mb-6">
+                    <h3 class="text-lg font-bold text-blue-400 mb-2 flex items-center gap-2">
+                        <span>💾 Copias de Seguridad Automáticas</span>
+                        <span class="text-[10px] bg-blue-900/50 px-2 py-0.5 rounded text-blue-300">Cada 5 min</span>
+                    </h3>
+                    <p class="text-xs text-gray-400 mb-4">Se guardan hasta 6 copias (últimos 30 min). Puedes restaurar cualquier punto anterior si algo sale mal.</p>
+                    <div id="backupsList" class="flex flex-col gap-3">
+                        <!-- Generado por JS -->
+                        <div class="text-center text-gray-500 italic py-8 border-2 border-dashed border-gray-800 rounded-xl">No hay backups disponibles aún...</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
