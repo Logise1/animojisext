@@ -103,7 +103,7 @@ const spriteNames = [
     'miner_basic', 'miner_drill', 'motor', 'ore_aluminum', 'ore_copper', 'ore_diamond',
     'ore_gold', 'ore_iron', 'ore_silicon', 'pipe', 'plate', 'processor', 'quantum_chip',
     'splitter_down', 'splitter_up', 'supercomputer', 'tank_chemical', 'tank_water',
-    'wafer_silicon', 'wire', 
+    'wafer_silicon', 'wire',
     'quantic/cristal_cuantico', 'quantic/lingote_cuantico', 'quantic/chip_cuantico_reforzado',
     'quantic/disco_cuantico', 'quantic/generador_cuantico', 'quantic/agujero_cuantico'
 ];
@@ -144,7 +144,7 @@ const RECIPES = {
     // QUÍMICA
     'craft_water': { name: 'Embotelladora (Agua)', in: { 'pipe': 1, 'plate': 1 }, out: 'tank_water', time: 2.0, type: 'crafter', cost: 800, cat: 'Química Básica' },
     'craft_chemical': { name: 'Síntesis Química', in: { 'tank_water': 1, 'ore_aluminum': 2 }, out: 'tank_chemical', time: 4.0, type: 'crafter', cost: 2500, cat: 'Química Avanzada' },
-    
+
     'smelt_cristal_cuantico': { name: 'Cristal Cuántico', in: { 'ore_diamond': 3, 'wafer_silicon': 2, 'quantum_chip': 1 }, out: 'cristal_cuantico', time: 30.0, type: 'smelter', cost: 3000000, cat: 'Fundición Cuántica' },
     'smelt_lingote_cuantico': { name: 'Lingote Cuántico', in: { 'cristal_cuantico': 2, 'quantum_chip': 2 }, out: 'lingote_cuantico', time: 60.0, type: 'smelter', cost: 10000000, cat: 'Fundición Cuántica' },
 
@@ -161,8 +161,7 @@ const BUILDINGS = {
     splitter3: { cost: 300, name: 'Divisor Triple (1 a 3)', shop: true, info: 'Alterna items hacia izq, frente y derecha.' },
     smelter: { cost: 200, name: 'Horno de Fundición', shop: true, info: 'Funde minerales en lingotes.' },
     crafter: { cost: 500, name: 'Ensamblador', shop: true, info: 'Combina items para crear objetos avanzados.' },
-    merger: { cost: 200, name: 'Fusionador (2 a 1)', shop: true, info: 'Fusiona 2 líneas en 1. Acepta items por los lados y los empuja al frente.' },
-    quantum_generator: { cost: 1000000, name: 'Generador Cuántico', shop: true, info: 'Genera Chips Cuánticos cada 30s. Lento pero valioso.' }
+    merger: { cost: 200, name: 'Fusionador (2 a 1)', shop: true, info: 'Fusiona 2 líneas en 1. Acepta items por los lados y los empuja al frente.' }
 };
 
 const DIRECTIONS = [
@@ -183,7 +182,7 @@ function hashSeed(str) {
 }
 
 function mulberry32(a) {
-    return function() {
+    return function () {
         a |= 0; a = a + 0x6D2B79F5 | 0;
         let t = Math.imul(a ^ a >>> 15, 1 | a);
         t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
@@ -195,20 +194,39 @@ const WORLD_SEED = hashSeed("Antigravity");
 
 // Ore deposit colors for ground tiles
 const ORE_DEPOSIT_INFO = {
-    'ore_gold':     { name: 'Veta de Oro',      tint: 'rgba(251, 191, 36, 0.25)', border: 'rgba(251, 191, 36, 0.5)', sprite: 'ore_gold' },
+    'ore_gold': { name: 'Veta de Oro', tint: 'rgba(251, 191, 36, 0.25)', border: 'rgba(251, 191, 36, 0.5)', sprite: 'ore_gold' },
     'ore_aluminum': { name: 'Veta de Aluminio', tint: 'rgba(203, 213, 225, 0.25)', border: 'rgba(203, 213, 225, 0.5)', sprite: 'ore_aluminum' },
-    'ore_silicon':  { name: 'Veta de Silicio',  tint: 'rgba(20, 184, 166, 0.25)',  border: 'rgba(20, 184, 166, 0.5)',  sprite: 'ore_silicon' },
-    'ore_diamond':  { name: 'Veta de Diamante', tint: 'rgba(103, 232, 249, 0.25)', border: 'rgba(103, 232, 249, 0.5)', sprite: 'ore_diamond' }
+    'ore_silicon': { name: 'Veta de Silicio', tint: 'rgba(20, 184, 166, 0.25)', border: 'rgba(20, 184, 166, 0.5)', sprite: 'ore_silicon' },
+    'ore_diamond': { name: 'Veta de Diamante', tint: 'rgba(103, 232, 249, 0.25)', border: 'rgba(103, 232, 249, 0.5)', sprite: 'ore_diamond' }
 };
 
-function getOreDeposit(x, y) {
-    // Combine world seed with tile position for unique per-tile RNG
+function getTileRNG(x, y) {
     const tileSeed = WORLD_SEED ^ (x * 374761393 + y * 668265263 + x * y * 1013904223);
-    const rng = mulberry32(tileSeed);
-    const val = rng();
+    return mulberry32(tileSeed)();
+}
 
-    // Probabilidades ajustadas (Más difícil): Diamante 0.5%, Oro 1.5%, Silicio 3%, Aluminio 5%
-    if (val < 0.005) return 'ore_diamond';
+function getOreDeposit(x, y) {
+    const val = getTileRNG(x, y);
+
+    // Lógica de Diamantes: Más frecuentes (antes 0.5%) pero con espaciado mínimo de 3 bloques (distancia 4).
+    // Para garantizar el espaciado y la aleatoriedad, solo spawnear si es el máximo local en un radio de 3.
+    if (val > 0.95) { // Threshold alto para asegurar que sean diamantes "especiales"
+        let isLocalMax = true;
+        const radius = 3;
+        for (let dx = -radius; dx <= radius; dx++) {
+            for (let dy = -radius; dy <= radius; dy++) {
+                if (dx === 0 && dy === 0) continue;
+                if (getTileRNG(x + dx, y + dy) > val) {
+                    isLocalMax = false;
+                    break;
+                }
+            }
+            if (!isLocalMax) break;
+        }
+        if (isLocalMax) return 'ore_diamond';
+    }
+
+    // Probabilidades ajustadas para el resto: Oro 2%, Silicio 3%, Aluminio 5% (sobre el val base)
     if (val < 0.02) return 'ore_gold';
     if (val < 0.05) return 'ore_silicon';
     if (val < 0.10) return 'ore_aluminum';
@@ -752,8 +770,8 @@ window.addEventListener('keydown', (e) => {
     else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') dx = -1;
     else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') dx = 1;
     else if (e.key === 'Delete' || e.key === 'Backspace') {
-        if(e.key === 'Backspace' && document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.isContentEditable)) {
-             return;
+        if (e.key === 'Backspace' && document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.isContentEditable)) {
+            return;
         }
         if (e.key === 'Backspace') e.preventDefault();
         deleteSelected();
@@ -780,13 +798,13 @@ window.addEventListener('keydown', (e) => {
             if (!state.map[nextKey] && cell) {
                 state.map[nextKey] = cell;
                 delete state.map[selectedTile];
-                
+
                 // Recalcular si es un extractor
                 if (cell.type === 'generator') {
                     const deposit = getOreDeposit(nx, ny);
                     cell.config = deposit || 'ore_iron';
                 }
-                
+
                 selectTile(nx, ny); // Mantiene el componente seleccionado y actualiza la UI
                 saveGameToCloud();
             }
@@ -1107,7 +1125,7 @@ window.upgradeMachine = function (gx, gy) {
         if (cell.type === 'conveyor') baseCost = 200;
         if (cell.type.startsWith('splitter')) baseCost = 500;
         if (cell.type === 'merger') baseCost = 300;
-        
+
         const upgCost = baseCost * Math.pow(2, upgLvl);
         if (state.money >= upgCost) {
             state.money -= upgCost;
@@ -1908,7 +1926,7 @@ window.moveSelected = function (dx, dy) {
     }
 };
 
-window.buildAtPointer = function() {
+window.buildAtPointer = function () {
     // Construir en el centro de la vista actual o donde esté el hover
     const mx = window.innerWidth / 2;
     const my = window.innerHeight / 2;
@@ -1919,7 +1937,7 @@ window.buildAtPointer = function() {
 if (isMobile && !rawUser) {
     const loginOverlay = document.getElementById('mobileLoginOverlay');
     loginOverlay.classList.remove('hidden');
-    
+
     const html5QrCode = new Html5Qrcode("reader");
     const qrConfig = { fps: 10, qrbox: { width: 250, height: 250 } };
 
@@ -1929,11 +1947,11 @@ if (isMobile && !rawUser) {
             const parts = decodedText.split('|');
             const timePart = parts[0].replace('Time: ', '').trim();
             const paramPart = parts[1].replace('Params: ', '').trim();
-            
+
             // Validar timestamp (máximo 60 segundos de antigüedad)
             const qrTime = new Date(timePart).getTime();
             const now = new Date().getTime();
-            
+
             if (now - qrTime > 60000) {
                 showToast("El código QR ha expirado. Genera uno nuevo.");
                 return;
@@ -1941,7 +1959,7 @@ if (isMobile && !rawUser) {
 
             const scanParams = new URLSearchParams(paramPart);
             const user = scanParams.get('user');
-            
+
             if (user) {
                 html5QrCode.stop();
                 localStorage.setItem('factory_user', user);
