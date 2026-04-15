@@ -459,7 +459,7 @@ function renderBackups() {
                 </div>
                 <div class="text-xs text-green-400 font-mono mt-1">$${b.money.toLocaleString()} | ${b.gridSize}x${b.gridSize}</div>
             </div>
-            <button onclick="restoreBackup(${i})" class="bg-blue-600 hover:bg-blue-500 group-hover:scale-105 transition-all px-4 py-2 rounded-lg font-bold text-xs shadow-lg text-white">
+            <button onclick="window.restoreBackup(${i})" class="bg-blue-600 hover:bg-blue-500 group-hover:scale-105 transition-all px-4 py-2 rounded-lg font-bold text-xs shadow-lg text-white">
                 Restaurar
             </button>
         `;
@@ -481,7 +481,7 @@ window.restoreBackup = function(index) {
     
     updateUI();
     saveGameToCloud();
-    toggleSettings();
+    window.toggleSettings();
     showToast("¡Backup restaurado con éxito!");
 };
 
