@@ -930,6 +930,26 @@ window.selectTile = function (gx, gy) {
                      </select>
                      <div class="text-xs text-gray-500 mt-1">💡 Coloca un minero sobre una veta para extraer minerales raros.</div>`;
         }
+        
+        // UPGRADE SYSTEM FOR MINERS
+        const upgLvl = cell.upgradeLevel || 0;
+        const baseCost = 400;
+        const upgCost = baseCost * Math.pow(2.2, upgLvl);
+        const speedMult = Math.min(Math.pow(1.5, upgLvl), 2.5).toFixed(2);
+        const isMax = Math.pow(1.5, upgLvl) >= 2.5;
+
+        html += `<div class="mt-4 border-t border-gray-600 pt-3">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs text-indigo-300 font-bold">Nivel Mejora: ${upgLvl}</span>
+                        <span class="text-[10px] text-gray-400 px-2 py-0.5 bg-gray-900 rounded border border-gray-700">Velocidad: x${speedMult}</span>
+                    </div>
+                    ${isMax ? 
+                        `<div class="w-full bg-gray-700/50 py-2 rounded-lg text-xs font-bold text-center text-indigo-400 border border-indigo-900/50">MÁXIMO ALCANZADO</div>` :
+                        `<button onclick="upgradeMachine('${gx}', '${gy}')" class="w-full bg-indigo-600 hover:bg-indigo-500 py-2 rounded-lg text-xs font-bold shadow text-white transition-colors">
+                            Mejorar Producción ($${Math.floor(upgCost).toLocaleString()})
+                        </button>`
+                    }
+                 </div>`;
     } else if (cell.type === 'quantum_generator') {
         html += `<div class="flex items-center gap-2 bg-purple-900/30 p-2 rounded border border-purple-700">
                     <img src="textures/factory/quantum_chip.png" class="w-6 h-6 object-contain">
@@ -1118,22 +1138,30 @@ window.closeInspector = function () {
 window.upgradeMachine = function (gx, gy) {
     const key = `${gx},${gy}`;
     const cell = state.map[key];
-    if (cell && (cell.type === 'smelter' || cell.type === 'crafter' || cell.type === 'conveyor' || cell.type.startsWith('splitter') || cell.type === 'merger')) {
+    if (cell && (cell.type === 'generator' || cell.type === 'smelter' || cell.type === 'crafter' || cell.type === 'conveyor' || cell.type.startsWith('splitter') || cell.type === 'merger')) {
         const upgLvl = cell.upgradeLevel || 0;
+
+        // Verificar límite de 2.5x para el minero
+        if (cell.type === 'generator' && Math.pow(1.5, upgLvl) >= 2.5) {
+            showToast("¡Este minero ya está al máximo!");
+            return;
+        }
+
         let baseCost = 1000;
+        if (cell.type === 'generator') baseCost = 400;
         if (cell.type === 'smelter') baseCost = 500;
         if (cell.type === 'conveyor') baseCost = 200;
         if (cell.type.startsWith('splitter')) baseCost = 500;
         if (cell.type === 'merger') baseCost = 300;
 
-        const upgCost = baseCost * Math.pow(2, upgLvl);
+        const upgCost = Math.floor(baseCost * Math.pow(cell.type === 'generator' ? 2.2 : 2, upgLvl));
         if (state.money >= upgCost) {
             state.money -= upgCost;
             cell.upgradeLevel = upgLvl + 1;
             updateUI();
             selectTile(gx, gy); // Refrescar el inspector visualmente
             saveGameToCloud();
-            showToast("¡Máquina acelerada!");
+            showToast(cell.type === 'generator' ? "¡Extracción mejorada!" : "¡Máquina acelerada!");
         } else {
             showToast("No tienes suficiente dinero.");
         }
@@ -1190,13 +1218,16 @@ function updateLogic(dt) {
 
         if (cell.type === 'generator') {
             cell.timer += dt;
-            let speed = 1.0;
-            if (cell.config === 'ore_diamond') speed = 4.0;
-            else if (cell.config === 'ore_gold' || cell.config === 'ore_silicon') speed = 2.0;
+            let baseProdTime = 1.0;
+            if (cell.config === 'ore_diamond') baseProdTime = 4.0;
+            else if (cell.config === 'ore_gold' || cell.config === 'ore_silicon') baseProdTime = 2.0;
 
-            if (cell.timer >= speed) {
+            const speedMultiplier = Math.min(Math.pow(1.5, cell.upgradeLevel || 0), 2.5);
+            const actualProdTime = baseProdTime / speedMultiplier;
+
+            if (cell.timer >= actualProdTime) {
                 state.items.push({ type: cell.config, x: gx, y: gy, nx: gx, ny: gy, progress: 0, moving: false, idleTime: 0 });
-                cell.timer = 0;
+                cell.timer -= actualProdTime; // Mantener excedente para fluidez
             }
         }
         else if (cell.type === 'quantum_generator') {
