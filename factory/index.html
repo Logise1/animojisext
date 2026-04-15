@@ -319,26 +319,7 @@
     <!-- Lienzo del Juego -->
     <canvas id="gameCanvas"></canvas>
 
-    <!-- UI MÓVIL: Controles -->
-    <div id="mobileControls" class="mobile-ctrl fixed bottom-4 w-full px-6 flex justify-between items-end pointer-events-none z-40">
-        <!-- D-PAD Izquierdo -->
-        <div class="grid grid-cols-3 gap-1 pointer-events-auto bg-gray-900/60 p-2 rounded-2xl backdrop-blur-md border border-gray-700">
-            <div></div>
-            <button onpointerdown="moveSelected(0, -1)" class="w-12 h-12 bg-gray-700/80 active:bg-blue-600 rounded-lg flex items-center justify-center text-xl">▲</button>
-            <div></div>
-            <button onpointerdown="moveSelected(-1, 0)" class="w-12 h-12 bg-gray-700/80 active:bg-blue-600 rounded-lg flex items-center justify-center text-xl">◀</button>
-            <button onpointerdown="buildAtPointer()" class="w-12 h-12 bg-blue-600 active:bg-blue-400 rounded-lg flex items-center justify-center text-xl">⚒️</button>
-            <button onpointerdown="moveSelected(1, 0)" class="w-12 h-12 bg-gray-700/80 active:bg-blue-600 rounded-lg flex items-center justify-center text-xl">▶</button>
-            <div></div>
-            <button onpointerdown="moveSelected(0, 1)" class="w-12 h-12 bg-gray-700/80 active:bg-blue-600 rounded-lg flex items-center justify-center text-xl">▼</button>
-            <div></div>
-        </div>
 
-        <!-- Botones Acción Derecha -->
-        <div class="flex flex-col gap-2 pointer-events-auto">
-            <button onclick="rotateSelected()" class="w-16 h-16 bg-blue-600/90 active:bg-blue-500 rounded-full shadow-2xl border-2 border-blue-400 flex items-center justify-center text-3xl">↻</button>
-        </div>
-    </div>
 
     <!-- OVERLAY DE LOGIN MÓVIL (QR Scanner) -->
     <div id="mobileLoginOverlay" class="hidden fixed inset-0 bg-slate-950 z-[100] flex flex-col items-center justify-center p-6 text-center">

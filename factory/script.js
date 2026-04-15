@@ -25,10 +25,9 @@ if (rawUser) {
     // Si es móvil y no hay usuario, forzar login QR (implementado abajo)
 }
 
-// Limpiar UI móvil si no es móvil
-if (!isMobile) {
-    const mCtrl = document.getElementById('mobileControls');
-    if (mCtrl) mCtrl.remove();
+// Auto-detección móvil
+if (isMobile) {
+    // Podríamos añadir clases específicas si fuera necesario
 }
 
 document.getElementById('playerNameDisplay').innerText = playerName;
@@ -757,6 +756,81 @@ canvas.addEventListener('wheel', (e) => {
     camera.zoom = Math.max(0.2, Math.min(camera.zoom * factor, 3.0));
     camera.x = w.worldX - (e.clientX - canvas.width / 2) / camera.zoom;
     camera.y = w.worldY - (e.clientY - canvas.height / 2) / camera.zoom;
+});
+
+// --- SOPORTE TÁCTIL (Pinch-to-zoom y Dos dedos para mover) ---
+let lastTouchPos = null;
+let lastTouchDist = null;
+let isPanningTouch = false;
+
+canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        const { worldX, worldY } = getScreenToWorld(touch.clientX, touch.clientY);
+        
+        if (state.tool === 'cursor') {
+            // Un dedo selecciona en modo cursor
+            const g = getGridPos(worldX, worldY);
+            selectTile(g.gx, g.gy);
+        } else {
+            // Un dedo construye en otros modos
+            isDraggingBuild = true;
+            buildAtMouse(touch.clientX, touch.clientY);
+        }
+    } else if (e.touches.length === 2) {
+        isDraggingBuild = false; // Cancelar construcción si entra un segundo dedo
+        isPanningTouch = true;
+        const t1 = e.touches[0];
+        const t2 = e.touches[1];
+        lastTouchPos = { x: (t1.clientX + t2.clientX) / 2, y: (t1.clientY + t2.clientY) / 2 };
+        lastTouchDist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+    }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (e.touches.length === 1 && isDraggingBuild) {
+        buildAtMouse(e.touches[0].clientX, e.touches[0].clientY);
+    } else if (e.touches.length === 2 && isPanningTouch) {
+        const t1 = e.touches[0];
+        const t2 = e.touches[1];
+        const currentMid = { x: (t1.clientX + t2.clientX) / 2, y: (t1.clientY + t2.clientY) / 2 };
+        const currentDist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+
+        // Pan
+        if (lastTouchPos) {
+            camera.x -= (currentMid.x - lastTouchPos.x) / camera.zoom;
+            camera.y -= (currentMid.y - lastTouchPos.y) / camera.zoom;
+        }
+
+        // Zoom (pinch)
+        if (lastTouchDist && lastTouchDist > 0) {
+            const zoomFactor = currentDist / lastTouchDist;
+            const oldZoom = camera.zoom;
+            camera.zoom = Math.max(0.2, Math.min(camera.zoom * zoomFactor, 3.0));
+            
+            // Ajustar cámara para que el zoom sea hacia el centro de los dedos
+            const { worldX, worldY } = getScreenToWorld(currentMid.x, currentMid.y);
+            camera.x = worldX - (currentMid.x - canvas.width / 2) / camera.zoom;
+            camera.y = worldY - (currentMid.y - canvas.height / 2) / camera.zoom;
+        }
+
+        lastTouchPos = currentMid;
+        lastTouchDist = currentDist;
+    }
+}, { passive: false });
+
+canvas.addEventListener('touchend', (e) => {
+    if (e.touches.length < 2) {
+        isPanningTouch = false;
+        lastTouchPos = null;
+        lastTouchDist = null;
+    }
+    if (e.touches.length === 0) {
+        if (isDraggingBuild) saveGameToCloud();
+        isDraggingBuild = false;
+    }
 });
 
 window.addEventListener('keydown', (e) => {
