@@ -160,7 +160,8 @@ const BUILDINGS = {
     splitter3: { cost: 300, name: 'Divisor Triple (1 a 3)', shop: true, info: 'Alterna items hacia izq, frente y derecha.' },
     smelter: { cost: 200, name: 'Horno de Fundición', shop: true, info: 'Funde minerales en lingotes.' },
     crafter: { cost: 500, name: 'Ensamblador', shop: true, info: 'Combina items para crear objetos avanzados.' },
-    merger: { cost: 200, name: 'Fusionador (2 a 1)', shop: true, info: 'Fusiona 2 líneas en 1. Acepta items por los lados y los empuja al frente.' }
+    merger: { cost: 200, name: 'Fusionador (2 a 1)', shop: true, info: 'Fusiona 2 líneas en 1. Acepta items por los lados y los empuja al frente.' },
+    smart_splitter: { cost: 1000, name: 'Divisor Inteligente', shop: true, info: 'Filtra materiales específicos hacia la izquierda, frente o derecha.' }
 };
 
 const DIRECTIONS = [
@@ -426,7 +427,14 @@ window.createBackup = function() {
     state.backups.unshift(snapshot);
     if (state.backups.length > 6) state.backups.pop(); // Max 6 backups (30 min)
     saveGameToCloud();
-    console.log("Backup creado automáticamente");
+    console.log("Backup creado");
+    
+    // Si el modal está abierto, refrescar la lista
+    const settingsModal = document.getElementById('settingsModal');
+    if (settingsModal && !settingsModal.classList.contains('hidden')) {
+        renderBackups();
+    }
+    showToast("¡Copia de seguridad creada!");
 };
 
 window.toggleSettings = function () {
@@ -933,6 +941,12 @@ window.addEventListener('keydown', (e) => {
         if (e.key === 'Backspace') e.preventDefault();
         deleteSelected();
         return;
+    } else if (e.key === 'e' || e.key === 'E') {
+        window.rotateSelected(1);
+        return;
+    } else if (e.key === 'q' || e.key === 'Q') {
+        window.rotateSelected(-1);
+        return;
     }
 
     if (dx !== 0 || dy !== 0) {
@@ -1188,6 +1202,40 @@ window.selectTile = function (gx, gy) {
                     </button>
                  </div>`;
 
+    } else if (cell.type === 'smart_splitter') {
+        const f = cell.filters || { 3: '*', 0: '*', 1: '*' };
+        const matsTable = Object.keys(MATS);
+        const getOpts = (current) => {
+            let opts = `<option value="*">* (Cualquiera)</option>`;
+            matsTable.forEach(m => {
+                opts += `<option value="${m}" ${current === m ? 'selected' : ''}>${MATS[m].name}</option>`;
+            });
+            return opts;
+        };
+
+        html += `<div class="mb-3">
+                    <p class="text-[10px] text-gray-400">Configura qué material sale por cada lado:</p>
+                 </div>
+                 <div class="space-y-3">
+                    <div>
+                        <label class="text-[10px] text-emerald-400 font-bold uppercase">⬅️ Izquierda</label>
+                        <select id="selSmart3" class="bg-gray-700 text-white p-1.5 rounded outline-none border border-emerald-700 w-full mt-1 text-xs">
+                            ${getOpts(f[3])}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-blue-400 font-bold uppercase">⬆️ Frente</label>
+                        <select id="selSmart0" class="bg-gray-700 text-white p-1.5 rounded outline-none border border-blue-700 w-full mt-1 text-xs">
+                            ${getOpts(f[0])}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-orange-400 font-bold uppercase">➡️ Derecha</label>
+                        <select id="selSmart1" class="bg-gray-700 text-white p-1.5 rounded outline-none border border-orange-700 w-full mt-1 text-xs">
+                            ${getOpts(f[1])}
+                        </select>
+                    </div>
+                 </div>`;
     } else if (cell.type === 'merger') {
         const parts = (cell.config || '1.0,1.0').split(',');
         const leftTime = parseFloat(parts[0]) || 1.0;
@@ -1285,6 +1333,22 @@ window.selectTile = function (gx, gy) {
         selLeft.onchange = updateMerger;
         selRight.onchange = updateMerger;
     }
+
+    const s0 = document.getElementById('selSmart0');
+    const s1 = document.getElementById('selSmart1');
+    const s3 = document.getElementById('selSmart3');
+    if (s0 && s1 && s3) {
+        const updateSmart = () => {
+            const c = state.map[selectedTile];
+            if (c) {
+                c.filters = { 0: s0.value, 1: s1.value, 3: s3.value };
+                saveGameToCloud();
+            }
+        };
+        s0.onchange = updateSmart;
+        s1.onchange = updateSmart;
+        s3.onchange = updateSmart;
+    }
 };
 
 window.closeInspector = function () {
@@ -1336,12 +1400,16 @@ window.toggleMachinePower = function (gx, gy) {
     }
 };
 
-window.rotateSelected = function () {
+window.rotateSelected = function (inc = 1) {
     if (!selectedTile) return;
     const cell = state.map[selectedTile];
     if (cell) {
-        cell.dir = (cell.dir + 1) % 4;
+        // Rotación bilateral: (dir + inc + 4) % 4 asegura valores positivos
+        cell.dir = (cell.dir + inc + 4) % 4;
         saveGameToCloud();
+        // Forzar redibujado de la UI si el inspector está abierto
+        const [gx, gy] = selectedTile.split(',').map(Number);
+        selectTile(gx, gy);
     }
 };
 
@@ -1477,6 +1545,23 @@ function updateLogic(dt) {
                     // Alterna entre Izquierda, Frente y Derecha
                     const dirs = [(cell.dir + 3) % 4, cell.dir, (cell.dir + 1) % 4];
                     pushDir = dirs[(cell.splitIndex || 0) % 3];
+                } else if (cell.type === 'smart_splitter') {
+                    isSplitter = true;
+                    const f = cell.filters || { 0: '*', 1: '*', 3: '*' };
+                    const l = (cell.dir + 3) % 4;
+                    const r = (cell.dir + 1) % 4;
+                    const fwd = cell.dir;
+
+                    if (f[3] && f[3] !== '*' && f[3] === item.type) pushDir = l;
+                    else if (f[0] && f[0] !== '*' && f[0] === item.type) pushDir = fwd;
+                    else if (f[1] && f[1] !== '*' && f[1] === item.type) pushDir = r;
+                    else {
+                        // Priority for '*' catch-all
+                        if (f[0] === '*') pushDir = fwd;
+                        else if (f[1] === '*') pushDir = r;
+                        else if (f[3] === '*') pushDir = l;
+                        else pushDir = fwd;
+                    }
                 }
 
                 const nx = item.x + DIRECTIONS[pushDir].dx;
@@ -1780,8 +1865,10 @@ function draw() {
                     }
                 }
             }
-        } else if (cell.type === 'splitter2' || cell.type === 'splitter3' || cell.type === 'merger') {
-            let spriteName = cell.type === 'splitter2' ? 'splitter_down' : (cell.type === 'splitter3' ? 'splitter_up' : 'splitter_down');
+        } else if (cell.type === 'splitter2' || cell.type === 'splitter3' || cell.type === 'merger' || cell.type === 'smart_splitter') {
+            let spriteName = (cell.type === 'splitter2' || cell.type === 'merger') ? 'splitter_down' : 'splitter_up';
+            if (cell.type === 'smart_splitter') spriteName = 'splitter_up';
+            
             if (SPRITES[spriteName]) {
                 let drawAngle = DIRECTIONS[cell.dir].angle;
                 if (cell.type === 'splitter2') drawAngle -= Math.PI / 2;
@@ -1789,6 +1876,8 @@ function draw() {
 
                 if (cell.type === 'merger') {
                     ctx.filter = 'hue-rotate(120deg) saturate(1.3)';
+                } else if (cell.type === 'smart_splitter') {
+                    ctx.filter = 'hue-rotate(280deg) brightness(1.2)';
                 }
                 ctx.rotate(drawAngle);
                 ctx.drawImage(SPRITES[spriteName], -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
@@ -2010,6 +2099,8 @@ function draw() {
         if (state.tool === 'merger') spriteKey = 'splitter_down';
         if (state.tool === 'quantum_generator') spriteKey = 'quantic/generador_cuantico';
 
+        if (state.tool === 'smart_splitter') spriteKey = 'splitter_up';
+
         if (spriteKey && SPRITES[spriteKey]) {
             if (state.tool !== 'seller') {
                 let drawAngle = DIRECTIONS[state.buildDir].angle;
@@ -2019,9 +2110,11 @@ function draw() {
             }
             if (state.tool === 'merger') {
                 ctx.filter = 'hue-rotate(120deg) saturate(1.3)';
+            } else if (state.tool === 'smart_splitter') {
+                ctx.filter = 'hue-rotate(280deg) brightness(1.2)';
             }
             ctx.drawImage(SPRITES[spriteKey], -TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
-            if (state.tool === 'merger') {
+            if (state.tool === 'merger' || state.tool === 'smart_splitter') {
                 ctx.filter = 'none';
             }
         } else {
